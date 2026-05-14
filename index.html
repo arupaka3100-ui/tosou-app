@@ -13,7 +13,6 @@
     --c-text: #1a1a2e;
     --c-muted: #888880;
     --c-border: #e0e0d8;
-    --c-success: #2d7a4f;
     --radius: 12px;
     --radius-sm: 8px;
   }
@@ -40,12 +39,7 @@
     z-index: 100;
   }
 
-  header h1 {
-    font-size: 17px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-  }
-
+  header h1 { font-size: 17px; font-weight: 600; letter-spacing: 0.02em; }
   header span {
     font-size: 11px;
     background: var(--c-accent);
@@ -85,12 +79,7 @@
     border-radius: 2px;
   }
 
-  /* モード選択 */
-  .mode-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
+  .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
   .mode-btn {
     border: 2px solid var(--c-border);
@@ -102,16 +91,11 @@
     background: white;
   }
 
-  .mode-btn.active {
-    border-color: var(--c-accent);
-    background: #fff5f6;
-  }
-
+  .mode-btn.active { border-color: var(--c-accent); background: #fff5f6; }
   .mode-btn .icon { font-size: 24px; margin-bottom: 6px; }
   .mode-btn .label { font-size: 13px; font-weight: 600; color: var(--c-text); }
   .mode-btn .desc { font-size: 11px; color: var(--c-muted); margin-top: 3px; }
 
-  /* 写真アップロード */
   .upload-area {
     border: 2px dashed var(--c-border);
     border-radius: var(--radius-sm);
@@ -119,26 +103,16 @@
     text-align: center;
     cursor: pointer;
     transition: all 0.15s;
-    position: relative;
   }
 
-  .upload-area:active { background: #f8f8f8; }
   .upload-area.has-image { border-style: solid; border-color: var(--c-accent); padding: 0; overflow: hidden; }
-
-  .upload-area img {
-    width: 100%;
-    max-height: 240px;
-    object-fit: cover;
-    display: block;
-    border-radius: 10px;
-  }
-
+  .upload-area img { width: 100%; max-height: 240px; object-fit: cover; display: block; border-radius: 10px; }
   .upload-icon { font-size: 36px; margin-bottom: 8px; }
   .upload-text { font-size: 14px; font-weight: 600; color: var(--c-text); }
   .upload-sub { font-size: 12px; color: var(--c-muted); margin-top: 4px; }
 
-  /* 入力フォーム */
   .input-group { margin-bottom: 14px; }
+
   .input-label {
     font-size: 13px;
     font-weight: 600;
@@ -157,11 +131,7 @@
     border-radius: 10px;
   }
 
-  .input-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+  .input-row { display: flex; align-items: center; gap: 8px; }
 
   input[type="number"] {
     width: 100%;
@@ -176,26 +146,10 @@
     transition: border-color 0.15s;
   }
 
-  input[type="number"]:focus {
-    outline: none;
-    border-color: var(--c-accent);
-  }
+  input[type="number"]:focus { outline: none; border-color: var(--c-accent); }
+  .unit { font-size: 14px; color: var(--c-muted); white-space: nowrap; min-width: 20px; }
+  .hint { font-size: 11px; color: var(--c-muted); margin-top: 5px; line-height: 1.5; }
 
-  .unit {
-    font-size: 14px;
-    color: var(--c-muted);
-    white-space: nowrap;
-    min-width: 20px;
-  }
-
-  .hint {
-    font-size: 11px;
-    color: var(--c-muted);
-    margin-top: 5px;
-    line-height: 1.5;
-  }
-
-  /* 解析ボタン */
   .analyze-btn {
     width: 100%;
     background: var(--c-accent);
@@ -230,7 +184,6 @@
 
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* 結果 */
   .result-card {
     background: var(--c-primary);
     color: white;
@@ -240,32 +193,15 @@
     display: none;
   }
 
-  .result-title {
-    font-size: 12px;
-    color: rgba(255,255,255,0.6);
-    margin-bottom: 16px;
-    font-weight: 600;
-    letter-spacing: 0.08em;
-  }
+  .result-title { font-size: 12px; color: rgba(255,255,255,0.6); margin-bottom: 16px; font-weight: 600; letter-spacing: 0.08em; }
 
-  .metrics {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 16px;
-  }
+  .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
 
-  .metric {
-    background: rgba(255,255,255,0.08);
-    border-radius: var(--radius-sm);
-    padding: 12px;
-  }
-
+  .metric { background: rgba(255,255,255,0.08); border-radius: var(--radius-sm); padding: 12px; }
   .metric-label { font-size: 11px; color: rgba(255,255,255,0.6); margin-bottom: 4px; }
   .metric-value { font-size: 22px; font-weight: 700; }
   .metric-value.accent { color: #ff6b7a; }
 
-  .detail-list { margin-bottom: 16px; }
   .detail-item {
     display: flex;
     justify-content: space-between;
@@ -315,43 +251,6 @@
     margin-top: 12px;
     display: none;
   }
-
-  /* APIキー入力 */
-  .api-section {
-    background: #fffbf0;
-    border: 1px solid #f0e0a0;
-    border-radius: var(--radius);
-    padding: 16px;
-    margin-bottom: 16px;
-  }
-
-  .api-label {
-    font-size: 12px;
-    font-weight: 600;
-    color: #886600;
-    margin-bottom: 8px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  input[type="password"] {
-    width: 100%;
-    border: 1.5px solid #e0d0a0;
-    border-radius: var(--radius-sm);
-    padding: 10px 12px;
-    font-size: 14px;
-    font-family: monospace;
-    background: white;
-    color: var(--c-text);
-  }
-
-  input[type="password"]:focus {
-    outline: none;
-    border-color: #cc9900;
-  }
-
-  .api-hint { font-size: 11px; color: #886600; margin-top: 6px; }
 </style>
 </head>
 <body>
@@ -362,13 +261,6 @@
 </header>
 
 <div class="container">
-
-  <!-- APIキー入力 -->
-  <div class="api-section">
-    <div class="api-label">🔑 Anthropic APIキー</div>
-    <input type="password" id="apiKey" placeholder="sk-ant-api03-..." autocomplete="off">
-    <p class="api-hint">※ キーはこの端末上でのみ使用されます。外部送信はされません。</p>
-  </div>
 
   <!-- 撮影モード -->
   <div class="card">
@@ -398,13 +290,11 @@
     </div>
   </div>
 
-  <!-- 寸法入力（正面モード） -->
+  <!-- 寸法入力（正面） -->
   <div class="card" id="input-front">
     <div class="card-title">寸法入力</div>
     <div class="input-group">
-      <div class="input-label">
-        横幅（間口）<span class="badge">必須</span>
-      </div>
+      <div class="input-label">横幅（間口）<span class="badge">必須</span></div>
       <div class="input-row">
         <input type="number" id="width" placeholder="例：8.0" step="0.1" min="0">
         <span class="unit">m</span>
@@ -420,13 +310,11 @@
     </div>
   </div>
 
-  <!-- 寸法入力（斜めモード） -->
+  <!-- 寸法入力（斜め） -->
   <div class="card" id="input-angle" style="display:none">
     <div class="card-title">寸法入力（斜め補正）</div>
     <div class="input-group">
-      <div class="input-label">
-        手前側の壁の高さ<span class="badge">必須</span>
-      </div>
+      <div class="input-label">手前側の壁の高さ<span class="badge">必須</span></div>
       <div class="input-row">
         <input type="number" id="heightNear" placeholder="例：5.0" step="0.1" min="0">
         <span class="unit">m</span>
@@ -434,9 +322,7 @@
       <p class="hint">写真の手前（近い側）の壁の高さを測ってください</p>
     </div>
     <div class="input-group">
-      <div class="input-label">
-        奥側の壁の高さ<span class="badge">必須</span>
-      </div>
+      <div class="input-label">奥側の壁の高さ<span class="badge">必須</span></div>
       <div class="input-row">
         <input type="number" id="heightFar" placeholder="例：4.0" step="0.1" min="0">
         <span class="unit">m</span>
@@ -516,15 +402,7 @@ document.getElementById('fileInput').addEventListener('change', function(e) {
 });
 
 async function analyze() {
-  const apiKey = document.getElementById('apiKey').value.trim();
-  if (!apiKey) {
-    showError('APIキーを入力してください');
-    return;
-  }
-  if (!imageBase64) {
-    showError('写真を選択してください');
-    return;
-  }
+  if (!imageBase64) { showError('写真を選択してください'); return; }
 
   const btn = document.getElementById('analyzeBtn');
   const spinner = document.getElementById('spinner');
@@ -535,66 +413,25 @@ async function analyze() {
   document.getElementById('errorMsg').style.display = 'none';
   document.getElementById('resultCard').style.display = 'none';
 
-  const floors = mode === 'front'
-    ? document.getElementById('floors').value
-    : document.getElementById('floors2').value;
-
-  let promptExtra = '';
-  if (mode === 'front') {
-    const width = document.getElementById('width').value;
-    promptExtra = `建物情報：横幅（実測）= ${width}m、階数 = ${floors}階建て。この横幅を基準スケールとして使用してください。`;
-  } else {
-    const hNear = document.getElementById('heightNear').value;
-    const hFar = document.getElementById('heightFar').value;
-    promptExtra = `斜め撮影です。手前の壁高さ = ${hNear}m、奥の壁高さ = ${hFar}m。この2点を基準に遠近補正して横幅を推定してください。階数 = ${floors}階建て。`;
-  }
-
-  const prompt = `あなたは塗装業の見積り専門AIです。この外壁写真を解析して塗装面積を計算してください。
-
-${promptExtra}
-
-以下をJSONのみで返答してください（説明文・マークダウン不要）：
-{
-  "estimatedWidth": 推定横幅(m、小数1桁),
-  "estimatedHeight": 推定高さ(m、小数1桁),
-  "totalWallArea": 外壁総面積㎡(小数1桁),
-  "openings": [
-    {"type": "窓/ドア/掃き出し窓などの種類", "count": 数, "unitArea": 1個あたりの面積㎡}
-  ],
-  "totalOpeningArea": 開口部合計面積㎡(小数1桁),
-  "paintArea": 塗装面積㎡(小数1桁),
-  "comment": "解析コメント（日本語2〜3文、精度・注意点を含む）",
-  "confidence": "高/中/低"
-}`;
+  const body = {
+    imageBase64,
+    mode,
+    floors: mode === 'front' ? document.getElementById('floors').value : document.getElementById('floors2').value,
+    width: document.getElementById('width').value,
+    heightNear: document.getElementById('heightNear').value,
+    heightFar: document.getElementById('heightFar').value
+  };
 
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    const res = await fetch('/api/analyze', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: imageBase64 } },
-            { type: 'text', text: prompt }
-          ]
-        }]
-      })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
     });
 
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error?.message || 'API エラー');
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error || '解析エラー');
 
-    const text = data.content.map(i => i.text || '').join('');
-    const clean = text.replace(/```json|```/g, '').trim();
-    const result = JSON.parse(clean);
     lastResult = result;
     showResult(result);
 
@@ -616,8 +453,7 @@ function showResult(r) {
   let detailHTML = '';
   if (r.openings && r.openings.length > 0) {
     r.openings.forEach(o => {
-      const total = (o.count * o.unitArea).toFixed(1);
-      detailHTML += `<div class="detail-item"><span class="dl">${o.type} × ${o.count}箇所</span><span class="dv">−${total} ㎡</span></div>`;
+      detailHTML += `<div class="detail-item"><span class="dl">${o.type} × ${o.count}箇所</span><span class="dv">−${(o.count * o.unitArea).toFixed(1)} ㎡</span></div>`;
     });
   }
   detailHTML += `<div class="detail-item"><span class="dl">開口部控除 合計</span><span class="dv">−${r.totalOpeningArea.toFixed(1)} ㎡</span></div>`;
@@ -635,17 +471,8 @@ function showError(msg) {
 function copyResult() {
   if (!lastResult) return;
   const r = lastResult;
-  let text = `【塗装面積 AI計測結果】\n`;
-  text += `外壁総面積：${r.totalWallArea.toFixed(1)} ㎡\n`;
-  text += `開口部控除：${r.totalOpeningArea.toFixed(1)} ㎡\n`;
-  text += `塗装面積：${r.paintArea.toFixed(1)} ㎡\n`;
-  text += `推定横幅：${r.estimatedWidth.toFixed(1)} m\n`;
-  text += `推定高さ：${r.estimatedHeight.toFixed(1)} m\n`;
-  if (r.openings) {
-    r.openings.forEach(o => {
-      text += `　${o.type}×${o.count}：${(o.count * o.unitArea).toFixed(1)} ㎡\n`;
-    });
-  }
+  let text = `【塗装面積 AI計測結果】\n外壁総面積：${r.totalWallArea.toFixed(1)} ㎡\n開口部控除：${r.totalOpeningArea.toFixed(1)} ㎡\n塗装面積：${r.paintArea.toFixed(1)} ㎡\n推定横幅：${r.estimatedWidth.toFixed(1)} m\n推定高さ：${r.estimatedHeight.toFixed(1)} m\n`;
+  if (r.openings) r.openings.forEach(o => { text += `　${o.type}×${o.count}：${(o.count * o.unitArea).toFixed(1)} ㎡\n`; });
   navigator.clipboard.writeText(text).then(() => {
     const btn = document.querySelector('.copy-btn');
     btn.textContent = '✅ コピーしました！';
