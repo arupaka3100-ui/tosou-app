@@ -5,252 +5,88 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>塗装面積 AI計測</title>
 <style>
-  :root {
-    --c-primary: #1a1a2e;
-    --c-accent: #e94560;
-    --c-bg: #f5f5f0;
-    --c-surface: #ffffff;
-    --c-text: #1a1a2e;
-    --c-muted: #888880;
-    --c-border: #e0e0d8;
-    --radius: 12px;
-    --radius-sm: 8px;
-  }
+:root {
+  --c-primary: #1a1a2e;
+  --c-accent: #e94560;
+  --c-bg: #f5f5f0;
+  --c-surface: #ffffff;
+  --c-text: #1a1a2e;
+  --c-muted: #888880;
+  --c-border: #e0e0d8;
+  --radius: 12px;
+  --radius-sm: 8px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif; background: var(--c-bg); color: var(--c-text); min-height: 100vh; padding-bottom: 60px; }
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+header { background: var(--c-primary); color: white; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+header h1 { font-size: 16px; font-weight: 600; }
+header span { font-size: 11px; background: var(--c-accent); padding: 2px 8px; border-radius: 20px; }
 
-  body {
-    font-family: 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
-    background: var(--c-bg);
-    color: var(--c-text);
-    min-height: 100vh;
-    padding-bottom: 40px;
-  }
+.steps { display: flex; padding: 12px 16px; gap: 0; background: white; border-bottom: 1px solid var(--c-border); }
+.step { flex: 1; text-align: center; font-size: 11px; color: var(--c-muted); position: relative; padding-bottom: 8px; }
+.step.active { color: var(--c-accent); font-weight: 600; }
+.step.done { color: var(--c-primary); }
+.step::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px; background: var(--c-border); }
+.step.active::after { background: var(--c-accent); }
+.step.done::after { background: var(--c-primary); }
 
-  header {
-    background: var(--c-primary);
-    color: white;
-    padding: 16px 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
+.container { padding: 16px; max-width: 600px; margin: 0 auto; }
 
-  header h1 { font-size: 17px; font-weight: 600; letter-spacing: 0.02em; }
-  header span {
-    font-size: 11px;
-    background: var(--c-accent);
-    padding: 2px 8px;
-    border-radius: 20px;
-    font-weight: 500;
-  }
+.card { background: var(--c-surface); border-radius: var(--radius); padding: 18px; margin-bottom: 14px; border: 1px solid var(--c-border); }
+.card-title { font-size: 12px; font-weight: 600; color: var(--c-muted); letter-spacing: 0.08em; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.card-title::before { content: ''; display: inline-block; width: 3px; height: 13px; background: var(--c-accent); border-radius: 2px; }
 
-  .container { padding: 20px 16px; max-width: 600px; margin: 0 auto; }
+.upload-area { border: 2px dashed var(--c-border); border-radius: var(--radius-sm); padding: 28px 20px; text-align: center; cursor: pointer; }
+.upload-area.has-image { border: none; padding: 0; }
+.upload-area img { width: 100%; border-radius: var(--radius-sm); display: block; }
+.upload-icon { font-size: 32px; margin-bottom: 8px; }
+.upload-text { font-size: 14px; font-weight: 600; }
+.upload-sub { font-size: 12px; color: var(--c-muted); margin-top: 4px; }
 
-  .card {
-    background: var(--c-surface);
-    border-radius: var(--radius);
-    padding: 20px;
-    margin-bottom: 16px;
-    border: 1px solid var(--c-border);
-  }
+.img-wrapper { position: relative; display: inline-block; width: 100%; }
+.img-wrapper img { width: 100%; display: block; border-radius: var(--radius-sm); }
+.img-wrapper svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
 
-  .card-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--c-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
+.measure-card { background: #f0f8ff; border: 1.5px solid #b8d8f8; border-radius: var(--radius-sm); padding: 14px; margin-bottom: 12px; }
+.measure-card.m2 { background: #fff8f0; border-color: #f8d8b8; }
+.measure-label { font-size: 13px; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 6px; }
+.measure-badge { width: 20px; height: 20px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: white; }
+.m1 .measure-badge { background: #0088ff; }
+.m2 .measure-badge { background: #ff8800; }
+.measure-instruction { font-size: 12px; color: var(--c-muted); margin-bottom: 10px; line-height: 1.5; }
+.input-row { display: flex; align-items: center; gap: 8px; }
+input[type="number"] { flex: 1; border: 1.5px solid var(--c-border); border-radius: var(--radius-sm); padding: 11px 12px; font-size: 16px; font-family: inherit; background: white; -webkit-appearance: none; }
+input[type="number"]:focus { outline: none; border-color: var(--c-accent); }
+.unit { font-size: 14px; color: var(--c-muted); }
 
-  .card-title::before {
-    content: '';
-    display: inline-block;
-    width: 3px;
-    height: 14px;
-    background: var(--c-accent);
-    border-radius: 2px;
-  }
+.btn { width: 100%; border: none; border-radius: var(--radius); padding: 15px; font-size: 15px; font-weight: 700; font-family: inherit; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: opacity 0.15s, transform 0.1s; }
+.btn-primary { background: var(--c-accent); color: white; }
+.btn-secondary { background: var(--c-primary); color: white; margin-top: 10px; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn:active:not(:disabled) { transform: scale(0.98); }
 
-  .mode-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.spinner { width: 17px; height: 17px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-  .mode-btn {
-    border: 2px solid var(--c-border);
-    border-radius: var(--radius-sm);
-    padding: 14px 10px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.15s;
-    background: white;
-  }
+.result-summary { background: var(--c-primary); color: white; border-radius: var(--radius); padding: 18px; margin-bottom: 14px; }
+.result-title { font-size: 11px; color: rgba(255,255,255,0.6); margin-bottom: 14px; letter-spacing: 0.08em; }
+.metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.metric { background: rgba(255,255,255,0.08); border-radius: var(--radius-sm); padding: 11px; }
+.metric-label { font-size: 11px; color: rgba(255,255,255,0.6); margin-bottom: 3px; }
+.metric-value { font-size: 20px; font-weight: 700; }
+.metric-value.accent { color: #ff6b7a; }
+.detail-item { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 12px; }
+.detail-item:last-child { border-bottom: none; }
+.dl { color: rgba(255,255,255,0.7); }
+.ai-comment { background: rgba(255,255,255,0.06); border-radius: var(--radius-sm); padding: 11px; font-size: 12px; color: rgba(255,255,255,0.8); line-height: 1.6; margin: 12px 0; border-left: 3px solid var(--c-accent); }
+.copy-btn { width: 100%; background: rgba(255,255,255,0.12); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: var(--radius-sm); padding: 11px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; }
 
-  .mode-btn.active { border-color: var(--c-accent); background: #fff5f6; }
-  .mode-btn .icon { font-size: 24px; margin-bottom: 6px; }
-  .mode-btn .label { font-size: 13px; font-weight: 600; color: var(--c-text); }
-  .mode-btn .desc { font-size: 11px; color: var(--c-muted); margin-top: 3px; }
+.error-msg { background: #fff0f0; border: 1px solid #ffcccc; border-radius: var(--radius-sm); padding: 12px; font-size: 13px; color: #cc0000; margin-top: 12px; display: none; }
 
-  .upload-area {
-    border: 2px dashed var(--c-border);
-    border-radius: var(--radius-sm);
-    padding: 30px 20px;
-    text-align: center;
-    cursor: pointer;
-    transition: all 0.15s;
-  }
+.note-box { background: #fffbf0; border: 1px solid #f0e0a0; border-radius: var(--radius-sm); padding: 12px; font-size: 12px; color: #886600; line-height: 1.6; margin-bottom: 14px; }
 
-  .upload-area.has-image { border-style: solid; border-color: var(--c-accent); padding: 0; overflow: hidden; }
-  .upload-area img { width: 100%; max-height: 240px; object-fit: cover; display: block; border-radius: 10px; }
-  .upload-icon { font-size: 36px; margin-bottom: 8px; }
-  .upload-text { font-size: 14px; font-weight: 600; color: var(--c-text); }
-  .upload-sub { font-size: 12px; color: var(--c-muted); margin-top: 4px; }
-
-  .input-group { margin-bottom: 14px; }
-
-  .input-label {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--c-text);
-    margin-bottom: 6px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  .input-label .badge {
-    font-size: 10px;
-    background: var(--c-accent);
-    color: white;
-    padding: 1px 6px;
-    border-radius: 10px;
-  }
-
-  .input-row { display: flex; align-items: center; gap: 8px; }
-
-  input[type="number"] {
-    width: 100%;
-    border: 1.5px solid var(--c-border);
-    border-radius: var(--radius-sm);
-    padding: 12px 14px;
-    font-size: 16px;
-    font-family: inherit;
-    color: var(--c-text);
-    background: white;
-    -webkit-appearance: none;
-    transition: border-color 0.15s;
-  }
-
-  input[type="number"]:focus { outline: none; border-color: var(--c-accent); }
-  .unit { font-size: 14px; color: var(--c-muted); white-space: nowrap; min-width: 20px; }
-  .hint { font-size: 11px; color: var(--c-muted); margin-top: 5px; line-height: 1.5; }
-
-  .analyze-btn {
-    width: 100%;
-    background: var(--c-accent);
-    color: white;
-    border: none;
-    border-radius: var(--radius);
-    padding: 16px;
-    font-size: 16px;
-    font-weight: 700;
-    font-family: inherit;
-    cursor: pointer;
-    transition: opacity 0.15s, transform 0.1s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    letter-spacing: 0.02em;
-  }
-
-  .analyze-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .analyze-btn:active:not(:disabled) { transform: scale(0.98); }
-
-  .spinner {
-    width: 18px;
-    height: 18px;
-    border: 2px solid rgba(255,255,255,0.4);
-    border-top-color: white;
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    display: none;
-  }
-
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .result-card {
-    background: var(--c-primary);
-    color: white;
-    border-radius: var(--radius);
-    padding: 20px;
-    margin-bottom: 16px;
-    display: none;
-  }
-
-  .result-title { font-size: 12px; color: rgba(255,255,255,0.6); margin-bottom: 16px; font-weight: 600; letter-spacing: 0.08em; }
-
-  .metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
-
-  .metric { background: rgba(255,255,255,0.08); border-radius: var(--radius-sm); padding: 12px; }
-  .metric-label { font-size: 11px; color: rgba(255,255,255,0.6); margin-bottom: 4px; }
-  .metric-value { font-size: 22px; font-weight: 700; }
-  .metric-value.accent { color: #ff6b7a; }
-
-  .detail-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-    font-size: 13px;
-  }
-
-  .detail-item:last-child { border-bottom: none; }
-  .detail-item .dl { color: rgba(255,255,255,0.7); }
-  .detail-item .dv { font-weight: 600; }
-
-  .ai-comment {
-    background: rgba(255,255,255,0.06);
-    border-radius: var(--radius-sm);
-    padding: 12px;
-    font-size: 12px;
-    color: rgba(255,255,255,0.8);
-    line-height: 1.6;
-    margin-bottom: 16px;
-    border-left: 3px solid var(--c-accent);
-  }
-
-  .copy-btn {
-    width: 100%;
-    background: rgba(255,255,255,0.12);
-    color: white;
-    border: 1px solid rgba(255,255,255,0.2);
-    border-radius: var(--radius-sm);
-    padding: 12px;
-    font-size: 14px;
-    font-weight: 600;
-    font-family: inherit;
-    cursor: pointer;
-    transition: background 0.15s;
-  }
-
-  .copy-btn:active { background: rgba(255,255,255,0.2); }
-
-  .error-msg {
-    background: #fff0f0;
-    border: 1px solid #ffcccc;
-    border-radius: var(--radius-sm);
-    padding: 12px;
-    font-size: 13px;
-    color: #cc0000;
-    margin-top: 12px;
-    display: none;
-  }
+.hidden { display: none; }
 </style>
 </head>
 <body>
@@ -260,224 +96,328 @@
   <span>Beta</span>
 </header>
 
+<div class="steps">
+  <div class="step active" id="step1-tab">①写真</div>
+  <div class="step" id="step2-tab">②測定指示</div>
+  <div class="step" id="step3-tab">③実測入力</div>
+  <div class="step" id="step4-tab">④結果確認</div>
+</div>
+
 <div class="container">
 
-  <!-- 撮影モード -->
-  <div class="card">
-    <div class="card-title">撮影モード</div>
-    <div class="mode-grid">
-      <div class="mode-btn active" onclick="setMode('front')" id="mode-front">
-        <div class="icon">📐</div>
-        <div class="label">正面撮影</div>
-        <div class="desc">真正面から撮れた</div>
-      </div>
-      <div class="mode-btn" onclick="setMode('angle')" id="mode-angle">
-        <div class="icon">📷</div>
-        <div class="label">斜め撮影</div>
-        <div class="desc">正面から撮れない</div>
+  <!-- Step 1: 写真アップロード -->
+  <div id="step1">
+    <div class="card">
+      <div class="card-title">外壁写真をアップロード</div>
+      <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+        <div class="upload-icon">🏠</div>
+        <div class="upload-text">写真をタップして選択</div>
+        <div class="upload-sub">カメラまたはライブラリから</div>
+        <input type="file" id="fileInput" accept="image/*" capture="environment" style="display:none">
       </div>
     </div>
+    <div class="note-box">
+      ヒント：建物全体が写るように少し離れて撮影すると精度が上がります。正面・斜めどちらでもOKです。
+    </div>
+    <button class="btn btn-primary" id="step1Btn" onclick="goStep2()" disabled>
+      <div class="spinner" id="spinner1"></div>
+      <span id="step1BtnText">AIに測定箇所を指示してもらう</span>
+    </button>
+    <div class="error-msg" id="error1"></div>
   </div>
 
-  <!-- 写真アップロード -->
-  <div class="card">
-    <div class="card-title">外壁写真</div>
-    <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
-      <div class="upload-icon">🏠</div>
-      <div class="upload-text">写真をタップして選択</div>
-      <div class="upload-sub">JPG / PNG 対応</div>
-      <input type="file" id="fileInput" accept="image/*" capture="environment" style="display:none">
+  <!-- Step 2: 測定指示 -->
+  <div id="step2" class="hidden">
+    <div class="card">
+      <div class="card-title">AIからの測定指示</div>
+      <div class="img-wrapper" id="imgWrapper2">
+        <img id="previewImg2" src="" alt="外壁写真">
+        <svg id="measureSvg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
+      </div>
     </div>
+    <div class="note-box" id="buildingNote"></div>
+    <button class="btn btn-primary" onclick="goStep3()">この箇所を現場で測定する</button>
   </div>
 
-  <!-- 寸法入力（正面） -->
-  <div class="card" id="input-front">
-    <div class="card-title">寸法入力</div>
-    <div class="input-group">
-      <div class="input-label">横幅（間口）<span class="badge">必須</span></div>
-      <div class="input-row">
-        <input type="number" id="width" placeholder="例：8.0" step="0.1" min="0">
-        <span class="unit">m</span>
+  <!-- Step 3: 実測入力 -->
+  <div id="step3" class="hidden">
+    <div class="card">
+      <div class="card-title">実測値を入力</div>
+
+      <div class="measure-card m1">
+        <div class="measure-label">
+          <span class="measure-badge">1</span>
+          <span id="label1">測定箇所1</span>
+        </div>
+        <div class="measure-instruction" id="instruction1"></div>
+        <div class="input-row">
+          <input type="number" id="val1" placeholder="例：8.0" step="0.1" min="0">
+          <span class="unit">m</span>
+        </div>
       </div>
-      <p class="hint">地面レベルで建物の横幅を1回だけ測ってください</p>
-    </div>
-    <div class="input-group">
-      <div class="input-label">階数</div>
-      <div class="input-row">
-        <input type="number" id="floors" placeholder="例：2" step="1" min="1" max="4" value="2">
-        <span class="unit">階</span>
+
+      <div class="measure-card m2">
+        <div class="measure-label">
+          <span class="measure-badge">2</span>
+          <span id="label2">測定箇所2</span>
+        </div>
+        <div class="measure-instruction" id="instruction2"></div>
+        <div class="input-row">
+          <input type="number" id="val2" placeholder="例：3.0" step="0.1" min="0">
+          <span class="unit">m</span>
+        </div>
       </div>
     </div>
+
+    <button class="btn btn-primary" id="step3Btn" onclick="goStep4()">
+      <div class="spinner" id="spinner3"></div>
+      <span id="step3BtnText">面積を計算する</span>
+    </button>
+    <div class="error-msg" id="error3"></div>
   </div>
 
-  <!-- 寸法入力（斜め） -->
-  <div class="card" id="input-angle" style="display:none">
-    <div class="card-title">寸法入力（斜め補正）</div>
-    <div class="input-group">
-      <div class="input-label">手前側の壁の高さ<span class="badge">必須</span></div>
-      <div class="input-row">
-        <input type="number" id="heightNear" placeholder="例：5.0" step="0.1" min="0">
-        <span class="unit">m</span>
-      </div>
-      <p class="hint">写真の手前（近い側）の壁の高さを測ってください</p>
-    </div>
-    <div class="input-group">
-      <div class="input-label">奥側の壁の高さ<span class="badge">必須</span></div>
-      <div class="input-row">
-        <input type="number" id="heightFar" placeholder="例：4.0" step="0.1" min="0">
-        <span class="unit">m</span>
-      </div>
-      <p class="hint">写真の奥（遠い側）の壁の高さを測ってください</p>
-    </div>
-    <div class="input-group">
-      <div class="input-label">階数</div>
-      <div class="input-row">
-        <input type="number" id="floors2" placeholder="例：2" step="1" min="1" max="4" value="2">
-        <span class="unit">階</span>
+  <!-- Step 4: 結果 -->
+  <div id="step4" class="hidden">
+    <div class="card">
+      <div class="card-title">解析結果（写真上に表示）</div>
+      <div class="img-wrapper" id="imgWrapper4">
+        <img id="previewImg4" src="" alt="外壁写真">
+        <svg id="resultSvg" viewBox="0 0 100 100" preserveAspectRatio="none"></svg>
       </div>
     </div>
-  </div>
 
-  <!-- 解析ボタン -->
-  <button class="analyze-btn" id="analyzeBtn" onclick="analyze()" disabled>
-    <div class="spinner" id="spinner"></div>
-    <span id="btnText">📸 AIで面積を計算する</span>
-  </button>
-
-  <div class="error-msg" id="errorMsg"></div>
-
-  <!-- 結果 -->
-  <div class="result-card" id="resultCard">
-    <div class="result-title">AI 解析結果</div>
-    <div class="metrics">
-      <div class="metric">
-        <div class="metric-label">外壁総面積</div>
-        <div class="metric-value" id="r-total">—</div>
+    <div class="result-summary">
+      <div class="result-title">計算結果</div>
+      <div class="metrics">
+        <div class="metric"><div class="metric-label">外壁総面積</div><div class="metric-value" id="r-total">—</div></div>
+        <div class="metric"><div class="metric-label">塗装面積</div><div class="metric-value accent" id="r-paint">—</div></div>
+        <div class="metric"><div class="metric-label">横幅</div><div class="metric-value" id="r-width">—</div></div>
+        <div class="metric"><div class="metric-label">総高さ</div><div class="metric-value" id="r-height">—</div></div>
       </div>
-      <div class="metric">
-        <div class="metric-label">塗装面積</div>
-        <div class="metric-value accent" id="r-paint">—</div>
-      </div>
-      <div class="metric">
-        <div class="metric-label">推定横幅</div>
-        <div class="metric-value" id="r-width">—</div>
-      </div>
-      <div class="metric">
-        <div class="metric-label">推定高さ</div>
-        <div class="metric-value" id="r-height">—</div>
-      </div>
+      <div id="r-details"></div>
+      <div class="ai-comment" id="r-comment"></div>
+      <button class="copy-btn" onclick="copyResult()">📋 jimuuにコピーする</button>
     </div>
-    <div class="detail-list" id="r-details"></div>
-    <div class="ai-comment" id="r-comment"></div>
-    <button class="copy-btn" onclick="copyResult()">📋 jimuuにコピーする</button>
+
+    <button class="btn btn-secondary" onclick="resetAll()">最初からやり直す</button>
   </div>
 
 </div>
 
 <script>
-let mode = 'front';
 let imageBase64 = null;
-let lastResult = null;
-
-function setMode(m) {
-  mode = m;
-  document.getElementById('mode-front').classList.toggle('active', m === 'front');
-  document.getElementById('mode-angle').classList.toggle('active', m === 'angle');
-  document.getElementById('input-front').style.display = m === 'front' ? 'block' : 'none';
-  document.getElementById('input-angle').style.display = m === 'angle' ? 'block' : 'none';
-}
+let imageSrc = null;
+let measureData = null;
+let resultData = null;
 
 document.getElementById('fileInput').addEventListener('change', function(e) {
   const file = e.target.files[0];
   if (!file) return;
   const reader = new FileReader();
   reader.onload = function(ev) {
+    imageSrc = ev.target.result;
     imageBase64 = ev.target.result.split(',')[1];
     const area = document.getElementById('uploadArea');
     area.classList.add('has-image');
-    area.innerHTML = `<img src="${ev.target.result}" alt="外壁写真">`;
-    document.getElementById('analyzeBtn').disabled = false;
+    area.innerHTML = `<img src="${imageSrc}" alt="外壁写真">`;
+    document.getElementById('step1Btn').disabled = false;
   };
   reader.readAsDataURL(file);
 });
 
-async function analyze() {
-  if (!imageBase64) { showError('写真を選択してください'); return; }
-
-  const btn = document.getElementById('analyzeBtn');
-  const spinner = document.getElementById('spinner');
-  const btnText = document.getElementById('btnText');
+async function goStep2() {
+  const btn = document.getElementById('step1Btn');
+  const spinner = document.getElementById('spinner1');
+  const btnText = document.getElementById('step1BtnText');
   btn.disabled = true;
   spinner.style.display = 'block';
   btnText.textContent = 'AI解析中...';
-  document.getElementById('errorMsg').style.display = 'none';
-  document.getElementById('resultCard').style.display = 'none';
-
-  const body = {
-    imageBase64,
-    mode,
-    floors: mode === 'front' ? document.getElementById('floors').value : document.getElementById('floors2').value,
-    width: document.getElementById('width').value,
-    heightNear: document.getElementById('heightNear').value,
-    heightFar: document.getElementById('heightFar').value
-  };
+  document.getElementById('error1').style.display = 'none';
 
   try {
     const res = await fetch('/api/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
+      body: JSON.stringify({ step: 'analyze', imageBase64 })
     });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    measureData = data;
 
-    const result = await res.json();
-    if (!res.ok) throw new Error(result.error || '解析エラー');
+    document.getElementById('previewImg2').src = imageSrc;
+    document.getElementById('previewImg4').src = imageSrc;
 
-    lastResult = result;
-    showResult(result);
+    drawMeasureLines(data);
 
+    document.getElementById('buildingNote').textContent =
+      `建物：${data.buildingInfo.style}　注意：${data.buildingInfo.note}`;
+
+    showStep(2);
   } catch(e) {
-    showError('解析に失敗しました：' + e.message);
+    showError('error1', e.message);
   }
 
   btn.disabled = false;
   spinner.style.display = 'none';
-  btnText.textContent = '📸 再解析する';
+  btnText.textContent = 'AIに測定箇所を指示してもらう';
 }
 
-function showResult(r) {
-  document.getElementById('r-total').textContent = r.totalWallArea.toFixed(1) + ' ㎡';
-  document.getElementById('r-paint').textContent = r.paintArea.toFixed(1) + ' ㎡';
-  document.getElementById('r-width').textContent = r.estimatedWidth.toFixed(1) + ' m';
-  document.getElementById('r-height').textContent = r.estimatedHeight.toFixed(1) + ' m';
+function drawMeasureLines(data) {
+  const svg = document.getElementById('measureSvg');
+  const m1 = data.measure1;
+  const m2 = data.measure2;
 
-  let detailHTML = '';
-  if (r.openings && r.openings.length > 0) {
-    r.openings.forEach(o => {
-      detailHTML += `<div class="detail-item"><span class="dl">${o.type} × ${o.count}箇所</span><span class="dv">−${(o.count * o.unitArea).toFixed(1)} ㎡</span></div>`;
+  svg.innerHTML = `
+    <line x1="${m1.position.x1}%" y1="${m1.position.y1}%" x2="${m1.position.x2}%" y2="${m1.position.y2}%"
+      stroke="#0088ff" stroke-width="0.8" stroke-dasharray="2,1"/>
+    <circle cx="${m1.position.x1}%" cy="${m1.position.y1}%" r="1.2" fill="#0088ff"/>
+    <circle cx="${m1.position.x2}%" cy="${m1.position.y2}%" r="1.2" fill="#0088ff"/>
+    <rect x="${(m1.position.x1+m1.position.x2)/2-8}%" y="${m1.position.y1-6}%" width="16%" height="5%" fill="rgba(0,100,255,0.85)" rx="1"/>
+    <text x="${(m1.position.x1+m1.position.x2)/2}%" y="${m1.position.y1-3}%" text-anchor="middle" fill="white" font-size="3" font-family="sans-serif" font-weight="bold">① ${m1.label}</text>
+
+    <line x1="${m2.position.x1}%" y1="${m2.position.y1}%" x2="${m2.position.x2}%" y2="${m2.position.y2}%"
+      stroke="#ff8800" stroke-width="0.8" stroke-dasharray="2,1"/>
+    <circle cx="${m2.position.x1}%" cy="${m2.position.y1}%" r="1.2" fill="#ff8800"/>
+    <circle cx="${m2.position.x2}%" cy="${m2.position.y2}%" r="1.2" fill="#ff8800"/>
+    <rect x="${m2.position.x2+1}%" y="${(m2.position.y1+m2.position.y2)/2-2.5}%" width="16%" height="5%" fill="rgba(255,120,0,0.85)" rx="1"/>
+    <text x="${m2.position.x2+9}%" y="${(m2.position.y1+m2.position.y2)/2+0.5}%" text-anchor="middle" fill="white" font-size="3" font-family="sans-serif" font-weight="bold">② ${m2.label}</text>
+  `;
+
+  document.getElementById('label1').textContent = m1.label;
+  document.getElementById('instruction1').textContent = m1.instruction;
+  document.getElementById('label2').textContent = m2.label;
+  document.getElementById('instruction2').textContent = m2.instruction;
+}
+
+function goStep3() { showStep(3); }
+
+async function goStep4() {
+  const v1 = document.getElementById('val1').value;
+  const v2 = document.getElementById('val2').value;
+  if (!v1 || !v2) { showError('error3', '2箇所の実測値を入力してください'); return; }
+
+  const btn = document.getElementById('step3Btn');
+  const spinner = document.getElementById('spinner3');
+  const btnText = document.getElementById('step3BtnText');
+  btn.disabled = true;
+  spinner.style.display = 'block';
+  btnText.textContent = '計算中...';
+  document.getElementById('error3').style.display = 'none';
+
+  try {
+    const res = await fetch('/api/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ step: 'calculate', imageBase64, measurement1: v1, measurement2: v2 })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    resultData = data;
+
+    drawResultAnnotations(data);
+    showResultSummary(data);
+    showStep(4);
+  } catch(e) {
+    showError('error3', e.message);
+  }
+
+  btn.disabled = false;
+  spinner.style.display = 'none';
+  btnText.textContent = '面積を計算する';
+}
+
+function drawResultAnnotations(data) {
+  const svg = document.getElementById('resultSvg');
+  let svgContent = '';
+
+  if (data.annotations) {
+    data.annotations.forEach(a => {
+      const color = a.type === 'width' ? '#00ccff' : a.type === 'height' ? '#ffdd00' : '#ff6666';
+      svgContent += `
+        <rect x="${a.x - 8}%" y="${a.y - 3}%" width="16%" height="5%" fill="rgba(0,0,0,0.75)" rx="1"/>
+        <text x="${a.x}%" y="${a.y + 0.5}%" text-anchor="middle" fill="${color}" font-size="3.2" font-family="sans-serif" font-weight="bold">${a.label}：${a.value}</text>
+      `;
     });
   }
-  detailHTML += `<div class="detail-item"><span class="dl">開口部控除 合計</span><span class="dv">−${r.totalOpeningArea.toFixed(1)} ㎡</span></div>`;
-  document.getElementById('r-details').innerHTML = detailHTML;
-  document.getElementById('r-comment').textContent = r.comment + '（信頼度：' + r.confidence + '）';
-  document.getElementById('resultCard').style.display = 'block';
+
+  svgContent += `
+    <rect x="1%" y="1%" width="32%" height="14%" fill="rgba(0,0,0,0.8)" rx="1.5"/>
+    <text x="3%" y="5%" fill="white" font-size="2.8" font-family="sans-serif" font-weight="bold">AI解析結果</text>
+    <text x="3%" y="8.5%" fill="#00ccff" font-size="2.8" font-family="sans-serif">外壁総面積：${data.totalWallArea?.toFixed(1)} m²</text>
+    <text x="3%" y="12%" fill="#ff6b7a" font-size="3.2" font-family="sans-serif" font-weight="bold">塗装面積：${data.paintArea?.toFixed(1)} m²</text>
+  `;
+
+  svg.innerHTML = svgContent;
 }
 
-function showError(msg) {
-  const el = document.getElementById('errorMsg');
-  el.textContent = msg;
-  el.style.display = 'block';
+function showResultSummary(data) {
+  document.getElementById('r-total').textContent = data.totalWallArea?.toFixed(1) + ' m²';
+  document.getElementById('r-paint').textContent = data.paintArea?.toFixed(1) + ' m²';
+  document.getElementById('r-width').textContent = data.dimensions?.width?.toFixed(1) + ' m';
+  document.getElementById('r-height').textContent = data.dimensions?.totalHeight?.toFixed(1) + ' m';
+
+  let html = '';
+  if (data.openings) {
+    data.openings.forEach(o => {
+      html += `<div class="detail-item"><span class="dl">${o.type} × ${o.count}箇所</span><span>−${o.totalArea?.toFixed(1)} m²</span></div>`;
+    });
+  }
+  html += `<div class="detail-item"><span class="dl">開口部控除 合計</span><span>−${data.totalOpeningArea?.toFixed(1)} m²</span></div>`;
+  document.getElementById('r-details').innerHTML = html;
+  document.getElementById('r-comment').textContent = data.comment + '（信頼度：' + data.confidence + '）';
 }
 
 function copyResult() {
-  if (!lastResult) return;
-  const r = lastResult;
-  let text = `【塗装面積 AI計測結果】\n外壁総面積：${r.totalWallArea.toFixed(1)} ㎡\n開口部控除：${r.totalOpeningArea.toFixed(1)} ㎡\n塗装面積：${r.paintArea.toFixed(1)} ㎡\n推定横幅：${r.estimatedWidth.toFixed(1)} m\n推定高さ：${r.estimatedHeight.toFixed(1)} m\n`;
-  if (r.openings) r.openings.forEach(o => { text += `　${o.type}×${o.count}：${(o.count * o.unitArea).toFixed(1)} ㎡\n`; });
+  if (!resultData) return;
+  const d = resultData;
+  let text = `【塗装面積 AI計測結果】\n外壁総面積：${d.totalWallArea?.toFixed(1)} m²\n開口部控除：${d.totalOpeningArea?.toFixed(1)} m²\n塗装面積：${d.paintArea?.toFixed(1)} m²\n横幅：${d.dimensions?.width?.toFixed(1)} m\n総高さ：${d.dimensions?.totalHeight?.toFixed(1)} m\n`;
+  if (d.openings) d.openings.forEach(o => { text += `　${o.type}×${o.count}：${o.totalArea?.toFixed(1)} m²\n`; });
   navigator.clipboard.writeText(text).then(() => {
     const btn = document.querySelector('.copy-btn');
     btn.textContent = '✅ コピーしました！';
     setTimeout(() => btn.textContent = '📋 jimuuにコピーする', 2000);
   });
+}
+
+function showStep(n) {
+  ['step1','step2','step3','step4'].forEach((id, i) => {
+    document.getElementById(id).classList.toggle('hidden', i !== n-1);
+    const tab = document.getElementById(`step${i+1}-tab`);
+    tab.classList.remove('active','done');
+    if (i+1 === n) tab.classList.add('active');
+    else if (i+1 < n) tab.classList.add('done');
+  });
+  window.scrollTo(0, 0);
+}
+
+function showError(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = '解析に失敗しました：' + msg;
+  el.style.display = 'block';
+}
+
+function resetAll() {
+  imageBase64 = null; imageSrc = null; measureData = null; resultData = null;
+  document.getElementById('uploadArea').classList.remove('has-image');
+  document.getElementById('uploadArea').innerHTML = `<div class="upload-icon">🏠</div><div class="upload-text">写真をタップして選択</div><div class="upload-sub">カメラまたはライブラリから</div><input type="file" id="fileInput" accept="image/*" capture="environment" style="display:none">`;
+  document.getElementById('fileInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      imageSrc = ev.target.result;
+      imageBase64 = ev.target.result.split(',')[1];
+      const area = document.getElementById('uploadArea');
+      area.classList.add('has-image');
+      area.innerHTML = `<img src="${imageSrc}" alt="外壁写真">`;
+      document.getElementById('step1Btn').disabled = false;
+    };
+    reader.readAsDataURL(file);
+  });
+  document.getElementById('step1Btn').disabled = true;
+  document.getElementById('val1').value = '';
+  document.getElementById('val2').value = '';
+  showStep(1);
 }
 </script>
 </body>
