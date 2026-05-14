@@ -440,7 +440,7 @@ function resetAll() {
   dimensions = []; openings = [];
   const area = document.getElementById('uploadArea');
   area.classList.remove('has-image');
-  area.innerHTML = `<div class="upload-icon">🏠</div><div class="upload-text">写真をタップして選択</div><div class="upload-sub">カメラまたはライブラリから</div><input type="file" id="fileInput" accept="image/*" capture="environment" style="display:none">`;
+  area.innerHTML = `<div class="upload-icon">🏠</div><div class="upload-text">写真をタップして選択</div><div class="upload-sub">カメラまたはライブラリから</div><input type="file" id="fileInput" accept="image/*"style="display:none">`;
   document.getElementById('fileInput').addEventListener('change', function(e) {
     const file = e.target.files[0]; if (!file) return;
     const reader = new FileReader();
