@@ -141,7 +141,7 @@ ${correctionStr}
           model: 'claude-haiku-4-5-20251001',
           max_tokens: 2000,
           messages: [{ role: 'user', content: [
-            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: imageBase64 } },
+            { type: 'image', source: { type: 'base64', media_type: imageBase64.startsWith('/9j/') ? 'image/jpeg' : 'image/png'', data: imageBase64 } },
             { type: 'text', text: prompt }
           ]}]
         })
@@ -193,7 +193,7 @@ ${correctionStr}
           model: 'claude-haiku-4-5-20251001',
           max_tokens: 1500,
           messages: [{ role: 'user', content: [
-            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: imageBase64 } },
+            { type: 'image', source: { type: 'base64', media_type: imageBase64.startsWith('/9j/') ? 'image/jpeg' : 'image/png'', data: imageBase64 } },
             { type: 'text', text: prompt }
           ]}]
         })
