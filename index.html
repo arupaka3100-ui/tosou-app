@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>塗装面積 AI計測</title>
+<style>
+  :root {
+    --c-primary: #1a1a2e;
+    --c-accent: #e94560;
+    --c-bg: #f5f5f0;
+    --c-surface: #ffffff;
+    --c-text: #1a1a2e;
+    --c-muted: #888880;
+    --c-border: #e0e0d8;
+    --c-success: #2d7a4f;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+    background: var(--c-bg);
+    color: var(--c-text);
+    min-height: 100vh;
+    padding-bottom: 40px;
+  }
+
+  header {
+    background: var(--c-primary);
+    color: white;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  header h1 {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  header span {
+    font-size: 11px;
+    background: var(--c-accent);
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+
+  .container { padding: 20px 16px; max-width: 600px; margin: 0 auto; }
+
+  .card {
+    background: var(--c-surface);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+    border: 1px solid var(--c-border);
+  }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--c-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card-title::before {
+    content: '';
+    display: inline-block;
+    width: 3px;
+    height: 14px;
+    background: var(--c-accent);
+    border-radius: 2px;
+  }
+
+  /* モード選択 */
+  .mode-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .mode-btn {
+    border: 2px solid var(--c-border);
+    border-radius: var(--radius-sm);
+    padding: 14px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: white;
+  }
+
+  .mode-btn.active {
+    border-color: var(--c-accent);
+    background: #fff5f6;
+  }
+
+  .mode-btn .icon { font-size: 24px; margin-bottom: 6px; }
+  .mode-btn .label { font-size: 13px; font-weight: 600; color: var(--c-text); }
+  .mode-btn .desc { font-size: 11px; color: var(--c-muted); margin-top: 3px; }
+
+  /* 写真アップロード */
+  .upload-area {
+    border: 2px dashed var(--c-border);
+    border-radius: var(--radius-sm);
+    padding: 30px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+  }
+
+  .upload-area:active { background: #f8f8f8; }
+  .upload-area.has-image { border-style: solid; border-color: var(--c-accent); padding: 0; overflow: hidden; }
+
+  .upload-area img {
+    width: 100%;
+    max-height: 240px;
+    object-fit: cover;
+    display: block;
+    border-radius: 10px;
+  }
+
+  .upload-icon { font-size: 36px; margin-bottom: 8px; }
+  .upload-text { font-size: 14px; font-weight: 600; color: var(--c-text); }
+  .upload-sub { font-size: 12px; color: var(--c-muted); margin-top: 4px; }
+
+  /* 入力フォーム */
+  .input-group { margin-bottom: 14px; }
+  .input-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--c-text);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .input-label .badge {
+    font-size: 10px;
+    background: var(--c-accent);
+    color: white;
+    padding: 1px 6px;
+    border-radius: 10px;
+  }
+
+  .input-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  input[type="number"] {
+    width: 100%;
+    border: 1.5px solid var(--c-border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    font-size: 16px;
+    font-family: inherit;
+    color: var(--c-text);
+    background: white;
+    -webkit-appearance: none;
+    transition: border-color 0.15s;
+  }
+
+  input[type="number"]:focus {
+    outline: none;
+    border-color: var(--c-accent);
+  }
+
+  .unit {
+    font-size: 14px;
+    color: var(--c-muted);
+    white-space: nowrap;
+    min-width: 20px;
+  }
+
+  .hint {
+    font-size: 11px;
+    color: var(--c-muted);
+    margin-top: 5px;
+    line-height: 1.5;
+  }
+
+  /* 解析ボタン */
+  .analyze-btn {
+    width: 100%;
+    background: var(--c-accent);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    padding: 16px;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    letter-spacing: 0.02em;
+  }
+
+  .analyze-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .analyze-btn:active:not(:disabled) { transform: scale(0.98); }
+
+  .spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* 結果 */
+  .result-card {
+    background: var(--c-primary);
+    color: white;
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+    display: none;
+  }
+
+  .result-title {
+    font-size: 12px;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 16px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+  }
+
+  .metrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .metric {
+    background: rgba(255,255,255,0.08);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+  }
+
+  .metric-label { font-size: 11px; color: rgba(255,255,255,0.6); margin-bottom: 4px; }
+  .metric-value { font-size: 22px; font-weight: 700; }
+  .metric-value.accent { color: #ff6b7a; }
+
+  .detail-list { margin-bottom: 16px; }
+  .detail-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    font-size: 13px;
+  }
+
+  .detail-item:last-child { border-bottom: none; }
+  .detail-item .dl { color: rgba(255,255,255,0.7); }
+  .detail-item .dv { font-weight: 600; }
+
+  .ai-comment {
+    background: rgba(255,255,255,0.06);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.8);
+    line-height: 1.6;
+    margin-bottom: 16px;
+    border-left: 3px solid var(--c-accent);
+  }
+
+  .copy-btn {
+    width: 100%;
+    background: rgba(255,255,255,0.12);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .copy-btn:active { background: rgba(255,255,255,0.2); }
+
+  .error-msg {
+    background: #fff0f0;
+    border: 1px solid #ffcccc;
+    border-radius: var(--radius-sm);
+    padding: 12px;
+    font-size: 13px;
+    color: #cc0000;
+    margin-top: 12px;
+    display: none;
+  }
+
+  /* APIキー入力 */
+  .api-section {
+    background: #fffbf0;
+    border: 1px solid #f0e0a0;
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .api-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #886600;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  input[type="password"] {
+    width: 100%;
+    border: 1.5px solid #e0d0a0;
+    border-radius: var(--radius-sm);
+    padding: 10px 12px;
+    font-size: 14px;
+    font-family: monospace;
+    background: white;
+    color: var(--c-text);
+  }
+
+  input[type="password"]:focus {
+    outline: none;
+    border-color: #cc9900;
+  }
+
+  .api-hint { font-size: 11px; color: #886600; margin-top: 6px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>塗装面積 AI計測</h1>
+  <span>Beta</span>
+</header>
+
+<div class="container">
+
+  <!-- APIキー入力 -->
+  <div class="api-section">
+    <div class="api-label">🔑 Anthropic APIキー</div>
+    <input type="password" id="apiKey" placeholder="sk-ant-api03-..." autocomplete="off">
+    <p class="api-hint">※ キーはこの端末上でのみ使用されます。外部送信はされません。</p>
+  </div>
+
+  <!-- 撮影モード -->
+  <div class="card">
+    <div class="card-title">撮影モード</div>
+    <div class="mode-grid">
+      <div class="mode-btn active" onclick="setMode('front')" id="mode-front">
+        <div class="icon">📐</div>
+        <div class="label">正面撮影</div>
+        <div class="desc">真正面から撮れた</div>
+      </div>
+      <div class="mode-btn" onclick="setMode('angle')" id="mode-angle">
+        <div class="icon">📷</div>
+        <div class="label">斜め撮影</div>
+        <div class="desc">正面から撮れない</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 写真アップロード -->
+  <div class="card">
+    <div class="card-title">外壁写真</div>
+    <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+      <div class="upload-icon">🏠</div>
+      <div class="upload-text">写真をタップして選択</div>
+      <div class="upload-sub">JPG / PNG 対応</div>
+      <input type="file" id="fileInput" accept="image/*" capture="environment" style="display:none">
+    </div>
+  </div>
+
+  <!-- 寸法入力（正面モード） -->
+  <div class="card" id="input-front">
+    <div class="card-title">寸法入力</div>
+    <div class="input-group">
+      <div class="input-label">
+        横幅（間口）<span class="badge">必須</span>
+      </div>
+      <div class="input-row">
+        <input type="number" id="width" placeholder="例：8.0" step="0.1" min="0">
+        <span class="unit">m</span>
+      </div>
+      <p class="hint">地面レベルで建物の横幅を1回だけ測ってください</p>
+    </div>
+    <div class="input-group">
+      <div class="input-label">階数</div>
+      <div class="input-row">
+        <input type="number" id="floors" placeholder="例：2" step="1" min="1" max="4" value="2">
+        <span class="unit">階</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 寸法入力（斜めモード） -->
+  <div class="card" id="input-angle" style="display:none">
+    <div class="card-title">寸法入力（斜め補正）</div>
+    <div class="input-group">
+      <div class="input-label">
+        手前側の壁の高さ<span class="badge">必須</span>
+      </div>
+      <div class="input-row">
+        <input type="number" id="heightNear" placeholder="例：5.0" step="0.1" min="0">
+        <span class="unit">m</span>
+      </div>
+      <p class="hint">写真の手前（近い側）の壁の高さを測ってください</p>
+    </div>
+    <div class="input-group">
+      <div class="input-label">
+        奥側の壁の高さ<span class="badge">必須</span>
+      </div>
+      <div class="input-row">
+        <input type="number" id="heightFar" placeholder="例：4.0" step="0.1" min="0">
+        <span class="unit">m</span>
+      </div>
+      <p class="hint">写真の奥（遠い側）の壁の高さを測ってください</p>
+    </div>
+    <div class="input-group">
+      <div class="input-label">階数</div>
+      <div class="input-row">
+        <input type="number" id="floors2" placeholder="例：2" step="1" min="1" max="4" value="2">
+        <span class="unit">階</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 解析ボタン -->
+  <button class="analyze-btn" id="analyzeBtn" onclick="analyze()" disabled>
+    <div class="spinner" id="spinner"></div>
+    <span id="btnText">📸 AIで面積を計算する</span>
+  </button>
+
+  <div class="error-msg" id="errorMsg"></div>
+
+  <!-- 結果 -->
+  <div class="result-card" id="resultCard">
+    <div class="result-title">AI 解析結果</div>
+    <div class="metrics">
+      <div class="metric">
+        <div class="metric-label">外壁総面積</div>
+        <div class="metric-value" id="r-total">—</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">塗装面積</div>
+        <div class="metric-value accent" id="r-paint">—</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">推定横幅</div>
+        <div class="metric-value" id="r-width">—</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">推定高さ</div>
+        <div class="metric-value" id="r-height">—</div>
+      </div>
+    </div>
+    <div class="detail-list" id="r-details"></div>
+    <div class="ai-comment" id="r-comment"></div>
+    <button class="copy-btn" onclick="copyResult()">📋 jimuuにコピーする</button>
+  </div>
+
+</div>
+
+<script>
+let mode = 'front';
+let imageBase64 = null;
+let lastResult = null;
+
+function setMode(m) {
+  mode = m;
+  document.getElementById('mode-front').classList.toggle('active', m === 'front');
+  document.getElementById('mode-angle').classList.toggle('active', m === 'angle');
+  document.getElementById('input-front').style.display = m === 'front' ? 'block' : 'none';
+  document.getElementById('input-angle').style.display = m === 'angle' ? 'block' : 'none';
+}
+
+document.getElementById('fileInput').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    imageBase64 = ev.target.result.split(',')[1];
+    const area = document.getElementById('uploadArea');
+    area.classList.add('has-image');
+    area.innerHTML = `<img src="${ev.target.result}" alt="外壁写真">`;
+    document.getElementById('analyzeBtn').disabled = false;
+  };
+  reader.readAsDataURL(file);
+});
+
+async function analyze() {
+  const apiKey = document.getElementById('apiKey').value.trim();
+  if (!apiKey) {
+    showError('APIキーを入力してください');
+    return;
+  }
+  if (!imageBase64) {
+    showError('写真を選択してください');
+    return;
+  }
+
+  const btn = document.getElementById('analyzeBtn');
+  const spinner = document.getElementById('spinner');
+  const btnText = document.getElementById('btnText');
+  btn.disabled = true;
+  spinner.style.display = 'block';
+  btnText.textContent = 'AI解析中...';
+  document.getElementById('errorMsg').style.display = 'none';
+  document.getElementById('resultCard').style.display = 'none';
+
+  const floors = mode === 'front'
+    ? document.getElementById('floors').value
+    : document.getElementById('floors2').value;
+
+  let promptExtra = '';
+  if (mode === 'front') {
+    const width = document.getElementById('width').value;
+    promptExtra = `建物情報：横幅（実測）= ${width}m、階数 = ${floors}階建て。この横幅を基準スケールとして使用してください。`;
+  } else {
+    const hNear = document.getElementById('heightNear').value;
+    const hFar = document.getElementById('heightFar').value;
+    promptExtra = `斜め撮影です。手前の壁高さ = ${hNear}m、奥の壁高さ = ${hFar}m。この2点を基準に遠近補正して横幅を推定してください。階数 = ${floors}階建て。`;
+  }
+
+  const prompt = `あなたは塗装業の見積り専門AIです。この外壁写真を解析して塗装面積を計算してください。
+
+${promptExtra}
+
+以下をJSONのみで返答してください（説明文・マークダウン不要）：
+{
+  "estimatedWidth": 推定横幅(m、小数1桁),
+  "estimatedHeight": 推定高さ(m、小数1桁),
+  "totalWallArea": 外壁総面積㎡(小数1桁),
+  "openings": [
+    {"type": "窓/ドア/掃き出し窓などの種類", "count": 数, "unitArea": 1個あたりの面積㎡}
+  ],
+  "totalOpeningArea": 開口部合計面積㎡(小数1桁),
+  "paintArea": 塗装面積㎡(小数1桁),
+  "comment": "解析コメント（日本語2〜3文、精度・注意点を含む）",
+  "confidence": "高/中/低"
+}`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{
+          role: 'user',
+          content: [
+            { type: 'image', source: { type: 'base64', media_type: 'image/jpeg', data: imageBase64 } },
+            { type: 'text', text: prompt }
+          ]
+        }]
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error?.message || 'API エラー');
+
+    const text = data.content.map(i => i.text || '').join('');
+    const clean = text.replace(/```json|```/g, '').trim();
+    const result = JSON.parse(clean);
+    lastResult = result;
+    showResult(result);
+
+  } catch(e) {
+    showError('解析に失敗しました：' + e.message);
+  }
+
+  btn.disabled = false;
+  spinner.style.display = 'none';
+  btnText.textContent = '📸 再解析する';
+}
+
+function showResult(r) {
+  document.getElementById('r-total').textContent = r.totalWallArea.toFixed(1) + ' ㎡';
+  document.getElementById('r-paint').textContent = r.paintArea.toFixed(1) + ' ㎡';
+  document.getElementById('r-width').textContent = r.estimatedWidth.toFixed(1) + ' m';
+  document.getElementById('r-height').textContent = r.estimatedHeight.toFixed(1) + ' m';
+
+  let detailHTML = '';
+  if (r.openings && r.openings.length > 0) {
+    r.openings.forEach(o => {
+      const total = (o.count * o.unitArea).toFixed(1);
+      detailHTML += `<div class="detail-item"><span class="dl">${o.type} × ${o.count}箇所</span><span class="dv">−${total} ㎡</span></div>`;
+    });
+  }
+  detailHTML += `<div class="detail-item"><span class="dl">開口部控除 合計</span><span class="dv">−${r.totalOpeningArea.toFixed(1)} ㎡</span></div>`;
+  document.getElementById('r-details').innerHTML = detailHTML;
+  document.getElementById('r-comment').textContent = r.comment + '（信頼度：' + r.confidence + '）';
+  document.getElementById('resultCard').style.display = 'block';
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function copyResult() {
+  if (!lastResult) return;
+  const r = lastResult;
+  let text = `【塗装面積 AI計測結果】\n`;
+  text += `外壁総面積：${r.totalWallArea.toFixed(1)} ㎡\n`;
+  text += `開口部控除：${r.totalOpeningArea.toFixed(1)} ㎡\n`;
+  text += `塗装面積：${r.paintArea.toFixed(1)} ㎡\n`;
+  text += `推定横幅：${r.estimatedWidth.toFixed(1)} m\n`;
+  text += `推定高さ：${r.estimatedHeight.toFixed(1)} m\n`;
+  if (r.openings) {
+    r.openings.forEach(o => {
+      text += `　${o.type}×${o.count}：${(o.count * o.unitArea).toFixed(1)} ㎡\n`;
+    });
+  }
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    btn.textContent = '✅ コピーしました！';
+    setTimeout(() => btn.textContent = '📋 jimuuにコピーする', 2000);
+  });
+}
+</script>
+</body>
+</html>
