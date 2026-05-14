@@ -6,90 +6,77 @@
 <title>塗装面積 AI計測</title>
 <style>
 :root {
-  --primary: #1a1a2e; --accent: #e94560; --bg: #f5f5f0;
-  --surface: #fff; --text: #1a1a2e; --muted: #888880;
-  --border: #e0e0d8; --r: 12px; --rs: 8px;
-  --green: #2d9e5a; --yellow: #cc8800; --red: #cc3333;
+  --primary:#1a1a2e; --accent:#e94560; --bg:#f5f5f0;
+  --surface:#fff; --text:#1a1a2e; --muted:#888880;
+  --border:#e0e0d8; --r:12px; --rs:8px;
+  --green:#2d9e5a; --yellow:#cc8800; --red:#cc3333;
 }
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body { font-family: 'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 80px; }
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:80px}
+header{background:var(--primary);color:white;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200}
+header h1{font-size:16px;font-weight:600}
+.beta{font-size:11px;background:var(--accent);padding:2px 8px;border-radius:20px}
+.container{padding:16px;max-width:600px;margin:0 auto}
+.card{background:var(--surface);border-radius:var(--r);padding:18px;margin-bottom:14px;border:1px solid var(--border)}
+.card-title{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.08em;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.card-title::before{content:'';display:inline-block;width:3px;height:13px;background:var(--accent);border-radius:2px}
+.upload-area{border:2px dashed var(--border);border-radius:var(--rs);padding:32px 20px;text-align:center;cursor:pointer}
+.upload-area.has-image{border:none;padding:0;overflow:hidden;border-radius:var(--rs)}
+.upload-area img{width:100%;display:block}
+.upload-icon{font-size:36px;margin-bottom:8px}
+.upload-text{font-size:14px;font-weight:600}
+.upload-sub{font-size:12px;color:var(--muted);margin-top:4px}
+.btn{width:100%;border:none;border-radius:var(--r);padding:15px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .15s,transform .1s;margin-bottom:10px}
+.btn-primary{background:var(--accent);color:white}
+.btn-outline{background:white;color:var(--primary);border:1.5px solid var(--border)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn:active:not(:disabled){transform:scale(.98)}
+.spinner{width:17px;height:17px;border:2px solid rgba(255,255,255,.4);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
+.note-box{background:#fffbf0;border:1px solid #f0e0a0;border-radius:var(--rs);padding:12px;font-size:12px;color:#886600;line-height:1.6;margin-bottom:14px}
+.error-msg{background:#fff0f0;border:1px solid #ffcccc;border-radius:var(--rs);padding:12px;font-size:13px;color:#cc3333;margin-top:10px;display:none}
+.hidden{display:none}
 
-header { background: var(--primary); color: white; padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 200; }
-header h1 { font-size: 16px; font-weight: 600; }
-.beta { font-size: 11px; background: var(--accent); padding: 2px 8px; border-radius: 20px; }
+/* 立面図 */
+.diagram-wrap{background:#f8f8f4;border-radius:var(--rs);padding:16px;margin-bottom:12px}
+.diagram-title{font-size:12px;color:var(--muted);margin-bottom:10px;text-align:center}
+.diagram-svg{width:100%;max-width:500px;display:block;margin:0 auto;cursor:pointer}
+.legend{font-size:11px;color:var(--muted);text-align:center;padding:8px 0;display:flex;justify-content:center;gap:16px;flex-wrap:wrap}
+.legend span{display:flex;align-items:center;gap:4px}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.dot-green{background:var(--green)}
+.dot-yellow{background:var(--yellow)}
+.dot-red{background:var(--red)}
+.dim-tap-hint{font-size:11px;color:var(--accent);text-align:center;margin-top:4px}
 
-.container { padding: 16px; max-width: 600px; margin: 0 auto; }
-.card { background: var(--surface); border-radius: var(--r); padding: 18px; margin-bottom: 14px; border: 1px solid var(--border); }
-.card-title { font-size: 12px; font-weight: 600; color: var(--muted); letter-spacing: 0.08em; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
-.card-title::before { content: ''; display: inline-block; width: 3px; height: 13px; background: var(--accent); border-radius: 2px; }
+/* 結果 */
+.result-card{background:var(--primary);color:white;border-radius:var(--r);padding:18px;margin-bottom:14px}
+.result-title{font-size:11px;color:rgba(255,255,255,.6);margin-bottom:14px;letter-spacing:.08em}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.metric{background:rgba(255,255,255,.08);border-radius:var(--rs);padding:11px}
+.metric-label{font-size:11px;color:rgba(255,255,255,.6);margin-bottom:3px}
+.metric-value{font-size:20px;font-weight:700}
+.metric-value.accent{color:#ff6b7a}
+.detail-item{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:12px}
+.detail-item:last-child{border-bottom:none}
+.copy-btn{width:100%;background:rgba(255,255,255,.12);color:white;border:1px solid rgba(255,255,255,.2);border-radius:var(--rs);padding:11px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;margin-top:10px}
 
-.upload-area { border: 2px dashed var(--border); border-radius: var(--rs); padding: 32px 20px; text-align: center; cursor: pointer; }
-.upload-area.has-image { border: none; padding: 0; overflow: hidden; border-radius: var(--rs); }
-.upload-area img { width: 100%; display: block; }
-.upload-icon { font-size: 36px; margin-bottom: 8px; }
-.upload-text { font-size: 14px; font-weight: 600; }
-.upload-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
-
-.img-container { position: relative; width: 100%; touch-action: none; }
-.img-container img { width: 100%; display: block; border-radius: var(--rs); }
-.img-container svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-
-.legend { font-size: 11px; color: var(--muted); text-align: center; padding: 8px 0; display: flex; justify-content: center; gap: 16px; }
-.legend span { display: flex; align-items: center; gap: 4px; }
-.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-.dot-green { background: var(--green); }
-.dot-yellow { background: var(--yellow); }
-.dot-red { background: var(--red); }
-
-.note-box { background: #fffbf0; border: 1px solid #f0e0a0; border-radius: var(--rs); padding: 12px; font-size: 12px; color: #886600; line-height: 1.6; margin-bottom: 14px; }
-
-.btn { width: 100%; border: none; border-radius: var(--r); padding: 15px; font-size: 15px; font-weight: 700; font-family: inherit; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: opacity 0.15s, transform 0.1s; margin-bottom: 10px; }
-.btn-primary { background: var(--accent); color: white; }
-.btn-secondary { background: var(--primary); color: white; }
-.btn-outline { background: white; color: var(--primary); border: 1.5px solid var(--border); }
-.btn:disabled { opacity: 0.4; cursor: not-allowed; }
-.btn:active:not(:disabled) { transform: scale(0.98); }
-
-.spinner { width: 17px; height: 17px; border: 2px solid rgba(255,255,255,0.4); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.result-bar { background: var(--primary); color: white; border-radius: var(--r); padding: 16px 18px; margin-bottom: 14px; display: none; }
-.result-bar-title { font-size: 11px; color: rgba(255,255,255,0.6); margin-bottom: 10px; letter-spacing: 0.08em; }
-.result-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-.metric { background: rgba(255,255,255,0.08); border-radius: var(--rs); padding: 10px; }
-.metric-label { font-size: 11px; color: rgba(255,255,255,0.6); margin-bottom: 2px; }
-.metric-value { font-size: 20px; font-weight: 700; }
-.metric-value.accent { color: #ff6b7a; }
-.detail-item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 12px; }
-.detail-item:last-child { border-bottom: none; }
-.copy-btn { width: 100%; background: rgba(255,255,255,0.12); color: white; border: 1px solid rgba(255,255,255,0.2); border-radius: var(--rs); padding: 11px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; margin-top: 10px; }
-
-.updating-badge { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.7); color: white; font-size: 11px; padding: 4px 10px; border-radius: 20px; display: none; }
-
-/* テンキーモーダル */
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 300; display: none; align-items: flex-end; justify-content: center; }
-.modal-overlay.show { display: flex; }
-.modal { background: white; border-radius: 20px 20px 0 0; padding: 20px; width: 100%; max-width: 400px; }
-.modal-title { font-size: 14px; font-weight: 600; text-align: center; margin-bottom: 4px; }
-.modal-ai { font-size: 12px; color: var(--muted); text-align: center; margin-bottom: 14px; }
-.modal-display { background: #f5f5f0; border-radius: var(--rs); padding: 14px; text-align: center; font-size: 28px; font-weight: 700; margin-bottom: 14px; min-height: 56px; letter-spacing: 2px; }
-.keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; }
-.key { background: #f0f0e8; border: none; border-radius: var(--rs); padding: 16px; font-size: 20px; font-weight: 600; font-family: inherit; cursor: pointer; transition: background 0.1s; }
-.key:active { background: #e0e0d8; }
-.key-action { background: var(--accent); color: white; }
-.key-del { background: #e0e0d8; }
-.key-confirm { background: var(--primary); color: white; border: none; border-radius: var(--rs); padding: 16px; font-size: 16px; font-weight: 700; font-family: inherit; cursor: pointer; width: 100%; }
-.key-confirm:active { opacity: 0.8; }
-.modal-unit { font-size: 14px; color: var(--muted); text-align: center; margin-bottom: 10px; }
-
-.error-msg { background: #fff0f0; border: 1px solid #ffcccc; border-radius: var(--rs); padding: 12px; font-size: 13px; color: #cc3333; margin-top: 10px; display: none; }
-.hidden { display: none; }
-
-.all-confirmed-banner { background: #e8f8e8; border: 1.5px solid #88cc88; border-radius: var(--rs); padding: 12px; text-align: center; font-size: 13px; color: #2d7a4f; font-weight: 600; margin-bottom: 14px; display: none; }
+/* テンキー */
+.modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);z-index:300;display:none;align-items:flex-end;justify-content:center}
+.modal-overlay.show{display:flex}
+.modal{background:white;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:400px}
+.modal-title{font-size:14px;font-weight:600;text-align:center;margin-bottom:4px}
+.modal-ai{font-size:12px;color:var(--muted);text-align:center;margin-bottom:12px}
+.modal-display{background:#f5f5f0;border-radius:var(--rs);padding:14px;text-align:center;font-size:28px;font-weight:700;margin-bottom:12px;min-height:56px}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.key{background:#f0f0e8;border:none;border-radius:var(--rs);padding:16px;font-size:20px;font-weight:600;font-family:inherit;cursor:pointer;transition:background .1s}
+.key:active{background:#e0e0d8}
+.key-del{background:#e0e0d8}
+.key-confirm{background:var(--primary);color:white;border:none;border-radius:var(--rs);padding:16px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;width:100%}
+.modal-unit{font-size:12px;color:var(--muted);text-align:center;margin-bottom:10px}
 </style>
 </head>
 <body>
-
 <header>
   <h1>塗装面積 AI計測</h1>
   <span class="beta">Beta</span>
@@ -105,10 +92,10 @@ header h1 { font-size: 16px; font-weight: 600; }
         <div class="upload-icon">🏠</div>
         <div class="upload-text">写真をタップして選択</div>
         <div class="upload-sub">カメラまたはライブラリから</div>
-        <input type="file" id="fileInput" accept="image/*" capture="environment" style="display:none">
+        <input type="file" id="fileInput" accept="image/*" style="display:none">
       </div>
     </div>
-    <div class="note-box">建物全体が写るよう少し離れて撮影してください。正面・斜めどちらでもOKです。</div>
+    <div class="note-box">建物全体が写るよう少し離れて撮影してください。</div>
     <button class="btn btn-primary" id="analyzeBtn" onclick="startAnalyze()" disabled>
       <div class="spinner" id="analyzeSpinner"></div>
       <span id="analyzeBtnText">AIで解析する</span>
@@ -116,28 +103,28 @@ header h1 { font-size: 16px; font-weight: 600; }
     <div class="error-msg" id="uploadError"></div>
   </div>
 
-  <!-- Step2: 写真上で入力 -->
-  <div id="view-measure" class="hidden">
+  <!-- Step2: 図面 + 入力 -->
+  <div id="view-diagram" class="hidden">
     <div class="card">
-      <div class="card-title">数値をタップして実測値を入力</div>
-      <div class="img-container" id="imgContainer">
-        <img id="measureImg" src="" alt="外壁写真">
-        <svg id="measureSvg" viewBox="0 0 100 100" preserveAspectRatio="none" id="measureSvg"></svg>
-        <div class="updating-badge" id="updatingBadge">AI補正中...</div>
+      <div class="card-title">立面図 — 数値をタップして実測値を入力</div>
+      <div class="diagram-wrap">
+        <div class="diagram-title" id="diagramTitle">建物立面図（AI推定）</div>
+        <svg id="diagramSvg" class="diagram-svg" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg"></svg>
       </div>
       <div class="legend">
         <span><span class="dot dot-green"></span>確実</span>
         <span><span class="dot dot-yellow"></span>推定</span>
         <span><span class="dot dot-red"></span>要確認</span>
       </div>
+      <div class="dim-tap-hint">▲ 数値をタップして実測値を入力してください</div>
     </div>
 
-    <div class="note-box" id="measureNote"></div>
-    <div class="all-confirmed-banner" id="allConfirmedBanner">✅ 全ての数値が確定しました！</div>
+    <div class="note-box" id="diagramNote"></div>
 
-    <div class="result-bar" id="resultBar">
-      <div class="result-bar-title">計算結果</div>
-      <div class="result-metrics">
+    <!-- 結果（全確定後に表示） -->
+    <div class="result-card hidden" id="resultCard">
+      <div class="result-title">計算結果</div>
+      <div class="metrics">
         <div class="metric"><div class="metric-label">外壁総面積</div><div class="metric-value" id="r-total">—</div></div>
         <div class="metric"><div class="metric-label">塗装面積</div><div class="metric-value accent" id="r-paint">—</div></div>
         <div class="metric"><div class="metric-label">横幅</div><div class="metric-value" id="r-width">—</div></div>
@@ -155,8 +142,8 @@ header h1 { font-size: 16px; font-weight: 600; }
 <!-- テンキーモーダル -->
 <div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
   <div class="modal">
-    <div class="modal-title" id="modalTitle">横幅を入力</div>
-    <div class="modal-ai" id="modalAI">AI推定：8.0m</div>
+    <div class="modal-title" id="modalTitle">実測値を入力</div>
+    <div class="modal-ai" id="modalAI">AI推定：—</div>
     <div class="modal-display" id="modalDisplay">—</div>
     <div class="modal-unit">m（メートル）</div>
     <div class="keypad">
@@ -178,282 +165,267 @@ header h1 { font-size: 16px; font-weight: 600; }
 </div>
 
 <script>
-let imageBase64 = null, imageSrc = null, imageMediaType = "image/jpeg";
-let buildingInfo = null;
-let dimensions = [], openings = [];
-let totalWallArea = 0, totalOpeningArea = 0, paintArea = 0;
-let currentEditId = null, currentInputStr = '';
+let imageBase64=null, imageSrc=null, imageMediaType='image/jpeg';
+let buildingInfo=null, dimensions=[], openings=[];
+let totalWallArea=0, totalOpeningArea=0, paintArea=0;
+let currentEditId=null, currentInputStr='';
 
-document.getElementById('fileInput').addEventListener('change', function(e) {
-  const file = e.target.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(ev) {
-    imageSrc = ev.target.result;
-    imageMediaType = file.type || "image/jpeg"; imageBase64 = ev.target.result.split(',')[1];
-    const area = document.getElementById('uploadArea');
+// ファイル選択
+document.getElementById('fileInput').addEventListener('change', function(e){
+  const file=e.target.files[0]; if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    imageSrc=ev.target.result;
+    imageBase64=ev.target.result.split(',')[1];
+    imageMediaType=file.type||'image/jpeg';
+    const area=document.getElementById('uploadArea');
     area.classList.add('has-image');
-    area.innerHTML = `<img src="${imageSrc}" alt="外壁写真">`;
-    document.getElementById('analyzeBtn').disabled = false;
+    area.innerHTML=`<img src="${imageSrc}" alt="外壁写真">`;
+    document.getElementById('analyzeBtn').disabled=false;
   };
   reader.readAsDataURL(file);
 });
 
-async function startAnalyze() {
+// AI解析
+async function startAnalyze(){
   setBtn('analyzeBtn','analyzeSpinner','analyzeBtnText','解析中...',true);
-  document.getElementById('uploadError').style.display = 'none';
-  try {
-    const res = await fetch('/api/analyze', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ step: "analyze", imageBase64, imageMediaType })
+  document.getElementById('uploadError').style.display='none';
+  try{
+    const res=await fetch('/api/analyze',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({step:'analyze', imageBase64, imageMediaType})
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
-
-    buildingInfo = data.buildingInfo;
-    dimensions = data.dimensions.map(d => ({ ...d, confirmed: false, originalValue: d.value }));
-    openings = data.openings || [];
-    totalWallArea = data.totalWallArea || 0;
-    totalOpeningArea = data.totalOpeningArea || 0;
-    paintArea = data.paintArea || 0;
-
-    document.getElementById('measureImg').src = imageSrc;
-    document.getElementById('measureNote').textContent = `建物：${buildingInfo.style}　${buildingInfo.note}`;
-
-    renderSvg();
-    showView('view-measure');
-  } catch(e) {
-    document.getElementById('uploadError').textContent = 'エラー：' + e.message;
-    document.getElementById('uploadError').style.display = 'block';
+    const data=await res.json();
+    if(!res.ok) throw new Error(data.error);
+    buildingInfo=data.buildingInfo;
+    dimensions=data.dimensions.map(d=>({...d, confirmed:false, originalValue:d.value}));
+    openings=data.openings||[];
+    totalWallArea=data.totalWallArea||0;
+    totalOpeningArea=data.totalOpeningArea||0;
+    paintArea=data.paintArea||0;
+    document.getElementById('diagramNote').textContent=`建物：${buildingInfo.style}　${buildingInfo.note}`;
+    document.getElementById('diagramTitle').textContent=`${buildingInfo.type}（${buildingInfo.floors}階建て）`;
+    drawDiagram();
+    showView('view-diagram');
+  }catch(e){
+    document.getElementById('uploadError').textContent='エラー：'+e.message;
+    document.getElementById('uploadError').style.display='block';
   }
   setBtn('analyzeBtn','analyzeSpinner','analyzeBtnText','AIで解析する',false);
 }
 
-function confColor(conf, confirmed) {
-  if (confirmed) return '#2d9e5a';
-  if (conf === 'high') return '#2d9e5a';
-  if (conf === 'medium') return '#cc8800';
+// 立面図を描画
+function drawDiagram(){
+  const svg=document.getElementById('diagramSvg');
+  const floors=buildingInfo?.floors||2;
+  const W=320, H=240, OX=50, OY=20;
+  const floorH=floors>0?Math.floor(H/floors):120;
+
+  let s='';
+
+  // 各階の壁
+  for(let f=0;f<floors;f++){
+    const fy=OY+(floors-1-f)*floorH;
+    const col='#e8e4dc';
+    s+=`<rect x="${OX}" y="${fy}" width="${W}" height="${floorH}" fill="${col}" stroke="#aaa" stroke-width="1"/>`;
+    s+=`<text x="${OX+8}" y="${fy+16}" font-size="10" fill="#888">${f+1}F</text>`;
+  }
+
+  // 開口部を描画
+  openings.forEach(op=>{
+    const f=op.floor||1;
+    const fy=OY+(floors-f)*floorH;
+    const wRatio=Math.min(op.width/12, 0.25);
+    const hRatio=Math.min(op.height/3.5, 0.7);
+    const opW=W*wRatio*op.count;
+    const opH=floorH*hRatio;
+    const opX=OX+W/2-opW/2;
+    const opY=fy+floorH*(1-hRatio)-10;
+    const cc=confColor(op.confidence, false);
+    s+=`<rect x="${opX}" y="${opY}" width="${opW}" height="${opH}" fill="#c8d8e8" stroke="${cc}" stroke-width="1.5" rx="2"/>`;
+    s+=`<text x="${opX+opW/2}" y="${opY+opH/2+4}" text-anchor="middle" font-size="9" fill="${cc}">${op.type}</text>`;
+  });
+
+  // 地面線
+  s+=`<line x1="${OX-10}" y1="${OY+H}" x2="${OX+W+10}" y2="${OY+H}" stroke="#888" stroke-width="2"/>`;
+
+  // 寸法線：横幅
+  const wDim=dimensions.find(d=>d.id==='width');
+  if(wDim){
+    const col=confColor(wDim.confidence, wDim.confirmed);
+    const sy=OY+H+20;
+    s+=`<line x1="${OX}" y1="${sy}" x2="${OX+W}" y2="${sy}" stroke="${col}" stroke-width="1.5"/>`;
+    s+=`<line x1="${OX}" y1="${sy-5}" x2="${OX}" y2="${sy+5}" stroke="${col}" stroke-width="1.5"/>`;
+    s+=`<line x1="${OX+W}" y1="${sy-5}" x2="${OX+W}" y2="${sy+5}" stroke="${col}" stroke-width="1.5"/>`;
+    s+=`<rect x="${OX+W/2-30}" y="${sy+4}" width="60" height="18" fill="${col}" rx="4" style="cursor:pointer" onclick="openModal('width')"/>`;
+    s+=`<text x="${OX+W/2}" y="${sy+17}" text-anchor="middle" font-size="12" font-weight="bold" fill="white" style="cursor:pointer" onclick="openModal('width')">${wDim.value.toFixed(1)}m${wDim.confirmed?' ✓':''}</text>`;
+  }
+
+  // 寸法線：各階高さ
+  const heightDims=dimensions.filter(d=>d.id!=='width');
+  heightDims.forEach((hDim,i)=>{
+    const col=confColor(hDim.confidence, hDim.confirmed);
+    const floorIdx=hDim.id==='height1F'?0:1;
+    const fy=OY+(floors-1-floorIdx)*floorH;
+    const sx=OX+W+20+(i*50);
+    s+=`<line x1="${sx}" y1="${fy}" x2="${sx}" y2="${fy+floorH}" stroke="${col}" stroke-width="1.5"/>`;
+    s+=`<line x1="${sx-5}" y1="${fy}" x2="${sx+5}" y2="${fy}" stroke="${col}" stroke-width="1.5"/>`;
+    s+=`<line x1="${sx-5}" y1="${fy+floorH}" x2="${sx+5}" y2="${fy+floorH}" stroke="${col}" stroke-width="1.5"/>`;
+    s+=`<rect x="${sx-25}" y="${fy+floorH/2-10}" width="50" height="18" fill="${col}" rx="4" style="cursor:pointer" onclick="openModal('${hDim.id}')"/>`;
+    s+=`<text x="${sx}" y="${fy+floorH/2+3}" text-anchor="middle" font-size="11" font-weight="bold" fill="white" style="cursor:pointer" onclick="openModal('${hDim.id}')">${hDim.value.toFixed(1)}m${hDim.confirmed?' ✓':''}</text>`;
+  });
+
+  svg.innerHTML=s;
+}
+
+function confColor(conf, confirmed){
+  if(confirmed) return '#2d9e5a';
+  if(conf==='high') return '#2d9e5a';
+  if(conf==='medium') return '#cc8800';
   return '#cc3333';
 }
 
-function renderSvg() {
-  const svg = document.getElementById('measureSvg');
-  let s = '';
-
-  dimensions.forEach(d => {
-    const col = confColor(d.confidence, d.confirmed);
-    const val = d.value.toFixed(1) + 'm';
-    const tx = d.textX, ty = d.textY;
-    const isH = d.direction === 'horizontal';
-
-    s += `<line x1="${d.lineX1}%" y1="${d.lineY1}%" x2="${d.lineX2}%" y2="${d.lineY2}%"
-      stroke="${col}" stroke-width="0.7" stroke-dasharray="${d.confirmed?'none':'3,1'}"/>`;
-    if (isH) {
-      s += `<polygon points="${d.lineX1}%,${d.lineY1}% ${d.lineX1+2}%,${d.lineY1-1}% ${d.lineX1+2}%,${d.lineY1+1}%" fill="${col}"/>`;
-      s += `<polygon points="${d.lineX2}%,${d.lineY2}% ${d.lineX2-2}%,${d.lineY2-1}% ${d.lineX2-2}%,${d.lineY2+1}%" fill="${col}"/>`;
-    } else {
-      s += `<polygon points="${d.lineX1}%,${d.lineY1}% ${d.lineX1-1}%,${d.lineY1+2}% ${d.lineX1+1}%,${d.lineY1+2}%" fill="${col}"/>`;
-      s += `<polygon points="${d.lineX2}%,${d.lineY2}% ${d.lineX2-1}%,${d.lineY2-2}% ${d.lineX2+1}%,${d.lineY2-2}%" fill="${col}"/>`;
-    }
-
-    s += `<rect x="${tx-7}%" y="${ty-3.5}%" width="14%" height="6%" fill="rgba(0,0,0,0.78)" rx="1.5"
-      style="cursor:pointer" onclick="openModal('${d.id}')"/>`;
-    s += `<text x="${tx}%" y="${ty+1}%" text-anchor="middle" fill="${col}" font-size="3.2"
-      font-family="sans-serif" font-weight="bold" style="cursor:pointer" onclick="openModal('${d.id}')">${val}</text>`;
-    if (d.confirmed) {
-      s += `<text x="${tx+7.5}%" y="${ty+1}%" fill="#2d9e5a" font-size="3.5" font-family="sans-serif">✓</text>`;
-    }
-  });
-
-  openings.forEach(o => {
-    const col = confColor(o.confidence, false);
-    const val = o.width.toFixed(1) + 'm';
-    s += `<rect x="${o.textX-5}%" y="${o.textY-2.5}%" width="10%" height="5%" fill="rgba(0,0,0,0.7)" rx="1"
-      style="cursor:pointer" onclick="openModal('${o.id}')"/>`;
-    s += `<text x="${o.textX}%" y="${o.textY+0.8}%" text-anchor="middle" fill="${col}" font-size="2.8"
-      font-family="sans-serif" font-weight="bold" style="cursor:pointer" onclick="openModal('${o.id}')">[${val}]</text>`;
-  });
-
-  svg.innerHTML = s;
-  checkAllConfirmed();
-}
-
-function checkAllConfirmed() {
-  const allDone = dimensions.every(d => d.confirmed);
-  document.getElementById('allConfirmedBanner').style.display = allDone ? 'block' : 'none';
-  if (allDone) updateResultBar();
-}
-
-function updateResultBar() {
-  document.getElementById('resultBar').style.display = 'block';
-  document.getElementById('r-total').textContent = totalWallArea.toFixed(1) + ' m²';
-  document.getElementById('r-paint').textContent = paintArea.toFixed(1) + ' m²';
-  const w = dimensions.find(d => d.id === 'width');
-  const h = dimensions.find(d => d.id === 'height1F');
-  if (w) document.getElementById('r-width').textContent = w.value.toFixed(1) + ' m';
-  if (h) document.getElementById('r-height').textContent = ((dimensions.find(d=>d.id==='height1F')?.value||0) + (dimensions.find(d=>d.id==='height2F')?.value||0)).toFixed(1) + ' m';
-  let html = '';
-  openings.forEach(o => { html += `<div class="detail-item"><span style="color:rgba(255,255,255,0.7)">${o.type} ×${o.count}</span><span>−${o.totalArea.toFixed(1)} m²</span></div>`; });
-  html += `<div class="detail-item"><span style="color:rgba(255,255,255,0.7)">開口部控除</span><span>−${totalOpeningArea.toFixed(1)} m²</span></div>`;
-  document.getElementById('r-details').innerHTML = html;
-}
-
-function openModal(id) {
-  currentEditId = id;
-  currentInputStr = '';
-  const dim = dimensions.find(d => d.id === id);
-  const open = openings.find(o => o.id === id);
-  const item = dim || open;
-  if (!item) return;
-  document.getElementById('modalTitle').textContent = (dim ? dim.label : open.type) + 'を入力';
-  document.getElementById('modalAI').textContent = 'AI推定：' + item.value.toFixed(1) + 'm';
-  document.getElementById('modalDisplay').textContent = item.value.toFixed(1);
-  currentInputStr = item.value.toFixed(1);
+// モーダル
+function openModal(id){
+  currentEditId=id;
+  const dim=dimensions.find(d=>d.id===id);
+  const op=openings.find(o=>o.id===id);
+  const item=dim||op;
+  if(!item)return;
+  document.getElementById('modalTitle').textContent=(dim?dim.label:op.type)+'を入力';
+  document.getElementById('modalAI').textContent='AI推定：'+item.value.toFixed(1)+'m';
+  currentInputStr=item.value.toFixed(1);
+  document.getElementById('modalDisplay').textContent=currentInputStr;
   document.getElementById('modalOverlay').classList.add('show');
 }
 
-function closeModalOutside(e) {
-  if (e.target === document.getElementById('modalOverlay')) closeModal();
-}
-function closeModal() { document.getElementById('modalOverlay').classList.remove('show'); }
+function closeModalOutside(e){ if(e.target===document.getElementById('modalOverlay')) closeModal(); }
+function closeModal(){ document.getElementById('modalOverlay').classList.remove('show'); }
 
-function keyPress(k) {
-  if (k === '.' && currentInputStr.includes('.')) return;
-  if (currentInputStr === '0' && k !== '.') currentInputStr = k;
-  else currentInputStr += k;
-  document.getElementById('modalDisplay').textContent = currentInputStr || '—';
+function keyPress(k){
+  if(k==='.'&&currentInputStr.includes('.'))return;
+  if(currentInputStr==='0'&&k!=='.') currentInputStr=k;
+  else currentInputStr+=k;
+  document.getElementById('modalDisplay').textContent=currentInputStr||'—';
 }
-function keyDel() {
-  currentInputStr = currentInputStr.slice(0, -1);
-  document.getElementById('modalDisplay').textContent = currentInputStr || '—';
+function keyDel(){
+  currentInputStr=currentInputStr.slice(0,-1);
+  document.getElementById('modalDisplay').textContent=currentInputStr||'—';
 }
 
-async function confirmInput() {
-  const val = parseFloat(currentInputStr);
-  if (isNaN(val) || val <= 0) return;
+async function confirmInput(){
+  const val=parseFloat(currentInputStr);
+  if(isNaN(val)||val<=0)return;
   closeModal();
 
-  const dim = dimensions.find(d => d.id === currentEditId);
-  const open = openings.find(o => o.id === currentEditId);
-
-  if (dim) {
-    const oldVal = dim.value;
-    dim.value = val;
-    dim.confirmed = true;
-    dim.confidence = 'high';
-    renderSvg();
-    await recalculate(dim.id, oldVal, val);
-  } else if (open) {
-    open.width = val;
-    open.area = parseFloat((val * open.height).toFixed(2));
-    open.totalArea = parseFloat((open.area * open.count).toFixed(2));
-    renderSvg();
-    recalculateTotals();
+  const dim=dimensions.find(d=>d.id===currentEditId);
+  if(dim){
+    const oldVal=dim.value;
+    dim.value=val;
+    dim.confirmed=true;
+    dim.confidence='high';
+    drawDiagram();
+    saveLearning(dim.id, oldVal, val);
+    await recalculate();
   }
-
-  saveLearningData(currentEditId, dim ? dim.originalValue : open?.width, val);
 }
 
-async function recalculate(confirmedId, oldVal, newVal) {
-  document.getElementById('updatingBadge').style.display = 'block';
-  try {
-    const res = await fetch('/api/analyze', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ step: 'recalculate', imageBase64, dimensions, openings, buildingInfo })
+async function recalculate(){
+  try{
+    const res=await fetch('/api/analyze',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({step:'recalculate', imageBase64, imageMediaType, dimensions, openings, buildingInfo})
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
+    const data=await res.json();
+    if(!res.ok)return;
 
-    data.dimensions.forEach(updated => {
-      const d = dimensions.find(x => x.id === updated.id);
-      if (d && !d.confirmed) {
-        d.value = updated.value;
-        d.confidence = updated.confidence;
-        d.note = updated.note;
-      }
+    // 未確定の値を更新
+    data.dimensions.forEach(upd=>{
+      const d=dimensions.find(x=>x.id===upd.id);
+      if(d&&!d.confirmed){ d.value=upd.value; d.confidence=upd.confidence; d.note=upd.note; }
     });
-    data.openings.forEach(updated => {
-      const o = openings.find(x => x.id === updated.id);
-      if (o) { o.width = updated.width; o.height = updated.height; o.area = updated.area; o.totalArea = updated.totalArea; o.confidence = updated.confidence; }
+    data.openings.forEach(upd=>{
+      const o=openings.find(x=>x.id===upd.id);
+      if(o){ o.width=upd.width; o.height=upd.height; o.totalArea=upd.totalArea; o.confidence=upd.confidence; }
     });
-    totalWallArea = data.totalWallArea || totalWallArea;
-    totalOpeningArea = data.totalOpeningArea || totalOpeningArea;
-    paintArea = data.paintArea || paintArea;
-    renderSvg();
-  } catch(e) { recalculateTotals(); }
-  document.getElementById('updatingBadge').style.display = 'none';
+    totalWallArea=data.totalWallArea||totalWallArea;
+    totalOpeningArea=data.totalOpeningArea||totalOpeningArea;
+    paintArea=data.paintArea||paintArea;
+    drawDiagram();
+    showResult();
+  }catch(e){ showResult(); }
 }
 
-function recalculateTotals() {
-  const w = dimensions.find(d => d.id === 'width')?.value || 0;
-  const h1 = dimensions.find(d => d.id === 'height1F')?.value || 0;
-  const h2 = dimensions.find(d => d.id === 'height2F')?.value || 0;
-  totalWallArea = parseFloat(((w * (h1 + h2)) * 2).toFixed(1));
-  totalOpeningArea = parseFloat(openings.reduce((s, o) => s + o.totalArea, 0).toFixed(1));
-  paintArea = parseFloat((totalWallArea - totalOpeningArea).toFixed(1));
-  if (dimensions.every(d => d.confirmed)) updateResultBar();
+function showResult(){
+  const rc=document.getElementById('resultCard');
+  rc.classList.remove('hidden');
+  document.getElementById('r-total').textContent=totalWallArea.toFixed(1)+' m²';
+  document.getElementById('r-paint').textContent=paintArea.toFixed(1)+' m²';
+  const w=dimensions.find(d=>d.id==='width');
+  const h1=dimensions.find(d=>d.id==='height1F');
+  const h2=dimensions.find(d=>d.id==='height2F');
+  if(w) document.getElementById('r-width').textContent=w.value.toFixed(1)+' m';
+  const totalH=((h1?.value||0)+(h2?.value||0));
+  document.getElementById('r-height').textContent=totalH.toFixed(1)+' m';
+  let html='';
+  openings.forEach(o=>{ html+=`<div class="detail-item"><span style="color:rgba(255,255,255,.7)">${o.type} ×${o.count}</span><span>−${o.totalArea.toFixed(1)} m²</span></div>`; });
+  html+=`<div class="detail-item"><span style="color:rgba(255,255,255,.7)">開口部控除</span><span>−${totalOpeningArea.toFixed(1)} m²</span></div>`;
+  document.getElementById('r-details').innerHTML=html;
 }
 
-async function saveLearningData(partId, aiVal, actualVal) {
-  if (!aiVal || !actualVal || aiVal === actualVal) return;
-  try {
-    await fetch('/api/analyze', {
-      method: 'POST', headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({
-        step: 'save_learning', imageBase64: null,
-        learningData: {
-          building_type: buildingInfo?.type || 'unknown',
-          shoot_angle: buildingInfo?.shootAngle || 'unknown',
-          part: partId, ai_value: aiVal, actual_value: actualVal,
-          created_at: new Date().toISOString()
-        }
-      })
-    });
-  } catch(e) {}
-}
-
-function copyResult() {
-  const w = dimensions.find(d=>d.id==='width')?.value||0;
-  const h1 = dimensions.find(d=>d.id==='height1F')?.value||0;
-  const h2 = dimensions.find(d=>d.id==='height2F')?.value||0;
-  let text = `【塗装面積 AI計測結果】\n外壁総面積：${totalWallArea.toFixed(1)} m²\n開口部控除：${totalOpeningArea.toFixed(1)} m²\n塗装面積：${paintArea.toFixed(1)} m²\n横幅：${w.toFixed(1)} m\n総高さ：${(h1+h2).toFixed(1)} m\n`;
-  openings.forEach(o => { text += `　${o.type}×${o.count}：${o.totalArea.toFixed(1)} m²\n`; });
-  navigator.clipboard.writeText(text).then(() => {
-    const btn = document.querySelector('.copy-btn');
-    btn.textContent = '✅ コピーしました！';
-    setTimeout(() => btn.textContent = '📋 jimuuにコピーする', 2000);
+function copyResult(){
+  const w=dimensions.find(d=>d.id==='width')?.value||0;
+  const h1=dimensions.find(d=>d.id==='height1F')?.value||0;
+  const h2=dimensions.find(d=>d.id==='height2F')?.value||0;
+  let text=`【塗装面積 AI計測結果】\n外壁総面積：${totalWallArea.toFixed(1)} m²\n開口部控除：${totalOpeningArea.toFixed(1)} m²\n塗装面積：${paintArea.toFixed(1)} m²\n横幅：${w.toFixed(1)} m\n総高さ：${(h1+h2).toFixed(1)} m\n`;
+  openings.forEach(o=>{ text+=`　${o.type}×${o.count}：${o.totalArea.toFixed(1)} m²\n`; });
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn=document.querySelector('.copy-btn');
+    btn.textContent='✅ コピーしました！';
+    setTimeout(()=>btn.textContent='📋 jimuuにコピーする',2000);
   });
 }
 
-function setBtn(btnId, spinnerId, textId, text, loading) {
-  document.getElementById(btnId).disabled = loading;
-  document.getElementById(spinnerId).style.display = loading ? 'block' : 'none';
-  document.getElementById(textId).textContent = text;
+async function saveLearning(partId, aiVal, actualVal){
+  if(!aiVal||aiVal===actualVal)return;
+  try{
+    await fetch('/api/analyze',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({step:'save_learning', imageBase64:null,
+        learningData:{building_type:buildingInfo?.type||'unknown', shoot_angle:buildingInfo?.shootAngle||'unknown',
+          part:partId, ai_value:aiVal, actual_value:actualVal, created_at:new Date().toISOString()}})
+    });
+  }catch(e){}
 }
 
-function showView(id) {
-  ['view-upload','view-measure'].forEach(v => document.getElementById(v).classList.toggle('hidden', v !== id));
-  window.scrollTo(0, 0);
+function setBtn(btnId,spinnerId,textId,text,loading){
+  document.getElementById(btnId).disabled=loading;
+  document.getElementById(spinnerId).style.display=loading?'block':'none';
+  document.getElementById(textId).textContent=text;
 }
 
-function resetAll() {
-  imageBase64 = null; imageSrc = null; buildingInfo = null;
-  dimensions = []; openings = [];
-  const area = document.getElementById('uploadArea');
+function showView(id){
+  ['view-upload','view-diagram'].forEach(v=>document.getElementById(v).classList.toggle('hidden',v!==id));
+  window.scrollTo(0,0);
+}
+
+function resetAll(){
+  imageBase64=null; imageSrc=null; buildingInfo=null; dimensions=[]; openings=[];
+  const area=document.getElementById('uploadArea');
   area.classList.remove('has-image');
-  area.innerHTML = `<div class="upload-icon">🏠</div><div class="upload-text">写真をタップして選択</div><div class="upload-sub">カメラまたはライブラリから</div><input type="file" id="fileInput" accept="image/*" capture="environment" style="display:none">`;
-  document.getElementById('fileInput').addEventListener('change', function(e) {
-    const file = e.target.files[0]; if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function(ev) {
-      imageSrc = ev.target.result; imageMediaType = file.type || "image/jpeg"; imageBase64 = ev.target.result.split(',')[1];
-      const a = document.getElementById('uploadArea'); a.classList.add('has-image');
-      a.innerHTML = `<img src="${imageSrc}" alt="外壁写真">`;
-      document.getElementById('analyzeBtn').disabled = false;
+  area.innerHTML=`<div class="upload-icon">🏠</div><div class="upload-text">写真をタップして選択</div><div class="upload-sub">カメラまたはライブラリから</div><input type="file" id="fileInput" accept="image/*" style="display:none">`;
+  document.getElementById('fileInput').addEventListener('change',function(e){
+    const file=e.target.files[0]; if(!file)return;
+    const reader=new FileReader();
+    reader.onload=function(ev){
+      imageSrc=ev.target.result; imageBase64=ev.target.result.split(',')[1]; imageMediaType=file.type||'image/jpeg';
+      const a=document.getElementById('uploadArea'); a.classList.add('has-image');
+      a.innerHTML=`<img src="${imageSrc}" alt="外壁写真">`;
+      document.getElementById('analyzeBtn').disabled=false;
     }; reader.readAsDataURL(file);
   });
-  document.getElementById('analyzeBtn').disabled = true;
-  document.getElementById('resultBar').style.display = 'none';
-  document.getElementById('allConfirmedBanner').style.display = 'none';
+  document.getElementById('analyzeBtn').disabled=true;
+  document.getElementById('resultCard').classList.add('hidden');
   showView('view-upload');
 }
 </script>
