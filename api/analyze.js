@@ -1,16 +1,13 @@
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-
   const apiKey = process.env.ANTHROPIC_API_KEY;
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_KEY;
   if (!apiKey) return res.status(500).json({ error: 'APIキーが設定されていません' });
-
-  const { step, imageBase64, imageMediaType, learningData } = req.body;
+  const { step, imageBase64, imageMediaType, dimensions, openings, buildingInfo, learningData } = req.body;
   const mediaType = imageMediaType || 'image/jpeg';
 
-  // 学習データ保存
   if (step === 'save_learning') {
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseKey = process.env.SUPABASE_KEY;
     if (!supabaseUrl || !supabaseKey) return res.status(200).json({ saved: false });
     try {
       const r = await fetch(`${supabaseUrl}/rest/v1/measurements`, {
@@ -24,40 +21,13 @@ export default async function handler(req, res) {
 
   if (!imageBase64) return res.status(400).json({ error: '画像データがありません' });
 
-  // 補正係数取得
-  let correctionStr = '';
-  if (supabaseUrl && supabaseKey) {
-    try {
-      const r = await fetch(`${supabaseUrl}/rest/v1/measurements?select=building_type,shoot_angle,part,ai_value,actual_value&limit=300`, {
-        headers: { 'apikey': supabaseKey, 'Authorization': `Bearer ${supabaseKey}` }
-      });
-      const rows = await r.json();
-      if (Array.isArray(rows) && rows.length > 0) {
-        const groups = {};
-        rows.forEach(row => {
-          const key = `${row.building_type}_${row.shoot_angle}_${row.part}`;
-          if (!groups[key]) groups[key] = [];
-          groups[key].push((row.actual_value - row.ai_value) / row.ai_value);
-        });
-        const corr = {};
-        Object.keys(groups).forEach(k => {
-          corr[k] = (1 + groups[k].reduce((a,b) => a+b, 0) / groups[k].length).toFixed(3);
-        });
-        if (Object.keys(corr).length > 0) correctionStr = `過去の学習補正係数：${JSON.stringify(corr)}。この係数を推定値に反映してください。`;
-      }
-    } catch(e) {}
-  }
-
-  // 初期解析
   if (step === 'analyze') {
     const prompt = `あなたは塗装業の見積り専門AIです。この外壁写真を解析してください。
 
-重要なルール：
-- 地面レベルまたは手が届く低い位置の寸法のみ推定
-- 脚立・高所作業が必要な箇所は測定指示しない
-- 2階以上の高さは写真の比率から推定
-- 信頼度：high=写真で明確、medium=比率推定、low=不明確
-${correctionStr}
+ルール：
+- 地面レベルで測れる箇所のみ推定（脚立不要）
+- 2階以上の高さは比率から推定
+- 信頼度：high=明確、medium=推定、low=不明確
 
 以下をJSONのみで返答（説明文・マークダウン不要）：
 {
@@ -69,71 +39,20 @@ ${correctionStr}
     "note": "現場での注意点"
   },
   "dimensions": [
-    {
-      "id": "width",
-      "label": "横幅",
-      "value": 8.0,
-      "confidence": "medium",
-      "note": "根拠",
-      "lineX1": 10,
-      "lineY1": 85,
-      "lineX2": 90,
-      "lineY2": 85,
-      "textX": 50,
-      "textY": 80,
-      "direction": "horizontal"
-    },
-    {
-      "id": "height1F",
-      "label": "1階高さ",
-      "value": 3.0,
-      "confidence": "medium",
-      "note": "根拠",
-      "lineX1": 92,
-      "lineY1": 55,
-      "lineX2": 92,
-      "lineY2": 90,
-      "textX": 85,
-      "textY": 72,
-      "direction": "vertical"
-    },
-    {
-      "id": "height2F",
-      "label": "2階高さ",
-      "value": 2.8,
-      "confidence": "medium",
-      "note": "比率から推定",
-      "lineX1": 92,
-      "lineY1": 20,
-      "lineX2": 92,
-      "lineY2": 55,
-      "textX": 85,
-      "textY": 37,
-      "direction": "vertical"
-    }
+    {"id": "width", "label": "横幅", "value": 8.0, "confidence": "medium", "note": "推定根拠"},
+    {"id": "height1F", "label": "1階高さ", "value": 3.0, "confidence": "medium", "note": "地面から1階軒下"},
+    {"id": "height2F", "label": "2階高さ", "value": 2.8, "confidence": "medium", "note": "比率から推定"}
   ],
   "openings": [
-    {
-      "id": "window1",
-      "label": "窓",
-      "type": "引き違い窓",
-      "count": 4,
-      "width": 1.6,
-      "height": 1.0,
-      "area": 1.6,
-      "totalArea": 6.4,
-      "confidence": "medium",
-      "note": "根拠",
-      "textX": 30,
-      "textY": 40
-    }
+    {"id": "op1", "type": "引き違い窓", "count": 2, "width": 1.6, "height": 1.0, "totalArea": 3.2, "confidence": "medium", "floor": 1},
+    {"id": "op2", "type": "玄関ドア", "count": 1, "width": 0.9, "height": 2.0, "totalArea": 1.8, "confidence": "high", "floor": 1}
   ],
   "totalWallArea": 95.2,
-  "totalOpeningArea": 6.4,
-  "paintArea": 88.8
+  "totalOpeningArea": 5.0,
+  "paintArea": 90.2
 }
 
-上記はフォーマット例です。実際の写真を解析して正確な値を返してください。`;
+実際の写真を解析して正確な値を入れてください。`;
 
     try {
       const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -158,35 +77,32 @@ ${correctionStr}
     }
   }
 
-  // 補正再計算
   if (step === 'recalculate') {
-    const { dimensions, openings, buildingInfo } = req.body;
-    const knownStr = dimensions.filter(d => d.confirmed).map(d => `${d.label}=${d.value}m（実測確定）`).join(', ');
+    const confirmedDims = dimensions.filter(d => d.confirmed);
+    const knownStr = confirmedDims.map(d => `${d.label}=${d.value}m（実測確定）`).join(', ');
     const unknownStr = dimensions.filter(d => !d.confirmed).map(d => `${d.label}=${d.value}m（推定）`).join(', ');
 
-    const prompt = `塗装業の見積り専門AIです。以下の確定実測値を基に未確定の推定値を補正してください。
-
-建物タイプ：${buildingInfo?.type || '不明'}
-確定実測値：${knownStr}
-現在の推定値：${unknownStr}
-${correctionStr}
+    const prompt = `塗装業見積りAIです。確定実測値を基に面積を計算してください。
+建物：${buildingInfo?.type || '不明'}
+確定実測値：${knownStr || 'なし'}
+推定値：${unknownStr}
+開口部：${JSON.stringify(openings)}
 
 以下をJSONのみで返答：
 {
   "dimensions": [
-    {"id": "width", "value": 8.0, "confidence": "high", "note": "実測値"},
-    {"id": "height1F", "value": 3.0, "confidence": "high", "note": "実測値"},
-    {"id": "height2F", "value": 2.8, "confidence": "medium", "note": "比率から推定"}
+    {"id": "width", "value": 8.0, "confidence": "high", "note": "根拠"},
+    {"id": "height1F", "value": 3.0, "confidence": "high", "note": "根拠"},
+    {"id": "height2F", "value": 2.8, "confidence": "medium", "note": "根拠"}
   ],
   "openings": [
-    {"id": "window1", "width": 1.6, "height": 1.0, "area": 1.6, "totalArea": 6.4, "confidence": "medium"}
+    {"id": "op1", "width": 1.6, "height": 1.0, "totalArea": 3.2, "confidence": "medium"},
+    {"id": "op2", "width": 0.9, "height": 2.0, "totalArea": 1.8, "confidence": "high"}
   ],
   "totalWallArea": 95.2,
-  "totalOpeningArea": 6.4,
-  "paintArea": 88.8
-}
-
-上記はフォーマット例です。実際の値を計算して返してください。`;
+  "totalOpeningArea": 5.0,
+  "paintArea": 90.2
+}`;
 
     try {
       const response = await fetch('https://api.anthropic.com/v1/messages', {
