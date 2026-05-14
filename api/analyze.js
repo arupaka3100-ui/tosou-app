@@ -6,7 +6,8 @@ export default async function handler(req, res) {
   const supabaseKey = process.env.SUPABASE_KEY;
   if (!apiKey) return res.status(500).json({ error: 'APIキーが設定されていません' });
 
-  const { step, imageBase64, corrections, learningData } = req.body;
+  const { step, imageBase64, imageMediaType, learningData } = req.body;
+  const mediaType = imageMediaType || 'image/jpeg';
 
   // 学習データ保存
   if (step === 'save_learning') {
@@ -61,9 +62,9 @@ ${correctionStr}
 以下をJSONのみで返答（説明文・マークダウン不要）：
 {
   "buildingInfo": {
-    "floors": 階数,
-    "type": "建物タイプ（例：木造2階建て）",
-    "shootAngle": "front または angle",
+    "floors": 2,
+    "type": "木造2階建て",
+    "shootAngle": "front",
     "style": "建物の特徴",
     "note": "現場での注意点"
   },
@@ -71,43 +72,43 @@ ${correctionStr}
     {
       "id": "width",
       "label": "横幅",
-      "value": 推定値m,
-      "confidence": "high/medium/low",
+      "value": 8.0,
+      "confidence": "medium",
       "note": "根拠",
-      "lineX1": 0-100,
-      "lineY1": 0-100,
-      "lineX2": 0-100,
-      "lineY2": 0-100,
-      "textX": ラベル表示X(0-100),
-      "textY": ラベル表示Y(0-100),
+      "lineX1": 10,
+      "lineY1": 85,
+      "lineX2": 90,
+      "lineY2": 85,
+      "textX": 50,
+      "textY": 80,
       "direction": "horizontal"
     },
     {
       "id": "height1F",
       "label": "1階高さ",
-      "value": 推定値m,
-      "confidence": "high/medium/low",
-      "note": "根拠（地面から1階軒下）",
-      "lineX1": 0-100,
-      "lineY1": 0-100,
-      "lineX2": 0-100,
-      "lineY2": 0-100,
-      "textX": 0-100,
-      "textY": 0-100,
+      "value": 3.0,
+      "confidence": "medium",
+      "note": "根拠",
+      "lineX1": 92,
+      "lineY1": 55,
+      "lineX2": 92,
+      "lineY2": 90,
+      "textX": 85,
+      "textY": 72,
       "direction": "vertical"
     },
     {
       "id": "height2F",
       "label": "2階高さ",
-      "value": 推定値m,
+      "value": 2.8,
       "confidence": "medium",
       "note": "比率から推定",
-      "lineX1": 0-100,
-      "lineY1": 0-100,
-      "lineX2": 0-100,
-      "lineY2": 0-100,
-      "textX": 0-100,
-      "textY": 0-100,
+      "lineX1": 92,
+      "lineY1": 20,
+      "lineX2": 92,
+      "lineY2": 55,
+      "textX": 85,
+      "textY": 37,
       "direction": "vertical"
     }
   ],
@@ -115,23 +116,24 @@ ${correctionStr}
     {
       "id": "window1",
       "label": "窓",
-      "type": "種類",
-      "count": 数,
-      "width": 幅m,
-      "height": 高さm,
-      "area": 面積m²,
-      "totalArea": 合計m²,
-      "confidence": "high/medium/low",
+      "type": "引き違い窓",
+      "count": 4,
+      "width": 1.6,
+      "height": 1.0,
+      "area": 1.6,
+      "totalArea": 6.4,
+      "confidence": "medium",
       "note": "根拠",
-      "textX": 0-100,
-      "textY": 0-100
+      "textX": 30,
+      "textY": 40
     }
   ],
-  "measureSuggestions": [
-    {"id": "width", "instruction": "地面レベルで左端から右端まで測ってください"},
-    {"id": "height1F", "instruction": "地面から1階軒下まで測ってください"}
-  ]
-}`;
+  "totalWallArea": 95.2,
+  "totalOpeningArea": 6.4,
+  "paintArea": 88.8
+}
+
+上記はフォーマット例です。実際の写真を解析して正確な値を返してください。`;
 
     try {
       const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -141,7 +143,7 @@ ${correctionStr}
           model: 'claude-haiku-4-5-20251001',
           max_tokens: 2000,
           messages: [{ role: 'user', content: [
-            { type: 'image', source: { type: 'base64', media_type: imageBase64.startsWith('/9j/') ? 'image/jpeg' : 'image/png'', data: imageBase64 } },
+            { type: 'image', source: { type: 'base64', media_type: mediaType, data: imageBase64 } },
             { type: 'text', text: prompt }
           ]}]
         })
@@ -162,28 +164,29 @@ ${correctionStr}
     const knownStr = dimensions.filter(d => d.confirmed).map(d => `${d.label}=${d.value}m（実測確定）`).join(', ');
     const unknownStr = dimensions.filter(d => !d.confirmed).map(d => `${d.label}=${d.value}m（推定）`).join(', ');
 
-    const prompt = `塗装業の見積り専門AIです。以下の確定実測値を基に、未確定の推定値を補正してください。
+    const prompt = `塗装業の見積り専門AIです。以下の確定実測値を基に未確定の推定値を補正してください。
 
 建物タイプ：${buildingInfo?.type || '不明'}
 確定実測値：${knownStr}
 現在の推定値：${unknownStr}
 ${correctionStr}
 
-確定値を基準スケールとして、未確定の寸法を再推定してください。
-また窓・ドアのサイズも確定値の比率で補正してください。
-
 以下をJSONのみで返答：
 {
   "dimensions": [
-    {"id": "各dimensionのid", "value": 補正後の値m, "confidence": "high/medium/low", "note": "補正根拠"}
+    {"id": "width", "value": 8.0, "confidence": "high", "note": "実測値"},
+    {"id": "height1F", "value": 3.0, "confidence": "high", "note": "実測値"},
+    {"id": "height2F", "value": 2.8, "confidence": "medium", "note": "比率から推定"}
   ],
   "openings": [
-    {"id": "各openingのid", "width": 補正後m, "height": 補正後m, "area": m², "totalArea": m², "confidence": "high/medium/low"}
+    {"id": "window1", "width": 1.6, "height": 1.0, "area": 1.6, "totalArea": 6.4, "confidence": "medium"}
   ],
-  "totalWallArea": 外壁総面積m²,
-  "totalOpeningArea": 開口部合計m²,
-  "paintArea": 塗装面積m²
-}`;
+  "totalWallArea": 95.2,
+  "totalOpeningArea": 6.4,
+  "paintArea": 88.8
+}
+
+上記はフォーマット例です。実際の値を計算して返してください。`;
 
     try {
       const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -193,7 +196,7 @@ ${correctionStr}
           model: 'claude-haiku-4-5-20251001',
           max_tokens: 1500,
           messages: [{ role: 'user', content: [
-            { type: 'image', source: { type: 'base64', media_type: imageBase64.startsWith('/9j/') ? 'image/jpeg' : 'image/png'', data: imageBase64 } },
+            { type: 'image', source: { type: 'base64', media_type: mediaType, data: imageBase64 } },
             { type: 'text', text: prompt }
           ]}]
         })
