@@ -134,7 +134,7 @@ header h1{font-size:16px;font-weight:600}
         <img id="areaImg" class="area-img" src="" alt="外壁写真">
         <canvas id="areaCanvas" class="area-canvas"></canvas>
       </div>
-      <div class="area-hint" id="areaHint">高さが同じ範囲を指でなぞって囲んでください</div>
+      <div class="area-hint" id="areaHint">指でなぞって囲んでください（斜め・自由な形でOK）</div>
       <div class="area-controls">
         <button class="area-btn area-btn-clear" onclick="clearArea()">やり直す</button>
         <button class="area-btn area-btn-confirm" id="areaConfirmBtn" onclick="confirmArea()" disabled>このエリアを解析する</button>
@@ -214,7 +214,7 @@ header h1{font-size:16px;font-weight:600}
 <script>
 let imageBase64=null,imageSrc=null,imageMediaType='image/jpeg';
 let areas=[],currentAreaIdx=0;
-let areaStart=null,areaEnd=null,isDrawing=false;
+let areaStart=null,areaEnd=null,areaPoints=[],isDrawing=false;
 let brushInterval=null;
 
 // ===== ローディング =====
@@ -266,7 +266,9 @@ function goToAreaSelect(){
   showView('view-area');
 }
 
-// ===== エリア描画イベント =====
+// ===== エリア描画イベント（自由多角形） =====
+let areaPoints=[];
+
 function setupAreaEvents(canvas){
   canvas.addEventListener('touchstart',onAreaStart,{passive:false});
   canvas.addEventListener('touchmove',onAreaMove,{passive:false});
@@ -286,27 +288,30 @@ function getPos(e,canvas){
 function onAreaStart(e){
   e.preventDefault();
   isDrawing=true;
+  areaPoints=[];
   const canvas=document.getElementById('areaCanvas');
-  areaStart=getPos(e,canvas);
-  areaEnd=areaStart;
+  areaPoints.push(getPos(e,canvas));
 }
 function onAreaMove(e){
   e.preventDefault();
   if(!isDrawing)return;
   const canvas=document.getElementById('areaCanvas');
-  areaEnd=getPos(e,canvas);
+  areaPoints.push(getPos(e,canvas));
   renderAreaCanvas();
 }
 function onAreaEnd(e){
   if(!isDrawing)return;
   isDrawing=false;
-  if(areaStart&&areaEnd){
-    const w=Math.abs(areaEnd.x-areaStart.x);
-    const h=Math.abs(areaEnd.y-areaStart.y);
-    if(w>20&&h>20){
-      document.getElementById('areaConfirmBtn').disabled=false;
-      document.getElementById('areaHint').textContent='エリアが選択されました。解析してください。';
-    }
+  if(areaPoints.length>3){
+    // 始点に戻して閉じる
+    areaPoints.push(areaPoints[0]);
+    renderAreaCanvas();
+    // バウンディングボックスを計算
+    const xs=areaPoints.map(p=>p.x),ys=areaPoints.map(p=>p.y);
+    areaStart={x:Math.min(...xs),y:Math.min(...ys)};
+    areaEnd={x:Math.max(...xs),y:Math.max(...ys)};
+    document.getElementById('areaConfirmBtn').disabled=false;
+    document.getElementById('areaHint').textContent='エリアが選択されました。解析してください。';
   }
 }
 
@@ -314,49 +319,68 @@ function renderAreaCanvas(){
   const canvas=document.getElementById('areaCanvas');
   const ctx=canvas.getContext('2d');
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  if(!areaStart||!areaEnd)return;
-  const x=Math.min(areaStart.x,areaEnd.x);
-  const y=Math.min(areaStart.y,areaEnd.y);
-  const w=Math.abs(areaEnd.x-areaStart.x);
-  const h=Math.abs(areaEnd.y-areaStart.y);
+  if(areaPoints.length<2)return;
+
+  ctx.beginPath();
+  ctx.moveTo(areaPoints[0].x,areaPoints[0].y);
+  for(let i=1;i<areaPoints.length;i++) ctx.lineTo(areaPoints[i].x,areaPoints[i].y);
+  ctx.closePath();
   ctx.strokeStyle='#e94560';
   ctx.lineWidth=3;
-  ctx.setLineDash([8,4]);
-  ctx.strokeRect(x,y,w,h);
-  ctx.setLineDash([]);
+  ctx.lineCap='round';
+  ctx.lineJoin='round';
+  ctx.stroke();
   ctx.fillStyle='rgba(233,69,96,0.08)';
-  ctx.fillRect(x,y,w,h);
-  // コーナーマーク
+  ctx.fill();
+
+  // 始点マーク
   ctx.fillStyle='#e94560';
-  [[x,y],[x+w,y],[x,y+h],[x+w,y+h]].forEach(([cx,cy])=>{
-    ctx.beginPath();ctx.arc(cx,cy,5,0,Math.PI*2);ctx.fill();
-  });
+  ctx.beginPath();ctx.arc(areaPoints[0].x,areaPoints[0].y,6,0,Math.PI*2);ctx.fill();
 }
 
 function clearArea(){
-  areaStart=null;areaEnd=null;
+  areaStart=null;areaEnd=null;areaPoints=[];
   const canvas=document.getElementById('areaCanvas');
   if(canvas)canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);
   document.getElementById('areaConfirmBtn').disabled=true;
-  document.getElementById('areaHint').textContent='高さが同じ範囲を指でなぞって囲んでください';
+  document.getElementById('areaHint').textContent='指でなぞって囲んでください（斜め・自由な形でOK）';
 }
 
 // エリアを確定して解析
 async function confirmArea(){
+  document.getElementById('areaConfirmBtn').disabled=true;
+
+  if(!areaStart||!areaEnd){
+    alert('エリアを選択してください');
+    document.getElementById('areaConfirmBtn').disabled=false;
+    return;
+  }
+  if(!imageBase64){
+    alert('写真が読み込まれていません');
+    document.getElementById('areaConfirmBtn').disabled=false;
+    return;
+  }
+
   const canvas=document.getElementById('areaCanvas');
   const x=Math.min(areaStart.x,areaEnd.x)/canvas.width*100;
   const y=Math.min(areaStart.y,areaEnd.y)/canvas.height*100;
   const w=Math.abs(areaEnd.x-areaStart.x)/canvas.width*100;
   const h=Math.abs(areaEnd.y-areaStart.y)/canvas.height*100;
   const areaRect={x,y,w,h};
+  // 多角形の頂点も送る
+  const polyPoints=areaPoints.map(p=>({x:parseFloat((p.x/canvas.width*100).toFixed(1)),y:parseFloat((p.y/canvas.height*100).toFixed(1))}));
 
   showLoading('AI解析中...','選択エリアの開口部を認識しています');
 
   try{
-    const res=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({step:'analyze_area',imageBase64,imageMediaType,areaRect})});
-    const data=await res.json();
-    if(!res.ok)throw new Error(data.error);
+    const res=await fetch('/api/analyze',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({step:'analyze_area',imageBase64,imageMediaType,areaRect,polyPoints})
+    });
+    let data;
+    try{data=await res.json();}catch(je){throw new Error('サーバー応答エラー');}
+    if(!res.ok)throw new Error(data.error||'APIエラー');
 
     const areaIdx=areas.length;
     areas.push({
@@ -384,6 +408,32 @@ async function confirmArea(){
   }catch(e){
     hideLoading();
     alert('エラー：'+e.message);
+    document.getElementById('areaConfirmBtn').disabled=false;
+  }
+}
+      areaRect,
+      roofType:data.roofType||'other',
+      gableHeightRatio:data.gableHeightRatio||0.25,
+      openings:data.openings||[],
+      buildingInfo:data.buildingInfo,
+      result:null
+    });
+    currentAreaIdx=areaIdx;
+
+    hideLoading();
+    document.getElementById('buildingNote').textContent=
+      data.buildingInfo?.style?`建物：${data.buildingInfo.style}　注意：${data.buildingInfo.note||''}`:'';
+    buildAreaTabs();
+    document.getElementById('widthInput').value='';
+    document.getElementById('heightInput').value='';
+    document.getElementById('diagramCard').style.display='none';
+    document.getElementById('resultCard').classList.add('hidden');
+    showView('view-result');
+
+  }catch(e){
+    hideLoading();
+    alert('エラー：'+e.message);
+    document.getElementById('areaConfirmBtn').disabled=false;
   }
 }
 
