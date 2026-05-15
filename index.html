@@ -234,7 +234,7 @@ function hideLoading(){
 }
 
 // ===== ファイル選択 =====
-document.getElementById('fileInput').addEventListener('change',function(e){
+function handleFileChange(e){
   const file=e.target.files[0];if(!file)return;
   const reader=new FileReader();
   reader.onload=function(ev){
@@ -247,6 +247,13 @@ document.getElementById('fileInput').addEventListener('change',function(e){
     document.getElementById('uploadNextBtn').disabled=false;
   };
   reader.readAsDataURL(file);
+}
+
+// イベント委譲でfileInputの変更を検知（動的に再生成されても対応）
+document.addEventListener('change',function(e){
+  if(e.target && e.target.id==='fileInput'){
+    handleFileChange(e);
+  }
 });
 
 // ===== エリア選択画面へ =====
@@ -657,16 +664,7 @@ function resetAll(){
   const area=document.getElementById('uploadArea');
   area.classList.remove('has-image');
   area.innerHTML=`<div class="upload-icon">🏠</div><div class="upload-text">写真をタップして選択</div><div class="upload-sub">カメラまたはライブラリから</div><input type="file" id="fileInput" accept="image/*" style="display:none">`;
-  document.getElementById('fileInput').addEventListener('change',function(e){
-    const file=e.target.files[0];if(!file)return;
-    const reader=new FileReader();
-    reader.onload=function(ev){
-      imageSrc=ev.target.result;imageBase64=ev.target.result.split(',')[1];imageMediaType=file.type||'image/jpeg';
-      const a=document.getElementById('uploadArea');a.classList.add('has-image');
-      a.innerHTML=`<img src="${imageSrc}" alt="外壁写真">`;
-      document.getElementById('uploadNextBtn').disabled=false;
-    };reader.readAsDataURL(file);
-  });
+  // イベント委譲で処理するため個別登録不要
   document.getElementById('uploadNextBtn').disabled=true;
   document.getElementById('resultCard').classList.add('hidden');
   showView('view-upload');
