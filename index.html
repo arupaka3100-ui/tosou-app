@@ -34,18 +34,14 @@ header h1{font-size:16px;font-weight:600}
 .note-box{background:#fffbf0;border:1px solid #f0e0a0;border-radius:var(--rs);padding:12px;font-size:12px;color:#886600;line-height:1.6;margin-bottom:14px}
 .error-msg{background:#fff0f0;border:1px solid #ffcccc;border-radius:var(--rs);padding:12px;font-size:13px;color:#cc3333;margin-top:10px;display:none}
 .hidden{display:none}
-
-/* 刷毛アニメーション */
-.loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(26,26,46,0.92);z-index:500;display:none;flex-direction:column;align-items:center;justify-content:center;gap:24px}
+.loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(26,26,46,.92);z-index:500;display:none;flex-direction:column;align-items:center;justify-content:center;gap:24px}
 .loading-overlay.show{display:flex}
 .loading-text{color:white;font-size:15px;font-weight:600;letter-spacing:.05em}
 .loading-sub{color:rgba(255,255,255,.6);font-size:12px}
 .brush-wrap{width:280px;height:60px;position:relative}
 .brush-track{position:absolute;bottom:12px;left:0;width:100%;height:8px;background:rgba(255,255,255,.15);border-radius:4px}
-.brush-paint{position:absolute;bottom:12px;left:0;width:0%;height:8px;background:linear-gradient(90deg,#e07000,#ff9900);border-radius:4px;transition:width .05s linear}
-.brush-icon{position:absolute;bottom:14px;font-size:28px;transition:left .05s linear;filter:drop-shadow(0 2px 4px rgba(0,0,0,.3))}
-
-/* 手書き境界線 */
+.brush-paint{position:absolute;bottom:12px;left:0;width:0%;height:8px;background:linear-gradient(90deg,#e07000,#ff9900);border-radius:4px}
+.brush-icon{position:absolute;bottom:14px;font-size:28px;left:0}
 .draw-container{position:relative;border-radius:var(--rs);overflow:hidden;margin-bottom:10px;touch-action:none}
 .draw-img{width:100%;display:block}
 .draw-canvas{position:absolute;top:0;left:0;width:100%;height:100%;cursor:crosshair}
@@ -55,43 +51,34 @@ header h1{font-size:16px;font-weight:600}
 .draw-btn-clear{background:#f0f0e8;color:var(--text)}
 .draw-btn-confirm{background:var(--accent);color:white}
 .draw-btn-confirm:disabled{opacity:.4}
-
-/* 面タブ */
 .face-tabs{display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;padding-bottom:4px}
 .face-tab{flex-shrink:0;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;border:1.5px solid var(--border);background:white;cursor:pointer;color:var(--muted)}
 .face-tab.active{background:var(--primary);color:white;border-color:var(--primary)}
 .face-tab.done{background:#e8f8e8;color:var(--green);border-color:var(--green)}
-
-/* 図面 */
-.diagram-wrap{background:#f0f0ec;border-radius:var(--rs);padding:8px;margin-bottom:10px;overflow-x:hidden}
+.diagram-wrap{background:#f0f0ec;border-radius:var(--rs);padding:8px;margin-bottom:10px}
 .diagram-svg{width:100%;display:block}
-
-/* 寸法一覧テキスト */
-.dim-list{background:#f8f8f4;border-radius:var(--rs);padding:12px;margin-bottom:10px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.dim-list-item{display:flex;flex-direction:column;gap:2px}
-.dim-list-label{font-size:10px;color:var(--muted)}
-.dim-list-value{font-size:14px;font-weight:700;cursor:pointer;padding:4px 8px;border-radius:6px;display:inline-block}
-.dim-list-value.required{border:2px solid var(--red);background:#fff0f0;color:var(--red)}
-.dim-list-value.confirmed{background:#e8f8e8;color:var(--green)}
-.dim-list-value.medium{background:#fff8e8;color:var(--yellow)}
-.dim-list-value.low{background:#fff0f0;color:var(--red)}
-.required-badge{font-size:10px;background:var(--red);color:white;padding:1px 6px;border-radius:8px;margin-left:4px}
-
+/* 実測入力エリア */
+.measure-input-card{background:#f0f8ff;border:2px solid #0066cc;border-radius:var(--r);padding:16px;margin-bottom:14px}
+.measure-input-title{font-size:13px;font-weight:700;color:#0066cc;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.measure-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.measure-label{font-size:13px;font-weight:600;min-width:110px;color:var(--text)}
+.measure-input{flex:1;border:2px solid #b8d8f8;border-radius:var(--rs);padding:11px 12px;font-size:18px;font-family:inherit;background:white;-webkit-appearance:none;text-align:center;font-weight:700}
+.measure-input:focus{outline:none;border-color:#0066cc}
+.measure-input.required{border-color:var(--red)}
+.measure-unit{font-size:13px;color:var(--muted);min-width:20px}
+.required-badge{font-size:10px;background:var(--red);color:white;padding:1px 6px;border-radius:8px}
+/* 寸法一覧 */
+.dim-list{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.dim-item{background:#f8f8f4;border-radius:var(--rs);padding:10px}
+.dim-item-label{font-size:10px;color:var(--muted);margin-bottom:3px}
+.dim-item-value{font-size:15px;font-weight:700}
+.dim-item-value.confirmed{color:var(--green)}
+.dim-item-value.medium{color:var(--yellow)}
+.dim-item-value.low{color:var(--red)}
 .legend{font-size:11px;color:var(--muted);text-align:center;padding:6px 0;display:flex;justify-content:center;gap:16px;flex-wrap:wrap}
 .legend span{display:flex;align-items:center;gap:4px}
 .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
 .dot-green{background:var(--green)}.dot-yellow{background:var(--yellow)}.dot-red{background:var(--red)}
-
-/* 撮影写真表示 */
-.photo-preview{border-radius:var(--rs);overflow:hidden;margin-bottom:10px}
-.photo-preview img{width:100%;display:block}
-.photo-label{font-size:11px;color:var(--muted);text-align:center;padding:6px 0}
-
-/* 更新ボタン */
-.update-bar{background:#fff8f0;border:1.5px solid #e07000;border-radius:var(--rs);padding:12px;margin-bottom:14px;display:none}
-.update-bar-text{font-size:12px;color:#e07000;margin-bottom:8px}
-
-/* 結果 */
 .result-card{background:var(--primary);color:white;border-radius:var(--r);padding:18px;margin-bottom:14px}
 .result-title{font-size:11px;color:rgba(255,255,255,.6);margin-bottom:14px;letter-spacing:.08em}
 .metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
@@ -102,8 +89,6 @@ header h1{font-size:16px;font-weight:600}
 .detail-item{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:12px}
 .detail-item:last-child{border-bottom:none}
 .copy-btn{width:100%;background:rgba(255,255,255,.12);color:white;border:1px solid rgba(255,255,255,.2);border-radius:var(--rs);padding:11px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;margin-top:10px}
-
-/* テンキー */
 .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);z-index:300;display:none;align-items:flex-end;justify-content:center}
 .modal-overlay.show{display:flex}
 .modal{background:white;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:400px}
@@ -116,13 +101,11 @@ header h1{font-size:16px;font-weight:600}
 .key-del{background:#e0e0d8}
 .key-confirm{background:var(--primary);color:white;border:none;border-radius:var(--rs);padding:16px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;width:100%}
 .modal-unit{font-size:12px;color:var(--muted);text-align:center;margin-bottom:10px}
-
 .selected-faces{font-size:13px;font-weight:600;color:var(--accent);text-align:center;margin:8px 0;min-height:20px}
+.share-height-box{background:#e8f8e8;border:1.5px solid var(--green);border-radius:var(--rs);padding:12px;margin-bottom:12px;font-size:12px;color:var(--green);display:none}
 </style>
 </head>
 <body>
-
-<!-- 刷毛ローディング -->
 <div class="loading-overlay" id="loadingOverlay">
   <div class="brush-wrap">
     <div class="brush-track"></div>
@@ -133,13 +116,10 @@ header h1{font-size:16px;font-weight:600}
   <div class="loading-sub" id="loadingSub">写真から建物の寸法を推定しています</div>
 </div>
 
-<header>
-  <h1>塗装面積 AI計測</h1>
-  <span class="beta">Beta</span>
-</header>
+<header><h1>塗装面積 AI計測</h1><span class="beta">Beta</span></header>
 <div class="container">
 
-  <!-- Step1: 写真アップロード -->
+  <!-- Step1: アップロード -->
   <div id="view-upload">
     <div class="card">
       <div class="card-title">外壁写真をアップロード</div>
@@ -166,7 +146,7 @@ header h1{font-size:16px;font-weight:600}
     <button class="btn btn-primary" id="faceNextBtn" disabled onclick="goToBoundary()">次へ →</button>
   </div>
 
-  <!-- Step3: 境界線手書き -->
+  <!-- Step3: 境界線 -->
   <div id="view-boundary" class="hidden">
     <div class="card">
       <div class="card-title">面の境界線を手書きで引く</div>
@@ -181,16 +161,41 @@ header h1{font-size:16px;font-weight:600}
           <span id="boundaryBtnText">AIで境界を補正する</span>
         </button>
       </div>
-      <div class="note-box">明暗の境界（建物の角）に沿って引くと精度が上がります。大まかでもOKです。</div>
+      <div class="note-box">明暗の境界（建物の角）に沿って引くと精度が上がります。</div>
     </div>
   </div>
 
-  <!-- Step4: 図面・入力 -->
+  <!-- Step4: 実測入力 + 図面 -->
   <div id="view-diagram" class="hidden">
     <div class="face-tabs" id="faceTabs"></div>
 
+    <!-- 実測入力（必須2点） -->
+    <div class="measure-input-card">
+      <div class="measure-input-title">📏 実測値を入力（距離計で測定）</div>
+      <div class="share-height-box" id="shareHeightBox"></div>
+      <div class="measure-row">
+        <div class="measure-label">手前の高さ<span class="required-badge">必須</span></div>
+        <input type="number" class="measure-input required" id="nearHeightInput" placeholder="例：6.5" step="0.1" min="0" inputmode="decimal">
+        <span class="measure-unit">m</span>
+      </div>
+      <div class="measure-row">
+        <div class="measure-label">奥の高さ<span class="required-badge">必須</span></div>
+        <input type="number" class="measure-input required" id="farHeightInput" placeholder="例：5.5" step="0.1" min="0" inputmode="decimal">
+        <span class="measure-unit">m</span>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px;line-height:1.6">
+        ※ 正面から撮れた場合は手前・奥に同じ値を入力してください<br>
+        ※ 横幅・窓サイズはAIが遠近法で自動計算します
+      </div>
+      <button class="btn btn-orange" style="margin-top:12px;margin-bottom:0;padding:13px" id="calcPerspBtn" onclick="calcPerspective()">
+        <div class="spinner" id="perspSpinner"></div>
+        <span id="perspBtnText">🔄 遠近補正で全体を計算する</span>
+      </button>
+    </div>
+
+    <!-- 図面 -->
     <div class="card">
-      <div class="card-title" id="diagramCardTitle">立面図</div>
+      <div class="card-title" id="diagramCardTitle">立面図（AI推定）</div>
       <div class="diagram-wrap">
         <svg id="diagramSvg" class="diagram-svg" xmlns="http://www.w3.org/2000/svg"></svg>
       </div>
@@ -199,37 +204,28 @@ header h1{font-size:16px;font-weight:600}
         <span><span class="dot dot-yellow"></span>推定</span>
         <span><span class="dot dot-red"></span>要確認</span>
       </div>
-
-      <!-- 寸法一覧（タップで入力） -->
-      <div style="margin-top:12px">
-        <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px">📏 寸法一覧（タップして実測値を入力）</div>
-        <div class="dim-list" id="dimList"></div>
-      </div>
     </div>
 
-    <!-- 更新バー -->
-    <div class="update-bar" id="updateBar">
-      <div class="update-bar-text">✏️ 実測値が入力されました。更新ボタンで全体を自動補正します。</div>
-      <button class="btn btn-orange" style="margin:0;padding:12px" onclick="doUpdate()">
-        <div class="spinner" id="updateSpinner"></div>
-        <span id="updateBtnText">🔄 AIで全体を更新する</span>
-      </button>
+    <!-- 寸法一覧 -->
+    <div class="card">
+      <div class="card-title">寸法一覧</div>
+      <div class="dim-list" id="dimList"></div>
     </div>
-
-    <div class="note-box" id="diagramNote"></div>
 
     <!-- 撮影写真 -->
     <div class="card">
       <div class="card-title">撮影写真（参照用）</div>
-      <div class="photo-preview" id="photoPreview"></div>
-      <div class="photo-label">図面と見比べて認識漏れを確認してください</div>
+      <div id="photoPreview"></div>
+      <div style="font-size:11px;color:var(--muted);text-align:center;margin-top:6px">図面と見比べて認識漏れを確認してください</div>
     </div>
 
+    <div class="note-box" id="diagramNote"></div>
     <button class="btn btn-blue" onclick="addNextFace()">＋ 別の面の写真を追加する</button>
     <button class="btn btn-green" id="calcBtn" onclick="doCalculate()">
       <div class="spinner" id="calcSpinner"></div>
       <span id="calcBtnText">📐 面積を計算する</span>
     </button>
+    <div class="error-msg" id="calcError"></div>
 
     <div class="result-card hidden" id="resultCard">
       <div class="result-title">計算結果（全面合計）</div>
@@ -240,32 +236,22 @@ header h1{font-size:16px;font-weight:600}
       <div id="r-details"></div>
       <button class="copy-btn" onclick="copyResult()">📋 jimuuにコピーする</button>
     </div>
-
     <button class="btn btn-outline" onclick="resetAll()">最初からやり直す</button>
   </div>
 
 </div>
 
-<!-- テンキー -->
-<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
   <div class="modal">
     <div class="modal-title" id="modalTitle">実測値を入力</div>
-    <div class="modal-ai" id="modalAI">AI推定：—</div>
+    <div class="modal-ai" id="modalAI"></div>
     <div class="modal-display" id="modalDisplay">—</div>
     <div class="modal-unit">m（メートル）</div>
     <div class="keypad">
-      <button class="key" onclick="keyPress('7')">7</button>
-      <button class="key" onclick="keyPress('8')">8</button>
-      <button class="key" onclick="keyPress('9')">9</button>
-      <button class="key" onclick="keyPress('4')">4</button>
-      <button class="key" onclick="keyPress('5')">5</button>
-      <button class="key" onclick="keyPress('6')">6</button>
-      <button class="key" onclick="keyPress('1')">1</button>
-      <button class="key" onclick="keyPress('2')">2</button>
-      <button class="key" onclick="keyPress('3')">3</button>
-      <button class="key" onclick="keyPress('.')">.</button>
-      <button class="key" onclick="keyPress('0')">0</button>
-      <button class="key key-del" onclick="keyDel()">⌫</button>
+      <button class="key" onclick="keyPress('7')">7</button><button class="key" onclick="keyPress('8')">8</button><button class="key" onclick="keyPress('9')">9</button>
+      <button class="key" onclick="keyPress('4')">4</button><button class="key" onclick="keyPress('5')">5</button><button class="key" onclick="keyPress('6')">6</button>
+      <button class="key" onclick="keyPress('1')">1</button><button class="key" onclick="keyPress('2')">2</button><button class="key" onclick="keyPress('3')">3</button>
+      <button class="key" onclick="keyPress('.')">.</button><button class="key" onclick="keyPress('0')">0</button><button class="key key-del" onclick="keyDel()">⌫</button>
     </div>
     <button class="key-confirm" onclick="confirmInput()">✓ 確定</button>
   </div>
@@ -279,23 +265,22 @@ let selectedFaceIds=[],faceData={},currentFaceId=null;
 let currentEditId=null,currentInputStr='';
 let drawPoints=[],isDrawing=false,boundaryLines=[];
 let brushInterval=null;
+let sharedNearHeight=null,sharedFarHeight=null;
 
 // ===== 刷毛アニメーション =====
 function showLoading(text,sub){
   document.getElementById('loadingText').textContent=text||'AI解析中...';
-  document.getElementById('loadingSub').textContent=sub||'写真から建物の寸法を推定しています';
+  document.getElementById('loadingSub').textContent=sub||'しばらくお待ちください';
   document.getElementById('loadingOverlay').classList.add('show');
-  let progress=0;
+  let p=0;
   const paint=document.getElementById('brushPaint');
   const icon=document.getElementById('brushIcon');
   brushInterval=setInterval(()=>{
-    progress+=1.2;
-    if(progress>100)progress=0;
-    paint.style.width=progress+'%';
-    icon.style.left=`calc(${progress}% - 16px)`;
+    p+=1.5;if(p>100)p=0;
+    paint.style.width=p+'%';
+    icon.style.left=`calc(${p}% - 16px)`;
   },30);
 }
-
 function hideLoading(){
   clearInterval(brushInterval);
   document.getElementById('loadingOverlay').classList.remove('show');
@@ -321,16 +306,11 @@ document.getElementById('fileInput').addEventListener('change',function(e){
 
 // ===== 面選択 =====
 function goToFaceSelect(){
-  selectedFaceIds=[];
-  drawFaceSelector();
-  updateFaceLabel();
-  showView('view-faceselect');
+  selectedFaceIds=[];drawFaceSelector();updateFaceLabel();showView('view-faceselect');
 }
-
 function drawFaceSelector(){
   const svg=document.getElementById('faceSvg');
-  const cx=110,cy=95,bw=80,bh=55;
-  const sel=selectedFaceIds;
+  const cx=110,cy=95,bw=80,bh=55,sel=selectedFaceIds;
   const sc=(id)=>sel.includes(id)?FACES[id].color:'#ccc';
   const bg=(id)=>sel.includes(id)?FACES[id].color+'33':'#f8f8f8';
   const sw=(id)=>sel.includes(id)?2.5:1;
@@ -352,25 +332,19 @@ function drawFaceSelector(){
     <text x="${cx+bw/2+32}" y="${cy+5}" text-anchor="middle" font-size="10" fill="#aaa">東</text>
     <text x="${cx-bw/2-32}" y="${cy+5}" text-anchor="middle" font-size="10" fill="#aaa">西</text>`;
 }
-
 function handleFaceClick(e){
-  let el=e.target;
-  let faceId=el.getAttribute('data-face');
+  let el=e.target,faceId=el.getAttribute('data-face');
   if(!faceId){el=el.parentElement;faceId=el?.getAttribute('data-face');}
   if(!faceId)return;
-  if(selectedFaceIds.includes(faceId)) selectedFaceIds=selectedFaceIds.filter(f=>f!==faceId);
+  if(selectedFaceIds.includes(faceId))selectedFaceIds=selectedFaceIds.filter(f=>f!==faceId);
   else selectedFaceIds.push(faceId);
-  drawFaceSelector();
-  updateFaceLabel();
+  drawFaceSelector();updateFaceLabel();
 }
-
 function updateFaceLabel(){
-  const el=document.getElementById('selectedFacesLabel');
-  const btn=document.getElementById('faceNextBtn');
+  const el=document.getElementById('selectedFacesLabel'),btn=document.getElementById('faceNextBtn');
   if(selectedFaceIds.length===0){el.textContent='面を選択してください';btn.disabled=true;}
   else{el.textContent='選択中：'+selectedFaceIds.map(id=>FACES[id].label+'（'+FACES[id].desc+'）').join(' ＋ ');btn.disabled=false;}
 }
-
 function goToBoundary(){
   if(selectedFaceIds.length>1){initDrawCanvas();showView('view-boundary');}
   else analyzeAllFaces();
@@ -378,19 +352,14 @@ function goToBoundary(){
 
 // ===== 手書き境界線 =====
 function initDrawCanvas(){
-  const img=document.getElementById('drawImg');
-  img.src=imageSrc;
+  const img=document.getElementById('drawImg');img.src=imageSrc;
   img.onload=function(){
     const canvas=document.getElementById('drawCanvas');
-    canvas.width=img.naturalWidth;
-    canvas.height=img.naturalHeight;
-    canvas.style.width='100%';
-    canvas.style.height='auto';
-    setupDrawEvents(canvas);
-    clearBoundary();
+    canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;
+    canvas.style.width='100%';canvas.style.height='auto';
+    setupDrawEvents(canvas);clearBoundary();
   };
 }
-
 function setupDrawEvents(canvas){
   canvas.addEventListener('touchstart',onDrawStart,{passive:false});
   canvas.addEventListener('touchmove',onDrawMove,{passive:false});
@@ -399,21 +368,15 @@ function setupDrawEvents(canvas){
   canvas.addEventListener('mousemove',onDrawMove);
   canvas.addEventListener('mouseup',onDrawEnd);
 }
-
 function getPos(e,canvas){
-  const rect=canvas.getBoundingClientRect();
-  const scaleX=canvas.width/rect.width;
-  const scaleY=canvas.height/rect.height;
+  const rect=canvas.getBoundingClientRect(),scaleX=canvas.width/rect.width,scaleY=canvas.height/rect.height;
   const src=e.touches?e.touches[0]:e;
   return{x:(src.clientX-rect.left)*scaleX,y:(src.clientY-rect.top)*scaleY};
 }
-
-function onDrawStart(e){e.preventDefault();isDrawing=true;drawPoints=[];const pos=getPos(e,document.getElementById('drawCanvas'));drawPoints.push(pos);}
+function onDrawStart(e){e.preventDefault();isDrawing=true;drawPoints=[];drawPoints.push(getPos(e,document.getElementById('drawCanvas')));}
 function onDrawMove(e){e.preventDefault();if(!isDrawing)return;drawPoints.push(getPos(e,document.getElementById('drawCanvas')));renderDrawCanvas();}
-function onDrawEnd(){if(!isDrawing)return;isDrawing=false;if(drawPoints.length>2){document.getElementById('boundaryConfirmBtn').disabled=false;document.getElementById('drawHint').textContent='境界線が引けました。AIで補正するか、やり直してください。';}}
-
+function onDrawEnd(){if(!isDrawing)return;isDrawing=false;if(drawPoints.length>2){document.getElementById('boundaryConfirmBtn').disabled=false;document.getElementById('drawHint').textContent='境界線が引けました。AIで補正してください。';}}
 function smoothPoints(pts,w){
-  if(pts.length<=w)return pts;
   return pts.map((p,i)=>{
     const s=Math.max(0,i-Math.floor(w/2)),e=Math.min(pts.length-1,i+Math.floor(w/2));
     let sx=0,sy=0,c=0;
@@ -421,20 +384,16 @@ function smoothPoints(pts,w){
     return{x:sx/c,y:sy/c};
   });
 }
-
 function renderDrawCanvas(){
-  const canvas=document.getElementById('drawCanvas');
-  const ctx=canvas.getContext('2d');
+  const canvas=document.getElementById('drawCanvas'),ctx=canvas.getContext('2d');
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  const sm=smoothPoints(drawPoints,8);
-  if(sm.length<2)return;
+  const sm=smoothPoints(drawPoints,8);if(sm.length<2)return;
   ctx.beginPath();ctx.moveTo(sm[0].x,sm[0].y);
   for(let i=1;i<sm.length;i++)ctx.lineTo(sm[i].x,sm[i].y);
-  ctx.strokeStyle='rgba(233,69,96,0.9)';ctx.lineWidth=3;ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke();
+  ctx.strokeStyle='rgba(233,69,96,.9)';ctx.lineWidth=3;ctx.lineCap='round';ctx.stroke();
   ctx.fillStyle='#e94560';
   [sm[0],sm[sm.length-1]].forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,6,0,Math.PI*2);ctx.fill();});
 }
-
 function clearBoundary(){
   drawPoints=[];
   const canvas=document.getElementById('drawCanvas');
@@ -442,46 +401,33 @@ function clearBoundary(){
   document.getElementById('boundaryConfirmBtn').disabled=true;
   document.getElementById('drawHint').textContent='指でなぞって面の境界線を引いてください';
 }
-
 async function confirmBoundary(){
-  const btn=document.getElementById('boundaryConfirmBtn');
-  btn.disabled=true;
+  document.getElementById('boundaryConfirmBtn').disabled=true;
   document.getElementById('boundaryBtnText').textContent='AI補正中...';
   showLoading('境界線を補正中...','明暗の差から建物の角を検出しています');
-
   const sm=smoothPoints(drawPoints,8);
   const canvas=document.getElementById('drawCanvas');
   const rel=sm.map(p=>({x:parseFloat((p.x/canvas.width*100).toFixed(1)),y:parseFloat((p.y/canvas.height*100).toFixed(1))}));
-
   try{
     const res=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({step:'correct_boundary',imageBase64,imageMediaType,drawnPoints:rel,faceIds:selectedFaceIds})});
     const data=await res.json();
     boundaryLines=data.correctedPoints||rel;
   }catch(e){boundaryLines=rel;}
-
   hideLoading();
   renderCorrectedBoundary(boundaryLines);
   document.getElementById('boundaryBtnText').textContent='この境界線で解析する ✓';
-  btn.disabled=false;
-  btn.onclick=()=>analyzeAllFaces();
+  document.getElementById('boundaryConfirmBtn').disabled=false;
+  document.getElementById('boundaryConfirmBtn').onclick=()=>analyzeAllFaces();
 }
-
 function renderCorrectedBoundary(pts){
-  const canvas=document.getElementById('drawCanvas');
-  const ctx=canvas.getContext('2d');
+  const canvas=document.getElementById('drawCanvas'),ctx=canvas.getContext('2d');
   ctx.clearRect(0,0,canvas.width,canvas.height);
   if(pts.length<2)return;
   const abs=pts.map(p=>({x:p.x/100*canvas.width,y:p.y/100*canvas.height}));
   ctx.beginPath();ctx.moveTo(abs[0].x,abs[0].y);
   for(let i=1;i<abs.length;i++)ctx.lineTo(abs[i].x,abs[i].y);
-  ctx.strokeStyle='rgba(45,158,90,0.95)';ctx.lineWidth=3;ctx.setLineDash([8,4]);ctx.lineCap='round';ctx.stroke();ctx.setLineDash([]);
-  if(selectedFaceIds.length>=2){
-    const mid=abs[Math.floor(abs.length/2)];
-    ctx.font='bold 16px sans-serif';
-    ctx.fillStyle='rgba(233,69,96,.9)';ctx.fillText(FACES[selectedFaceIds[0]].label,mid.x-80,mid.y);
-    ctx.fillStyle='rgba(0,102,204,.9)';ctx.fillText(FACES[selectedFaceIds[1]].label,mid.x+10,mid.y);
-  }
+  ctx.strokeStyle='rgba(45,158,90,.95)';ctx.lineWidth=3;ctx.setLineDash([8,4]);ctx.lineCap='round';ctx.stroke();ctx.setLineDash([]);
   document.getElementById('drawHint').textContent='✅ AI補正完了。確認して解析に進んでください。';
 }
 
@@ -491,7 +437,6 @@ async function analyzeAllFaces(){
   for(let i=0;i<selectedFaceIds.length;i++){
     const faceId=selectedFaceIds[i];
     if(faceData[faceId])continue;
-    const faceNames={S:'南面（正面）',N:'北面（背面）',E:'東面（右側面）',W:'西面（左側面）'};
     try{
       const res=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({step:'analyze',imageBase64,imageMediaType,
@@ -499,36 +444,172 @@ async function analyzeAllFaces(){
           boundary:boundaryLines.length>0?boundaryLines:null})});
       const data=await res.json();
       if(!res.ok)throw new Error(data.error);
-      faceData[faceId]={faceId,
-        dimensions:data.dimensions.map(d=>({...d,confirmed:false,originalValue:d.value})),
+      faceData[faceId]={
+        faceId,
+        pixelData:data.pixelData,
+        estimatedDimensions:data.estimatedDimensions,
+        dimensions:[
+          {id:'width',label:'横幅',value:data.estimatedDimensions?.width||8,confidence:'medium',note:'遠近補正前の推定値'},
+          {id:'nearHeight',label:'手前の高さ',value:data.estimatedDimensions?.nearHeight||6,confidence:'medium',note:'AI推定'},
+          {id:'farHeight',label:'奥の高さ',value:data.estimatedDimensions?.farHeight||6,confidence:'medium',note:'AI推定'},
+          {id:'height1F',label:'1階高さ',value:data.estimatedDimensions?.height1F||3,confidence:'medium',note:'比率から推定'},
+          {id:'height2F',label:'2階高さ',value:data.estimatedDimensions?.height2F||3,confidence:'medium',note:'比率から推定'}
+        ],
         openings:(data.openings||[]).map(o=>({...o,confirmed:false})),
         buildingInfo:data.buildingInfo,
         roofType:data.roofType||'gable',
         image:{base64:imageBase64,mediaType:imageMediaType,src:imageSrc}
       };
-    }catch(e){hideLoading();document.getElementById('uploadError').textContent='エラー：'+e.message;document.getElementById('uploadError').style.display='block';return;}
+    }catch(e){
+      hideLoading();
+      document.getElementById('uploadError').textContent='エラー：'+e.message;
+      document.getElementById('uploadError').style.display='block';
+      return;
+    }
   }
   hideLoading();
   currentFaceId=selectedFaceIds[0];
+
+  // 既に高さが入力済みなら共有ヒントを表示
+  checkShareHeight();
   buildFaceTabs();
   drawDiagram();
   renderDimList();
   renderPhoto();
+
+  // 入力フィールドをリセット
+  document.getElementById('nearHeightInput').value='';
+  document.getElementById('farHeightInput').value='';
+
   showView('view-diagram');
+}
+
+// ===== 高さ共有チェック =====
+function checkShareHeight(){
+  const shareBox=document.getElementById('shareHeightBox');
+  if(sharedNearHeight&&sharedFarHeight){
+    shareBox.style.display='block';
+    shareBox.textContent=`✅ 他の面で入力した高さ（手前：${sharedNearHeight}m、奥：${sharedFarHeight}m）を使用できます。`;
+    document.getElementById('nearHeightInput').value=sharedNearHeight;
+    document.getElementById('farHeightInput').value=sharedFarHeight;
+  }else{
+    shareBox.style.display='none';
+  }
+}
+
+// ===== 遠近補正計算 =====
+async function calcPerspective(){
+  const nh=parseFloat(document.getElementById('nearHeightInput').value);
+  const fh=parseFloat(document.getElementById('farHeightInput').value);
+
+  if(isNaN(nh)||nh<=0){alert('手前の高さを入力してください');return;}
+  if(isNaN(fh)||fh<=0){alert('奥の高さを入力してください');return;}
+
+  const face=faceData[currentFaceId];
+  if(!face){return;}
+
+  showLoading('遠近補正計算中...','実測値を基に全寸法を補正しています');
+
+  // 高さを全面に共有
+  sharedNearHeight=nh;
+  sharedFarHeight=fh;
+
+  try{
+    const res=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        step:'perspective_calc',
+        imageBase64:face.image.base64,
+        imageMediaType:face.image.mediaType,
+        nearHeight:nh,
+        farHeight:fh,
+        faceInfo:{
+          pixelData:face.pixelData,
+          estimatedDimensions:face.estimatedDimensions,
+          openings:face.openings
+        }
+      })
+    });
+    const data=await res.json();
+    if(!res.ok)throw new Error(data.error);
+
+    // 寸法を更新
+    face.dimensions=data.dimensions;
+    face.openings=data.openings||face.openings;
+    face.totalWallArea=data.totalWallArea;
+    face.totalOpeningArea=data.totalOpeningArea;
+    face.paintArea=data.paintArea;
+
+    hideLoading();
+    buildFaceTabs();
+    drawDiagram();
+    renderDimList();
+
+    // 他の面も同じ高さで補正
+    await shareHeightToOtherFaces(nh, fh);
+
+  }catch(e){
+    hideLoading();
+    alert('計算エラー：'+e.message);
+  }
+}
+
+// 他面に高さを共有して補正
+async function shareHeightToOtherFaces(nh, fh){
+  const otherFaceIds=Object.keys(faceData).filter(id=>id!==currentFaceId);
+  if(otherFaceIds.length===0)return;
+
+  showLoading('他の面を補正中...','同じ建物の高さを全面に反映しています');
+
+  for(const faceId of otherFaceIds){
+    const face=faceData[faceId];
+    if(!face||!face.pixelData)continue;
+    try{
+      const res=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          step:'share_height',
+          imageBase64:face.image?.base64||imageBase64,
+          imageMediaType:face.image?.mediaType||imageMediaType,
+          nearHeight:nh,
+          farHeight:fh,
+          targetFaceData:{
+            pixelData:face.pixelData,
+            estimatedDimensions:face.estimatedDimensions,
+            openings:face.openings
+          }
+        })
+      });
+      const data=await res.json();
+      if(res.ok){
+        face.dimensions=data.dimensions;
+        face.openings=data.openings||face.openings;
+        face.totalWallArea=data.totalWallArea;
+        face.totalOpeningArea=data.totalOpeningArea;
+        face.paintArea=data.paintArea;
+      }
+    }catch(e){}
+  }
+  hideLoading();
+  buildFaceTabs();
+  drawDiagram();
+  renderDimList();
 }
 
 // ===== 面タブ =====
 function buildFaceTabs(){
   document.getElementById('faceTabs').innerHTML=Object.keys(faceData).map(fid=>{
-    const isDone=faceData[fid].dimensions.find(d=>d.id==='width')?.confirmed;
+    const face=faceData[fid];
+    const isDone=face.dimensions.find(d=>d.id==='nearHeight')?.confirmed;
     const isActive=fid===currentFaceId;
     return `<div class="face-tab ${isActive?'active':isDone?'done':''}" onclick="switchFace('${fid}')">${FACES[fid].label}（${FACES[fid].desc}）</div>`;
   }).join('');
 }
+function switchFace(faceId){
+  currentFaceId=faceId;
+  buildFaceTabs();drawDiagram();renderDimList();renderPhoto();
+  checkShareHeight();
+}
 
-function switchFace(faceId){currentFaceId=faceId;buildFaceTabs();drawDiagram();renderDimList();renderPhoto();}
-
-// ===== 図面描画（屋根形状対応） =====
+// ===== 図面描画 =====
 function drawDiagram(){
   const face=faceData[currentFaceId];if(!face)return;
   const {dimensions,openings,buildingInfo,roofType}=face;
@@ -536,28 +617,26 @@ function drawDiagram(){
   document.getElementById('diagramCardTitle').textContent=`${FACES[currentFaceId].label}（${FACES[currentFaceId].desc}） 立面図`;
   document.getElementById('diagramNote').textContent=`建物：${buildingInfo?.style||''}　注意：${buildingInfo?.note||''}`;
 
-  const LM=20,TM=50,BM=50,WW=260,FH=80;
-  const TH=FH*floors;
-  const svgW=LM+WW+LM,svgH=TM+TH+BM;
+  const LM=20,TM=50,BM=40,WW=260,FH=80;
+  const TH=FH*floors,svgW=LM+WW+LM,svgH=TM+TH+BM;
   const svg=document.getElementById('diagramSvg');
   svg.setAttribute('viewBox',`0 0 ${svgW} ${svgH}`);
   svg.setAttribute('height',svgH);
 
   let s='';
 
-  // 屋根描画
-  const roofH=40;
-  const rx=LM,ry=TM-roofH,rw=WW;
+  // 屋根
+  const roofH=35,rx=LM,ry=TM-roofH,rw=WW;
   if(roofType==='flat'){
-    s+=`<rect x="${rx}" y="${ry}" width="${rw}" height="12" fill="#888" rx="2"/>`;
-    s+=`<text x="${rx+rw/2}" y="${ry-4}" text-anchor="middle" font-size="9" fill="#888">陸屋根</text>`;
+    s+=`<rect x="${rx}" y="${ry+20}" width="${rw}" height="10" fill="#777" rx="2"/>`;
+    s+=`<text x="${rx+rw/2}" y="${ry+15}" text-anchor="middle" font-size="9" fill="#999">陸屋根</text>`;
   }else if(roofType==='shed'){
-    s+=`<polygon points="${rx},${ry+roofH} ${rx+rw},${ry} ${rx+rw},${ry+roofH}" fill="#888"/>`;
-    s+=`<text x="${rx+rw/2}" y="${ry-4}" text-anchor="middle" font-size="9" fill="#888">片流れ</text>`;
+    s+=`<polygon points="${rx},${ry+roofH} ${rx+rw},${ry+5} ${rx+rw},${ry+roofH}" fill="#777"/>`;
+  }else if(roofType==='hip'){
+    s+=`<polygon points="${rx},${ry+roofH} ${rx+rw*0.2},${ry} ${rx+rw*0.8},${ry} ${rx+rw},${ry+roofH}" fill="#777"/>`;
   }else{
-    // 切妻（デフォルト・山型）
-    s+=`<polygon points="${rx},${ry+roofH} ${rx+rw/2},${ry} ${rx+rw},${ry+roofH}" fill="#888" stroke="#666" stroke-width="1"/>`;
-    s+=`<text x="${rx+rw/2}" y="${ry-4}" text-anchor="middle" font-size="9" fill="#888">切妻屋根</text>`;
+    s+=`<polygon points="${rx},${ry+roofH} ${rx+rw/2},${ry} ${rx+rw},${ry+roofH}" fill="#777" stroke="#555" stroke-width="1"/>`;
+    s+=`<text x="${rx+rw/2}" y="${ry-3}" text-anchor="middle" font-size="8" fill="#999">切妻</text>`;
   }
 
   // 各階の壁
@@ -568,55 +647,45 @@ function drawDiagram(){
   }
   s+=`<line x1="${LM-8}" y1="${TM+TH}" x2="${LM+WW+8}" y2="${TM+TH}" stroke="#666" stroke-width="2"/>`;
 
-  // 開口部（引き出し線で重なり防止）
-  const opCount=openings.length;
+  // 開口部
+  const opCount=openings.length||1;
   openings.forEach((op,idx)=>{
-    const f=op.floor||1;
-    const fy=TM+(floors-f)*FH;
+    const f=op.floor||1,fy=TM+(floors-f)*FH;
     const opW=Math.min(op.width*13,WW*0.22);
     const opH=Math.min(op.height*18,FH*0.65);
     const spacing=WW/(opCount+1);
-    const opX=LM+spacing*(idx+1)-opW/2;
-    const opY=fy+FH-opH-6;
+    const opX=LM+spacing*(idx+1)-opW/2,opY=fy+FH-opH-6;
     const cc=confColor(op.confidence,op.confirmed);
     s+=`<rect x="${opX}" y="${opY}" width="${opW}" height="${opH}" fill="#c8d8e8" stroke="${cc}" stroke-width="2" rx="2"/>`;
-    // 引き出し線でラベルを上に表示
-    const lx=opX+opW/2,ly=fy+6;
+    const lx=opX+opW/2,ly=fy+6,lw=Math.max(opW+4,44);
     s+=`<line x1="${lx}" y1="${opY}" x2="${lx}" y2="${ly+12}" stroke="${cc}" stroke-width="1" stroke-dasharray="3,2"/>`;
-    const lw=Math.max(opW+4,44);
     s+=`<rect x="${lx-lw/2}" y="${ly}" width="${lw}" height="12" fill="${cc}" rx="3"/>`;
     s+=`<text x="${lx}" y="${ly+9}" text-anchor="middle" font-size="8" font-weight="bold" fill="white">${op.type}×${op.count}</text>`;
-    // 開口部内の幅数値
-    s+=`<rect x="${opX+opW/2-16}" y="${opY+opH/2-6}" width="32" height="12" fill="${cc}" rx="3" style="cursor:pointer" onclick="openModal('${op.id}')"/>`;
-    s+=`<text x="${opX+opW/2}" y="${opY+opH/2+3}" text-anchor="middle" font-size="8" font-weight="bold" fill="white" style="cursor:pointer" onclick="openModal('${op.id}')">${op.width.toFixed(1)}m</text>`;
+    s+=`<rect x="${opX+opW/2-16}" y="${opY+opH/2-6}" width="32" height="12" fill="${cc}" rx="3"/>`;
+    s+=`<text x="${opX+opW/2}" y="${opY+opH/2+3}" text-anchor="middle" font-size="8" font-weight="bold" fill="white">${op.width.toFixed(1)}m</text>`;
   });
 
-  // 横幅（下・必須表示）
+  // 横幅（下）
   const wDim=dimensions.find(d=>d.id==='width');
   if(wDim){
-    const col=wDim.confirmed?'#2d9e5a':wDim.confidence==='medium'?'#cc8800':'#cc3333';
-    const sy=TM+TH+18;
+    const col=confColor(wDim.confidence,wDim.confirmed),sy=TM+TH+18;
     s+=`<line x1="${LM}" y1="${sy}" x2="${LM+WW}" y2="${sy}" stroke="${col}" stroke-width="1.5"/>`;
     s+=`<line x1="${LM}" y1="${sy-5}" x2="${LM}" y2="${sy+5}" stroke="${col}" stroke-width="1.5"/>`;
     s+=`<line x1="${LM+WW}" y1="${sy-5}" x2="${LM+WW}" y2="${sy+5}" stroke="${col}" stroke-width="1.5"/>`;
-    const req=!wDim.confirmed?'【必須】':'';
-    s+=`<rect x="${LM+WW/2-38}" y="${sy+5}" width="76" height="15" fill="${col}" rx="4" style="cursor:pointer" onclick="openModal('width')"/>`;
-    s+=`<text x="${LM+WW/2}" y="${sy+15.5}" text-anchor="middle" font-size="9" font-weight="bold" fill="white" style="cursor:pointer" onclick="openModal('width')">${req}横幅 ${wDim.value.toFixed(1)}m${wDim.confirmed?' ✓':''}</text>`;
+    s+=`<rect x="${LM+WW/2-30}" y="${sy+5}" width="60" height="14" fill="${col}" rx="3"/>`;
+    s+=`<text x="${LM+WW/2}" y="${sy+14}" text-anchor="middle" font-size="9" font-weight="bold" fill="white">横幅 ${wDim.value.toFixed(1)}m${wDim.confirmed?' ✓':''}</text>`;
   }
 
-  // 高さ（左側に表示・1F・2F・総高さ）
-  const h1Dim=dimensions.find(d=>d.id==='height1F');
-  const h2Dim=dimensions.find(d=>d.id==='height2F');
-  const totalH=(h1Dim?.value||0)+(h2Dim?.value||0);
-
-  // 総高さ（左外側）
-  if(h1Dim&&h2Dim){
-    const col='#666';
-    const sx=LM-14;
-    s+=`<line x1="${sx}" y1="${TM}" x2="${sx}" y2="${TM+TH}" stroke="${col}" stroke-width="1"/>`;
-    s+=`<line x1="${sx-4}" y1="${TM}" x2="${sx+4}" y2="${TM}" stroke="${col}" stroke-width="1"/>`;
-    s+=`<line x1="${sx-4}" y1="${TM+TH}" x2="${sx+4}" y2="${TM+TH}" stroke="${col}" stroke-width="1"/>`;
-    s+=`<text x="${sx-3}" y="${TM+TH/2+3}" text-anchor="middle" font-size="8" fill="${col}" transform="rotate(-90,${sx-3},${TM+TH/2})">総高${totalH.toFixed(1)}m</text>`;
+  // 高さ（左）
+  const nhDim=dimensions.find(d=>d.id==='nearHeight');
+  const fhDim=dimensions.find(d=>d.id==='farHeight');
+  if(nhDim){
+    const col=confColor(nhDim.confidence,nhDim.confirmed),sx=LM-14;
+    s+=`<line x1="${sx}" y1="${TM}" x2="${sx}" y2="${TM+TH}" stroke="${col}" stroke-width="1.5"/>`;
+    s+=`<line x1="${sx-4}" y1="${TM}" x2="${sx+4}" y2="${TM}" stroke="${col}" stroke-width="1.5"/>`;
+    s+=`<line x1="${sx-4}" y1="${TM+TH}" x2="${sx+4}" y2="${TM+TH}" stroke="${col}" stroke-width="1.5"/>`;
+    const lbl=nhDim.confirmed?`${nhDim.value.toFixed(1)}m✓`:`~${nhDim.value.toFixed(1)}m`;
+    s+=`<text x="${sx-4}" y="${TM+TH/2+3}" text-anchor="middle" font-size="8" font-weight="bold" fill="${col}" transform="rotate(-90,${sx-4},${TM+TH/2})">${lbl}</text>`;
   }
 
   svg.innerHTML=s;
@@ -629,56 +698,42 @@ function confColor(conf,confirmed){
   return'#cc3333';
 }
 
-// ===== 寸法一覧（テキスト） =====
+// ===== 寸法一覧 =====
 function renderDimList(){
   const face=faceData[currentFaceId];if(!face)return;
   const {dimensions,openings}=face;
-  const h1=dimensions.find(d=>d.id==='height1F')?.value||0;
-  const h2=dimensions.find(d=>d.id==='height2F')?.value||0;
-  const totalH=(h1+h2).toFixed(1);
-
   let html='';
   dimensions.forEach(d=>{
     const cls=d.confirmed?'confirmed':d.confidence==='medium'?'medium':'low';
-    const isReq=(d.id==='width'||d.id==='totalHeight')&&!d.confirmed;
-    const req=isReq?'<span class="required-badge">必須</span>':'';
-    const extra=d.id==='height1F'||d.id==='height2F'?`<br><span style="font-size:10px;color:var(--muted)">総高さ ${totalH}m</span>`:'';
-    html+=`<div class="dim-list-item">
-      <div class="dim-list-label">${d.label}${req}</div>
-      <div class="dim-list-value ${isReq?'required':cls}" onclick="openModal('${d.id}')">${d.value.toFixed(1)} m${d.confirmed?' ✓':''}${extra}</div>
+    html+=`<div class="dim-item">
+      <div class="dim-item-label">${d.label}</div>
+      <div class="dim-item-value ${cls}">${d.value.toFixed(2)}m${d.confirmed?' ✓':''}</div>
     </div>`;
   });
-  openings.forEach(o=>{
-    const cls=o.confirmed?'confirmed':o.confidence==='medium'?'medium':'low';
-    html+=`<div class="dim-list-item">
-      <div class="dim-list-label">${o.type}×${o.count}</div>
-      <div class="dim-list-value ${cls}" onclick="openModal('${o.id}')">${o.width.toFixed(1)} m幅${o.confirmed?' ✓':''}</div>
+  if(face.paintArea){
+    html+=`<div class="dim-item" style="grid-column:1/-1;background:#e8f8e8">
+      <div class="dim-item-label">塗装面積（この面）</div>
+      <div class="dim-item-value confirmed">${face.paintArea.toFixed(1)} m²</div>
     </div>`;
-  });
+  }
   document.getElementById('dimList').innerHTML=html;
 }
 
-// ===== 撮影写真表示 =====
+// ===== 撮影写真 =====
 function renderPhoto(){
   const face=faceData[currentFaceId];if(!face)return;
-  const src=face.image?.src||imageSrc;
-  document.getElementById('photoPreview').innerHTML=`<img src="${src}" alt="撮影写真" style="width:100%;display:block;border-radius:8px">`;
+  document.getElementById('photoPreview').innerHTML=`<img src="${face.image?.src||imageSrc}" alt="撮影写真" style="width:100%;display:block;border-radius:8px">`;
 }
 
 // ===== テンキー =====
+let currentModalTarget=null;
 function openModal(id){
-  currentEditId=id;
-  const face=faceData[currentFaceId];
-  const dim=face.dimensions.find(d=>d.id===id);
-  const op=face.openings.find(o=>o.id===id);
-  const item=dim||op;if(!item)return;
-  document.getElementById('modalTitle').textContent=(dim?dim.label:op.type+'幅')+'を入力';
-  document.getElementById('modalAI').textContent='AI推定：'+item.value.toFixed(1)+'m';
-  currentInputStr=item.value.toFixed(1);
-  document.getElementById('modalDisplay').textContent=currentInputStr;
+  currentEditId=id;currentModalTarget=id;currentInputStr='';
+  document.getElementById('modalTitle').textContent=id+'を入力';
+  document.getElementById('modalAI').textContent='';
+  document.getElementById('modalDisplay').textContent='—';
   document.getElementById('modalOverlay').classList.add('show');
 }
-function closeModalOutside(e){if(e.target===document.getElementById('modalOverlay'))closeModal();}
 function closeModal(){document.getElementById('modalOverlay').classList.remove('show');}
 function keyPress(k){
   if(k==='.'&&currentInputStr.includes('.'))return;
@@ -689,54 +744,6 @@ function keyDel(){currentInputStr=currentInputStr.slice(0,-1);document.getElemen
 function confirmInput(){
   const val=parseFloat(currentInputStr);if(isNaN(val)||val<=0)return;
   closeModal();
-  const face=faceData[currentFaceId];
-  const dim=face.dimensions.find(d=>d.id===currentEditId);
-  const op=face.openings.find(o=>o.id===currentEditId);
-  if(dim){saveLearning(dim.id,dim.value,val,face.buildingInfo);dim.value=val;dim.confirmed=true;dim.confidence='high';}
-  else if(op){op.width=val;op.area=parseFloat((val*op.height).toFixed(2));op.totalArea=parseFloat((op.area*op.count).toFixed(2));op.confirmed=true;}
-  drawDiagram();renderDimList();buildFaceTabs();
-  // 更新バーを表示
-  document.getElementById('updateBar').style.display='block';
-}
-
-// ===== AIで全体を更新 =====
-async function doUpdate(){
-  setBtn('updateBar','updateSpinner','updateBtnText','AI補正中...',true);
-  showLoading('全体を再計算中...','実測値を基に全寸法を補正しています');
-  const face=faceData[currentFaceId];
-  try{
-    const res=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({step:'recalculate',imageBase64:face.image?.base64||imageBase64,
-        imageMediaType:face.image?.mediaType||imageMediaType,
-        dimensions:face.dimensions,openings:face.openings,buildingInfo:face.buildingInfo})});
-    const data=await res.json();
-    if(!res.ok)throw new Error(data.error);
-    if(data.dimensions){
-      data.dimensions.forEach(upd=>{
-        const d=face.dimensions.find(x=>x.id===upd.id);
-        if(d&&!d.confirmed){d.value=upd.value;d.confidence=upd.confidence;}
-      });
-    }
-    if(data.openings){
-      data.openings.forEach(upd=>{
-        const o=face.openings.find(x=>x.id===upd.id);
-        if(o&&!o.confirmed){o.width=upd.width;o.height=upd.height;o.totalArea=upd.totalArea;o.confidence=upd.confidence;}
-      });
-    }
-  }catch(e){}
-  hideLoading();
-  drawDiagram();renderDimList();buildFaceTabs();
-  document.getElementById('updateBar').style.display='none';
-  document.getElementById('updateBtnText').textContent='🔄 AIで全体を更新する';
-  document.getElementById('updateBar').querySelector('button').disabled=false;
-}
-
-function setBtn(barId,spinnerId,textId,text,loading){
-  const bar=document.getElementById(barId);
-  const btn=bar?.querySelector('button');
-  if(btn)btn.disabled=loading;
-  document.getElementById(spinnerId).style.display=loading?'block':'none';
-  document.getElementById(textId).textContent=text;
 }
 
 // ===== 別の面を追加 =====
@@ -761,22 +768,37 @@ function addNextFace(){
 
 // ===== 面積計算 =====
 async function doCalculate(){
-  showLoading('面積を計算中...','全面の塗装面積を合計しています');
-  let allWallArea=0,allOpeningArea=0;const faceResults=[];
-  Object.keys(faceData).forEach(faceId=>{
-    const face=faceData[faceId];
-    const w=face.dimensions.find(d=>d.id==='width')?.value||0;
-    const h1=face.dimensions.find(d=>d.id==='height1F')?.value||0;
-    const h2=face.dimensions.find(d=>d.id==='height2F')?.value||0;
-    const totalH=thDim?.confirmed?thDim.value:(h1+h2); const wallArea=parseFloat((w*totalH).toFixed(1));
-    const openingArea=parseFloat(face.openings.reduce((s,o)=>s+o.totalArea,0).toFixed(1));
-    const paintArea=parseFloat(Math.max(0,wallArea-openingArea).toFixed(1));
-    allWallArea+=wallArea;allOpeningArea+=openingArea;
-    faceResults.push({faceId,label:FACES[faceId].label,desc:FACES[faceId].desc,wallArea,openingArea,paintArea});
-  });
-  const totalPaint=parseFloat(Math.max(0,allWallArea-allOpeningArea).toFixed(1));
-  hideLoading();
-  showResult(allWallArea,allOpeningArea,totalPaint,faceResults);
+  document.getElementById('calcError').style.display='none';
+  const btn=document.getElementById('calcBtn');
+  const spinner=document.getElementById('calcSpinner');
+  const btnText=document.getElementById('calcBtnText');
+  btn.disabled=true;
+  spinner.style.display='block';
+  btnText.textContent='計算中...';
+
+  try{
+    let allWallArea=0,allOpeningArea=0;
+    const faceResults=[];
+    Object.keys(faceData).forEach(faceId=>{
+      const face=faceData[faceId];
+      // 遠近補正済みの値を優先
+      const wallArea=face.totalWallArea||0;
+      const openingArea=face.totalOpeningArea||0;
+      const paintArea=face.paintArea||Math.max(0,wallArea-openingArea);
+      allWallArea+=wallArea;
+      allOpeningArea+=openingArea;
+      faceResults.push({faceId,label:FACES[faceId].label,desc:FACES[faceId].desc,wallArea,openingArea,paintArea});
+    });
+    const totalPaint=parseFloat(Math.max(0,allWallArea-allOpeningArea).toFixed(1));
+    showResult(allWallArea,allOpeningArea,totalPaint,faceResults);
+  }catch(e){
+    document.getElementById('calcError').textContent='エラー：'+e.message;
+    document.getElementById('calcError').style.display='block';
+  }
+
+  btn.disabled=false;
+  spinner.style.display='none';
+  btnText.textContent='📐 面積を計算する';
 }
 
 function showResult(wallArea,openingArea,paintArea,faceResults){
@@ -798,10 +820,7 @@ function copyResult(){
   let text='【塗装面積 AI計測結果】\n';let totalW=0,totalP=0;
   Object.keys(faceData).forEach(faceId=>{
     const face=faceData[faceId];
-    const w=face.dimensions.find(d=>d.id==='width')?.value||0;
-    const h1=face.dimensions.find(d=>d.id==='height1F')?.value||0;
-    const h2=face.dimensions.find(d=>d.id==='height2F')?.value||0;
-    const wall=w*(h1+h2),opening=face.openings.reduce((s,o)=>s+o.totalArea,0),paint=Math.max(0,wall-opening);
+    const wall=face.totalWallArea||0,opening=face.totalOpeningArea||0,paint=face.paintArea||0;
     totalW+=wall;totalP+=paint;
     text+=`\n${FACES[faceId].label}（${FACES[faceId].desc}）\n外壁面積：${wall.toFixed(1)} m²\n開口部控除：${opening.toFixed(1)} m²\n塗装面積：${paint.toFixed(1)} m²\n`;
   });
@@ -812,14 +831,6 @@ function copyResult(){
   });
 }
 
-async function saveLearning(partId,aiVal,actualVal,buildingInfo){
-  if(!aiVal||aiVal===actualVal)return;
-  try{await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({step:'save_learning',imageBase64:null,
-      learningData:{building_type:buildingInfo?.type||'unknown',shoot_angle:buildingInfo?.shootAngle||'unknown',
-        part:partId,ai_value:aiVal,actual_value:actualVal,created_at:new Date().toISOString()}})});}catch(e){}
-}
-
 function showView(id){
   ['view-upload','view-faceselect','view-boundary','view-diagram'].forEach(v=>document.getElementById(v).classList.toggle('hidden',v!==id));
   window.scrollTo(0,0);
@@ -827,6 +838,7 @@ function showView(id){
 
 function resetAll(){
   imageBase64=null;imageSrc=null;faceData={};currentFaceId=null;selectedFaceIds=[];boundaryLines=[];
+  sharedNearHeight=null;sharedFarHeight=null;
   hideLoading();
   const area=document.getElementById('uploadArea');
   area.classList.remove('has-image');
@@ -843,7 +855,7 @@ function resetAll(){
   });
   document.getElementById('uploadNextBtn').disabled=true;
   document.getElementById('resultCard').classList.add('hidden');
-  document.getElementById('updateBar').style.display='none';
+  document.getElementById('calcError').style.display='none';
   showView('view-upload');
 }
 </script>
