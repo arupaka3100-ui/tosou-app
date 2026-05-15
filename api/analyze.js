@@ -32,10 +32,9 @@ export default async function handler(req, res) {
     const prompt = `あなたは塗装業の見積り専門AIです。この外壁写真を解析してください。
 ${areaDesc}
 
-重要：斜め撮影を前提とした遠近補正計算のため、ピクセル数を正確に返してください。
-- 手前（左端）と奥（右端）で壁の高さがピクセル上で異なります
-- 各開口部のx位置（左端からの割合）とピクセルサイズを返してください
-- 実測値は横幅・高さの2点のみ。残りはピクセルから計算します
+重要：各開口部の写真上の位置を正確に%で返してください。
+写真上に枠を重ねて表示するため、位置精度が重要です。
+斜め撮影前提：手前と奥で壁の高さpxが異なります。
 
 以下をJSONのみで返答（説明文・マークダウン不要）：
 {
@@ -43,6 +42,8 @@ ${areaDesc}
   "roofType": "gable",
   "gableHeightRatio": 0.25,
   "wallPixels": {
+    "leftX": 10,
+    "rightX": 90,
     "leftHeightPx": 350,
     "rightHeightPx": 280,
     "totalWidthPx": 800
@@ -57,7 +58,13 @@ ${areaDesc}
       "heightPx": 60,
       "confidence": "medium",
       "floor": 1,
-      "note": "根拠"
+      "note": "根拠",
+      "bbox": {
+        "x": 20,
+        "y": 35,
+        "w": 15,
+        "h": 12
+      }
     },
     {
       "id": "op2",
@@ -68,14 +75,21 @@ ${areaDesc}
       "heightPx": 120,
       "confidence": "high",
       "floor": 1,
-      "note": "根拠"
+      "note": "根拠",
+      "bbox": {
+        "x": 55,
+        "y": 50,
+        "w": 10,
+        "h": 25
+      }
     }
   ]
 }
 
-xRatioは壁の左端から右端に対する窓の中心位置の割合（0〜1）です。
-widthPx・heightPxは写真上の窓1個分のピクセル数です。
-wallPixelsは選択エリア内の壁のピクセル情報です。
+bboxは写真全体に対する位置（%）です：
+x=左端、y=上端、w=幅、h=高さ（すべて0〜100の%）
+xRatioは壁の左端から右端に対する窓中心の割合（0〜1）
+widthPx・heightPxは写真上の窓1個分のピクセル数
 実際の写真を解析して正確な値を入れてください。`;
 
     try {
@@ -103,33 +117,23 @@ wallPixelsは選択エリア内の壁のピクセル情報です。
     const w = parseFloat(width);
     const h = parseFloat(height);
     const { wallPixels, openings: ops, gableHeightRatio: ghr, roofType: rt } = req.body;
-
     const rType = rt || 'other';
     const gableRatio = parseFloat(ghr) || 0.25;
     const gableH = rType === 'gable' ? parseFloat((h * gableRatio).toFixed(2)) : 0;
     const gableArea = rType === 'gable' ? parseFloat((w * gableH / 2).toFixed(1)) : 0;
 
-    // 手前・奥の縮尺を計算
     const leftPx = wallPixels?.leftHeightPx || 350;
     const rightPx = wallPixels?.rightHeightPx || 280;
-    const wallWidthPx = wallPixels?.totalWidthPx || 800;
-
-    // 手前（左）・奥（右）の縮尺 m/px
     const leftScale = h / leftPx;
     const rightScale = h / rightPx;
 
-    // 各開口部のサイズを線形補間で計算
     const calcOpenings = (ops||[]).map(op => {
-      // 窓のx位置（0=手前, 1=奥）から縮尺を補間
       const xRatio = op.xRatio || 0.5;
       const scale = leftScale + (rightScale - leftScale) * xRatio;
-
-      // 窓1個の実寸
       const opW = parseFloat((op.widthPx * scale).toFixed(2));
       const opH = parseFloat((op.heightPx * scale).toFixed(2));
       const area = parseFloat((opW * opH).toFixed(2));
       const totalArea = parseFloat((area * op.count).toFixed(2));
-
       return { ...op, width: opW, height: opH, area, totalArea };
     });
 
@@ -139,11 +143,9 @@ wallPixelsは選択エリア内の壁のピクセル情報です。
     const paintArea = parseFloat(Math.max(0, totalWallArea - totalOpening).toFixed(1));
 
     return res.status(200).json({
-      width: w, height: h,
-      gableH, gableArea,
+      width: w, height: h, gableH, gableArea,
       openings: calcOpenings,
-      wallArea, totalWallArea, totalOpening, paintArea,
-      debug: { leftScale: leftScale.toFixed(4), rightScale: rightScale.toFixed(4) }
+      wallArea, totalWallArea, totalOpening, paintArea
     });
   }
 
