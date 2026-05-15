@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>テスト</title>
+</head>
+<body>
+<h2>ファイル選択テスト</h2>
+<p id="status">未選択</p>
+<br>
+<input type="file" id="fileInput" accept="image/*" style="display:none" onchange="onFileChange(this)">
+<button onclick="document.getElementById('fileInput').click()" style="padding:20px;font-size:18px;background:#e94560;color:white;border:none;border-radius:8px">
+  写真を選択
+</button>
+<br><br>
+<img id="preview" style="max-width:300px;display:none">
+
+<script>
+function onFileChange(input) {
+  document.getElementById('status').textContent = 'ファイル選択された：' + input.files.length + '個';
+  var file = input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    document.getElementById('preview').src = ev.target.result;
+    document.getElementById('preview').style.display = 'block';
+    document.getElementById('status').textContent = '読み込み完了：' + file.name;
+  };
+  reader.readAsDataURL(file);
+}
+</script>
+</body>
+</html>
