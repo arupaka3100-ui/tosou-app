@@ -114,11 +114,11 @@ header h1{font-size:16px;font-weight:600}
   <div id="view-upload">
     <div class="card">
       <div class="card-title">外壁写真をアップロード</div>
+      <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFileChange(this)">
       <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
-        <div class="upload-icon">🏠</div>
-        <div class="upload-text">写真をタップして選択</div>
-        <div class="upload-sub">カメラまたはライブラリから</div>
-        <input type="file" id="fileInput" accept="image/*" style="display:none">
+        <div class="upload-icon" id="uploadIcon">🏠</div>
+        <div class="upload-text" id="uploadText">写真をタップして選択</div>
+        <div class="upload-sub" id="uploadSub">カメラまたはライブラリから</div>
       </div>
     </div>
     <div class="note-box">建物全体が写るよう少し離れて撮影してください。</div>
@@ -234,8 +234,8 @@ function hideLoading(){
 }
 
 // ===== ファイル選択 =====
-function handleFileChange(e){
-  const file=e.target.files[0];if(!file)return;
+function handleFileChange(input){
+  const file=input.files[0];if(!file)return;
   const reader=new FileReader();
   reader.onload=function(ev){
     imageSrc=ev.target.result;
@@ -243,18 +243,11 @@ function handleFileChange(e){
     imageMediaType=file.type||'image/jpeg';
     const area=document.getElementById('uploadArea');
     area.classList.add('has-image');
-    area.innerHTML=`<img src="${imageSrc}" alt="外壁写真">`;
+    area.innerHTML=`<img src="${imageSrc}" alt="外壁写真" style="width:100%;display:block">`;
     document.getElementById('uploadNextBtn').disabled=false;
   };
   reader.readAsDataURL(file);
 }
-
-// イベント委譲でfileInputの変更を検知（動的に再生成されても対応）
-document.addEventListener('change',function(e){
-  if(e.target && e.target.id==='fileInput'){
-    handleFileChange(e);
-  }
-});
 
 // ===== エリア選択画面へ =====
 function goToAreaSelect(){
@@ -663,8 +656,10 @@ function resetAll(){
   areaStart=null;areaEnd=null;
   const area=document.getElementById('uploadArea');
   area.classList.remove('has-image');
-  area.innerHTML=`<div class="upload-icon">🏠</div><div class="upload-text">写真をタップして選択</div><div class="upload-sub">カメラまたはライブラリから</div><input type="file" id="fileInput" accept="image/*" style="display:none">`;
-  // イベント委譲で処理するため個別登録不要
+  area.innerHTML=`<div class="upload-icon">🏠</div><div class="upload-text">写真をタップして選択</div><div class="upload-sub">カメラまたはライブラリから</div>`;
+  // fileInputをリセット
+  const fi=document.getElementById('fileInput');
+  if(fi)fi.value='';
   document.getElementById('uploadNextBtn').disabled=true;
   document.getElementById('resultCard').classList.add('hidden');
   showView('view-upload');
