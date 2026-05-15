@@ -2,7 +2,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'APIキーが設定されていません' });
-  const { step, imageBase64, imageMediaType, width, height, roofType, gableHeightRatio, faceInfo, boundary, drawnPoints, faceIds, learningData, areaRect } = req.body;
+  const { step, imageBase64, imageMediaType, width, height, roofType, gableHeightRatio, faceInfo, boundary, drawnPoints, faceIds, learningData, areaRect, polyPoints } = req.body;
   const mediaType = imageMediaType || 'image/jpeg';
 
   if (step === 'save_learning') {
@@ -23,9 +23,12 @@ export default async function handler(req, res) {
 
   // エリア解析（選択エリア内の開口部・屋根形状を認識）
   if (step === 'analyze_area') {
-    const areaDesc = areaRect
-      ? `選択エリア：写真全体に対して左${areaRect.x.toFixed(0)}%から右${(areaRect.x+areaRect.w).toFixed(0)}%、上${areaRect.y.toFixed(0)}%から下${(areaRect.y+areaRect.h).toFixed(0)}%の範囲`
-      : '写真全体';
+    let areaDesc = '写真全体';
+    if(polyPoints && polyPoints.length > 2){
+      areaDesc = `選択エリア（多角形）：頂点座標 ${JSON.stringify(polyPoints.slice(0,6))}（写真サイズに対する%）。このエリア内のみ解析してください。`;
+    } else if(areaRect){
+      areaDesc = `選択エリア：写真全体に対して左${areaRect.x.toFixed(0)}%から右${(areaRect.x+areaRect.w).toFixed(0)}%、上${areaRect.y.toFixed(0)}%から下${(areaRect.y+areaRect.h).toFixed(0)}%の範囲`;
+    }
 
     const prompt = `あなたは塗装業の見積り専門AIです。この外壁写真を解析してください。
 ${areaDesc}
