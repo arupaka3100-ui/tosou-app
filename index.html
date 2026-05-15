@@ -297,9 +297,9 @@ function onMove(e) {
 function onEnd(e) {
   if (!state.drawing) return;
   state.drawing = false;
-  if (state.polyPoints.length > 5) {
+  if (state.polyPoints.length > 1) {
     document.getElementById('confirmAreaBtn').disabled = false;
-    document.getElementById('areaHint').textContent = 'エリアが選択されました。解析してください。';
+    document.getElementById('areaHint').textContent = 'エリアが選択されました（' + state.polyPoints.length + '点）。解析してください。';
   }
 }
 
@@ -337,7 +337,10 @@ function clearArea() {
 
 // ===== エリア解析 =====
 async function analyzeArea() {
-  if (state.polyPoints.length < 3) { alert('エリアを選択してください'); return; }
+  if (state.polyPoints.length < 3) { 
+    alert('エリアを選択してください（現在の点数：' + state.polyPoints.length + '）'); 
+    return; 
+  }
   document.getElementById('confirmAreaBtn').disabled = true;
 
   var canvas = document.getElementById('areaCanvas');
