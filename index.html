@@ -361,6 +361,13 @@ async function analyzeArea() {
     h: Math.max.apply(null, ys) - Math.min.apply(null, ys)
   };
 
+  // imageBase64チェック
+  if (!state.imageBase64) {
+    alert('写真データがありません。最初からやり直してください。');
+    document.getElementById('confirmAreaBtn').disabled = false;
+    return;
+  }
+
   showLoading('AI解析中...', '開口部・屋根形状を認識しています');
 
   try {
@@ -394,7 +401,9 @@ async function analyzeArea() {
 
   } catch(e) {
     hideLoading();
-    alert('エラー：' + e.message);
+    alert('エラー：' + e.message + '
+
+ネットワークエラーの場合はページを再読み込みしてください。');
     document.getElementById('confirmAreaBtn').disabled = false;
   }
 }
