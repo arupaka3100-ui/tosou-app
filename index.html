@@ -165,8 +165,12 @@ header h1{font-size:16px;font-weight:600}
       </div>
     </div>
     <div class="card">
-      <div class="card-title">撮影写真（参照用）</div>
-      <div id="photoRef"></div>
+      <div class="card-title">撮影写真（開口部認識結果）</div>
+      <div style="position:relative;border-radius:8px;overflow:hidden">
+        <img id="photoRef" style="width:100%;display:block;border-radius:8px">
+        <canvas id="bboxCanvas" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none"></canvas>
+      </div>
+      <div style="font-size:11px;color:#888;text-align:center;margin-top:6px">認識した開口部に枠を表示しています</div>
     </div>
     <div class="note-box" id="buildingNote" style="display:none"></div>
     <button class="btn btn-blue" onclick="addArea()">＋ 別のエリアを追加する</button>
@@ -215,7 +219,7 @@ function goStep2(){
     c.width=img.naturalWidth;c.height=img.naturalHeight;
     setupCanvas(c);clearArea();
   };
-  document.getElementById('photoRef').innerHTML='<img src="'+state.imageSrc+'" style="width:100%;display:block;border-radius:8px">';
+  document.getElementById('photoRef').src=state.imageSrc;
   show('step2');
 }
 
@@ -309,7 +313,7 @@ function switchArea(idx){
   if(a.result){
     document.getElementById('widthInput').value=a.result.width;
     document.getElementById('heightInput').value=a.result.height;
-    drawDiagram(a);renderOpTable(a);
+    drawDiagram(a);renderOpTable(a);renderBbox(a);
     document.getElementById('diagramArea').classList.remove('hidden');
   }else{
     document.getElementById('widthInput').value='';
@@ -335,7 +339,7 @@ async function doCalc(){
       body:JSON.stringify({step:'calculate_area',imageBase64:state.imageBase64,imageMediaType:state.imageMediaType,width:w,height:h,roofType:a.roofType,gableHeightRatio:a.gableRatio,openings:a.openings})});
     var data=await res.json();
     if(!res.ok)throw new Error(data.error||'計算エラー');
-    a.result=data;buildTabs();drawDiagram(a);renderOpTable(a);
+    a.result=data;buildTabs();drawDiagram(a);renderOpTable(a);renderBbox(a);
     document.getElementById('diagramArea').classList.remove('hidden');
     showTotal();
   }catch(e){err.textContent='エラー：'+e.message;err.style.display='block';}
@@ -383,6 +387,64 @@ function drawDiagram(area){
   s+='<line x1="'+(sx-4)+'" y1="'+(TM+H)+'" x2="'+(sx+4)+'" y2="'+(TM+H)+'" stroke="#2d9e5a" stroke-width="1.5"/>';
   s+='<text x="'+(sx-3)+'" y="'+(mid+3)+'" text-anchor="middle" font-size="8" font-weight="bold" fill="#2d9e5a" transform="rotate(-90,'+(sx-3)+','+mid+')">高さ '+r.height.toFixed(1)+'m ✓</text>';
   svg.innerHTML=s;
+}
+
+function renderBbox(area){
+  var img=document.getElementById('photoRef');
+  var canvas=document.getElementById('bboxCanvas');
+  img.src=state.imageSrc;
+  img.onload=function(){
+    canvas.width=img.naturalWidth;
+    canvas.height=img.naturalHeight;
+    var ctx=canvas.getContext('2d');
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    var ops=area.openings||[];
+    ops.forEach(function(op,i){
+      var bbox=op.bbox;
+      if(!bbox)return;
+      var x=bbox.x/100*canvas.width;
+      var y=bbox.y/100*canvas.height;
+      var w=bbox.w/100*canvas.width;
+      var h=bbox.h/100*canvas.height;
+      var colors=['#e94560','#0066cc','#2d9e5a','#cc8800','#9933cc'];
+      var col=colors[i%colors.length];
+      ctx.strokeStyle=col;
+      ctx.lineWidth=3;
+      ctx.strokeRect(x,y,w,h);
+      // ラベル背景
+      ctx.fillStyle=col;
+      ctx.fillRect(x,y-22,w,22);
+      ctx.fillStyle='white';
+      ctx.font='bold 14px sans-serif';
+      ctx.fillText((i+1)+' '+op.type+'×'+op.count,x+4,y-6);
+    });
+  };
+  // 既に読み込み済みの場合
+  if(img.complete&&img.naturalWidth>0){
+    canvas.width=img.naturalWidth;
+    canvas.height=img.naturalHeight;
+    var ctx=canvas.getContext('2d');
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    var ops=area.openings||[];
+    ops.forEach(function(op,i){
+      var bbox=op.bbox;
+      if(!bbox)return;
+      var x=bbox.x/100*canvas.width;
+      var y=bbox.y/100*canvas.height;
+      var w=bbox.w/100*canvas.width;
+      var h=bbox.h/100*canvas.height;
+      var colors=['#e94560','#0066cc','#2d9e5a','#cc8800','#9933cc'];
+      var col=colors[i%colors.length];
+      ctx.strokeStyle=col;
+      ctx.lineWidth=3;
+      ctx.strokeRect(x,y,w,h);
+      ctx.fillStyle=col;
+      ctx.fillRect(x,y-22,w,22);
+      ctx.fillStyle='white';
+      ctx.font='bold 14px sans-serif';
+      ctx.fillText((i+1)+' '+op.type+'×'+op.count,x+4,y-6);
+    });
+  }
 }
 
 function renderOpTable(area){
@@ -462,6 +524,9 @@ function resetAll(){
   document.getElementById('retakeBtn').style.display='none';
   document.getElementById('fileInput').value='';
   document.getElementById('step1Next').disabled=true;
+  document.getElementById('photoRef').src='';
+  var bc=document.getElementById('bboxCanvas');
+  if(bc){var ctx=bc.getContext('2d');ctx.clearRect(0,0,bc.width,bc.height);}
   document.getElementById('totalResult').classList.add('hidden');
   show('step1');
 }
