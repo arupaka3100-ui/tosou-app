@@ -2,7 +2,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) return res.status(500).json({ error: 'APIキーが設定されていません' });
-  const { step, imageBase64, imageMediaType, width, height, roofType, gableHeightRatio, faceInfo, boundary, drawnPoints, faceIds, learningData, areaRect, polyPoints } = req.body;
+  const { step, imageBase64, imageMediaType, width, height, roofType, gableHeightRatio, openings, polyPoints, areaRect, learningData } = req.body;
   const mediaType = imageMediaType || 'image/jpeg';
 
   if (step === 'save_learning') {
@@ -21,36 +21,61 @@ export default async function handler(req, res) {
 
   if (!imageBase64) return res.status(400).json({ error: '画像データがありません' });
 
-  // エリア解析（選択エリア内の開口部・屋根形状を認識）
   if (step === 'analyze_area') {
     let areaDesc = '写真全体';
-    if(polyPoints && polyPoints.length > 2){
+    if (polyPoints && polyPoints.length > 2) {
       areaDesc = `選択エリア（多角形）：頂点座標 ${JSON.stringify(polyPoints.slice(0,6))}（写真サイズに対する%）。このエリア内のみ解析してください。`;
-    } else if(areaRect){
+    } else if (areaRect) {
       areaDesc = `選択エリア：写真全体に対して左${areaRect.x.toFixed(0)}%から右${(areaRect.x+areaRect.w).toFixed(0)}%、上${areaRect.y.toFixed(0)}%から下${(areaRect.y+areaRect.h).toFixed(0)}%の範囲`;
     }
 
     const prompt = `あなたは塗装業の見積り専門AIです。この外壁写真を解析してください。
 ${areaDesc}
 
-重要：横幅・高さは現場で実測するため、AIは以下のみ推定してください：
-- 選択エリア内の開口部（窓・ドア）の種類・数・比率
-- 屋根形状（gable=切妻、flat=陸屋根、shed=片流れ、hip=寄棟）
-- 切妻の場合：妻壁の高さ比率（エリア高さに対する割合）
-- 建物の特徴・注意点
+重要：斜め撮影を前提とした遠近補正計算のため、ピクセル数を正確に返してください。
+- 手前（左端）と奥（右端）で壁の高さがピクセル上で異なります
+- 各開口部のx位置（左端からの割合）とピクセルサイズを返してください
+- 実測値は横幅・高さの2点のみ。残りはピクセルから計算します
 
-以下をJSONのみで返答：
+以下をJSONのみで返答（説明文・マークダウン不要）：
 {
   "buildingInfo": {"floors": 2, "type": "木造2階建て", "style": "建物の特徴", "note": "注意点"},
   "roofType": "gable",
   "gableHeightRatio": 0.25,
+  "wallPixels": {
+    "leftHeightPx": 350,
+    "rightHeightPx": 280,
+    "totalWidthPx": 800
+  },
   "openings": [
-    {"id": "op1", "type": "引き違い窓", "count": 2, "widthRatio": 0.20, "heightRatio": 0.35, "confidence": "medium", "floor": 1, "note": "根拠"},
-    {"id": "op2", "type": "玄関ドア", "count": 1, "widthRatio": 0.12, "heightRatio": 0.45, "confidence": "high", "floor": 1, "note": "根拠"}
+    {
+      "id": "op1",
+      "type": "引き違い窓",
+      "count": 2,
+      "xRatio": 0.35,
+      "widthPx": 90,
+      "heightPx": 60,
+      "confidence": "medium",
+      "floor": 1,
+      "note": "根拠"
+    },
+    {
+      "id": "op2",
+      "type": "玄関ドア",
+      "count": 1,
+      "xRatio": 0.60,
+      "widthPx": 55,
+      "heightPx": 120,
+      "confidence": "high",
+      "floor": 1,
+      "note": "根拠"
+    }
   ]
 }
 
-widthRatioは選択エリアの横幅に対する比率、heightRatioはエリアの高さに対する比率です。
+xRatioは壁の左端から右端に対する窓の中心位置の割合（0〜1）です。
+widthPx・heightPxは写真上の窓1個分のピクセル数です。
+wallPixelsは選択エリア内の壁のピクセル情報です。
 実際の写真を解析して正確な値を入れてください。`;
 
     try {
@@ -69,25 +94,42 @@ widthRatioは選択エリアの横幅に対する比率、heightRatioはエリ�
       if (!response.ok) throw new Error(data.error?.message || 'APIエラー');
       const result = JSON.parse(data.content.map(i => i.text||'').join('').replace(/```json|```/g,'').trim());
       return res.status(200).json(result);
-    } catch(e) { return res.status(500).json({ error: e.message }); }
+    } catch(e) {
+      return res.status(500).json({ error: e.message });
+    }
   }
 
-  // エリアの面積計算
   if (step === 'calculate_area') {
     const w = parseFloat(width);
     const h = parseFloat(height);
-    const { openings, gableHeightRatio: ghr, roofType: rt } = req.body;
+    const { wallPixels, openings: ops, gableHeightRatio: ghr, roofType: rt } = req.body;
+
     const rType = rt || 'other';
     const gableRatio = parseFloat(ghr) || 0.25;
-
     const gableH = rType === 'gable' ? parseFloat((h * gableRatio).toFixed(2)) : 0;
     const gableArea = rType === 'gable' ? parseFloat((w * gableH / 2).toFixed(1)) : 0;
 
-    const calcOpenings = (openings||[]).map(op => {
-      const opW = parseFloat((w * op.widthRatio).toFixed(2));
-      const opH = parseFloat((h * op.heightRatio).toFixed(2));
+    // 手前・奥の縮尺を計算
+    const leftPx = wallPixels?.leftHeightPx || 350;
+    const rightPx = wallPixels?.rightHeightPx || 280;
+    const wallWidthPx = wallPixels?.totalWidthPx || 800;
+
+    // 手前（左）・奥（右）の縮尺 m/px
+    const leftScale = h / leftPx;
+    const rightScale = h / rightPx;
+
+    // 各開口部のサイズを線形補間で計算
+    const calcOpenings = (ops||[]).map(op => {
+      // 窓のx位置（0=手前, 1=奥）から縮尺を補間
+      const xRatio = op.xRatio || 0.5;
+      const scale = leftScale + (rightScale - leftScale) * xRatio;
+
+      // 窓1個の実寸
+      const opW = parseFloat((op.widthPx * scale).toFixed(2));
+      const opH = parseFloat((op.heightPx * scale).toFixed(2));
       const area = parseFloat((opW * opH).toFixed(2));
       const totalArea = parseFloat((area * op.count).toFixed(2));
+
       return { ...op, width: opW, height: opH, area, totalArea };
     });
 
@@ -100,7 +142,8 @@ widthRatioは選択エリアの横幅に対する比率、heightRatioはエリ�
       width: w, height: h,
       gableH, gableArea,
       openings: calcOpenings,
-      wallArea, totalWallArea, totalOpening, paintArea
+      wallArea, totalWallArea, totalOpening, paintArea,
+      debug: { leftScale: leftScale.toFixed(4), rightScale: rightScale.toFixed(4) }
     });
   }
 
