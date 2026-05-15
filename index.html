@@ -111,17 +111,25 @@ header h1{font-size:16px;font-weight:600}
 
   <!-- Step1: アップロード -->
   <div id="step1">
-    <input type="file" id="fileInput" accept="image/*" style="position:absolute;left:-9999px;opacity:0">
     <div class="card">
       <div class="card-title">外壁写真をアップロード</div>
-      <div id="uploadArea" style="border:2px dashed #e0e0d8;border-radius:8px;padding:40px 20px;text-align:center;cursor:pointer;background:white" onclick="triggerFileInput()">
-        <div class="upload-icon">🏠</div>
-        <div class="upload-text">写真をタップして選択</div>
-        <div class="upload-sub">カメラまたはライブラリから</div>
+      <!-- fileInputをvisibility:hiddenで高さ0にして確実にクリック可能に -->
+      <div style="position:relative">
+        <div id="uploadArea" style="border:2px dashed #e0e0d8;border-radius:8px;padding:40px 20px;text-align:center;background:white;cursor:pointer">
+          <div class="upload-icon">🏠</div>
+          <div class="upload-text">写真をタップして選択</div>
+          <div class="upload-sub">カメラまたはライブラリから</div>
+        </div>
+        <input type="file" id="fileInput" accept="image/*"
+          style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:100px">
       </div>
       <div id="previewArea" style="display:none;margin-top:10px">
         <img id="previewImg" style="width:100%;display:block;border-radius:8px">
-        <button class="btn btn-outline" style="margin-top:8px;margin-bottom:0;padding:10px;font-size:13px" onclick="triggerFileInput()">📷 撮り直す</button>
+        <div style="position:relative;margin-top:8px">
+          <div class="btn btn-outline" style="margin-bottom:0;padding:10px;font-size:13px">📷 撮り直す</div>
+          <input type="file" id="fileInput2" accept="image/*"
+            style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:100px">
+        </div>
       </div>
     </div>
     <div class="note-box">建物全体が写るよう少し離れて撮影してください。</div>
@@ -230,26 +238,29 @@ var state = {
 };
 
 // ===== ファイル選択 =====
-function triggerFileInput() {
-  document.getElementById('fileInput').value = '';
-  document.getElementById('fileInput').click();
-}
-
-document.getElementById('fileInput').addEventListener('change', function(e) {
-  var file = e.target.files[0];
+function handleFile(file) {
   if (!file) return;
   var reader = new FileReader();
   reader.onload = function(ev) {
     state.imageSrc = ev.target.result;
     state.imageBase64 = ev.target.result.split(',')[1];
     state.imageMediaType = file.type || 'image/jpeg';
-    // アップロードエリアを隠してプレビューを表示
     document.getElementById('uploadArea').style.display = 'none';
     document.getElementById('previewImg').src = state.imageSrc;
     document.getElementById('previewArea').style.display = 'block';
     document.getElementById('step1Next').disabled = false;
   };
   reader.readAsDataURL(file);
+}
+
+document.getElementById('fileInput').addEventListener('change', function(e) {
+  handleFile(e.target.files[0]);
+});
+
+document.addEventListener('change', function(e) {
+  if (e.target && e.target.id === 'fileInput2') {
+    handleFile(e.target.files[0]);
+  }
 });
 
 // ===== Step2へ =====
@@ -693,6 +704,8 @@ function resetAll() {
   document.getElementById('previewArea').style.display = 'none';
   document.getElementById('previewImg').src = '';
   document.getElementById('fileInput').value = '';
+  var fi2 = document.getElementById('fileInput2');
+  if (fi2) fi2.value = '';
   document.getElementById('step1Next').disabled = true;
   document.getElementById('totalResult').classList.add('hidden');
   show('step1');
