@@ -5,12 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>塗装面積 AI計測</title>
 <style>
-:root {
-  --primary:#1a1a2e; --accent:#e94560; --bg:#f5f5f0;
-  --surface:#fff; --text:#1a1a2e; --muted:#888880;
-  --border:#e0e0d8; --r:12px; --rs:8px;
-  --green:#2d9e5a; --yellow:#cc8800; --red:#cc3333;
-}
+:root{--primary:#1a1a2e;--accent:#e94560;--bg:#f5f5f0;--surface:#fff;--text:#1a1a2e;--muted:#888880;--border:#e0e0d8;--r:12px;--rs:8px;--green:#2d9e5a;--yellow:#cc8800;--red:#cc3333}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;padding-bottom:80px}
 header{background:var(--primary);color:white;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:200}
@@ -28,6 +23,7 @@ header h1{font-size:16px;font-weight:600}
 .upload-sub{font-size:12px;color:var(--muted);margin-top:4px}
 .btn{width:100%;border:none;border-radius:var(--r);padding:15px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .15s,transform .1s;margin-bottom:10px}
 .btn-primary{background:var(--accent);color:white}
+.btn-green{background:var(--green);color:white}
 .btn-outline{background:white;color:var(--primary);border:1.5px solid var(--border)}
 .btn:disabled{opacity:.4;cursor:not-allowed}
 .btn:active:not(:disabled){transform:scale(.98)}
@@ -36,20 +32,13 @@ header h1{font-size:16px;font-weight:600}
 .note-box{background:#fffbf0;border:1px solid #f0e0a0;border-radius:var(--rs);padding:12px;font-size:12px;color:#886600;line-height:1.6;margin-bottom:14px}
 .error-msg{background:#fff0f0;border:1px solid #ffcccc;border-radius:var(--rs);padding:12px;font-size:13px;color:#cc3333;margin-top:10px;display:none}
 .hidden{display:none}
-
-/* 立面図 */
-.diagram-wrap{background:#f8f8f4;border-radius:var(--rs);padding:16px;margin-bottom:12px}
-.diagram-title{font-size:12px;color:var(--muted);margin-bottom:10px;text-align:center}
-.diagram-svg{width:100%;max-width:500px;display:block;margin:0 auto;cursor:pointer}
-.legend{font-size:11px;color:var(--muted);text-align:center;padding:8px 0;display:flex;justify-content:center;gap:16px;flex-wrap:wrap}
+.diagram-wrap{background:#f0f0ec;border-radius:var(--rs);padding:8px;margin-bottom:10px;overflow-x:auto}
+.diagram-svg{width:100%;display:block}
+.legend{font-size:11px;color:var(--muted);text-align:center;padding:6px 0;display:flex;justify-content:center;gap:16px;flex-wrap:wrap}
 .legend span{display:flex;align-items:center;gap:4px}
 .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
-.dot-green{background:var(--green)}
-.dot-yellow{background:var(--yellow)}
-.dot-red{background:var(--red)}
-.dim-tap-hint{font-size:11px;color:var(--accent);text-align:center;margin-top:4px}
-
-/* 結果 */
+.dot-green{background:var(--green)}.dot-yellow{background:var(--yellow)}.dot-red{background:var(--red)}
+.dim-hint{font-size:11px;color:var(--accent);text-align:center;margin-top:4px}
 .result-card{background:var(--primary);color:white;border-radius:var(--r);padding:18px;margin-bottom:14px}
 .result-title{font-size:11px;color:rgba(255,255,255,.6);margin-bottom:14px;letter-spacing:.08em}
 .metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
@@ -60,8 +49,6 @@ header h1{font-size:16px;font-weight:600}
 .detail-item{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:12px}
 .detail-item:last-child{border-bottom:none}
 .copy-btn{width:100%;background:rgba(255,255,255,.12);color:white;border:1px solid rgba(255,255,255,.2);border-radius:var(--rs);padding:11px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;margin-top:10px}
-
-/* テンキー */
 .modal-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);z-index:300;display:none;align-items:flex-end;justify-content:center}
 .modal-overlay.show{display:flex}
 .modal{background:white;border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:400px}
@@ -69,7 +56,7 @@ header h1{font-size:16px;font-weight:600}
 .modal-ai{font-size:12px;color:var(--muted);text-align:center;margin-bottom:12px}
 .modal-display{background:#f5f5f0;border-radius:var(--rs);padding:14px;text-align:center;font-size:28px;font-weight:700;margin-bottom:12px;min-height:56px}
 .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
-.key{background:#f0f0e8;border:none;border-radius:var(--rs);padding:16px;font-size:20px;font-weight:600;font-family:inherit;cursor:pointer;transition:background .1s}
+.key{background:#f0f0e8;border:none;border-radius:var(--rs);padding:16px;font-size:20px;font-weight:600;font-family:inherit;cursor:pointer}
 .key:active{background:#e0e0d8}
 .key-del{background:#e0e0d8}
 .key-confirm{background:var(--primary);color:white;border:none;border-radius:var(--rs);padding:16px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;width:100%}
@@ -103,25 +90,27 @@ header h1{font-size:16px;font-weight:600}
     <div class="error-msg" id="uploadError"></div>
   </div>
 
-  <!-- Step2: 図面 + 入力 -->
+  <!-- Step2: 図面 -->
   <div id="view-diagram" class="hidden">
     <div class="card">
       <div class="card-title">立面図 — 数値をタップして実測値を入力</div>
       <div class="diagram-wrap">
-        <div class="diagram-title" id="diagramTitle">建物立面図（AI推定）</div>
-        <svg id="diagramSvg" class="diagram-svg" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg"></svg>
+        <svg id="diagramSvg" class="diagram-svg" xmlns="http://www.w3.org/2000/svg"></svg>
       </div>
       <div class="legend">
-        <span><span class="dot dot-green"></span>確実</span>
+        <span><span class="dot dot-green"></span>確実・確定</span>
         <span><span class="dot dot-yellow"></span>推定</span>
         <span><span class="dot dot-red"></span>要確認</span>
       </div>
-      <div class="dim-tap-hint">▲ 数値をタップして実測値を入力してください</div>
+      <div class="dim-hint">▲ 数値をタップして実測値を入力できます</div>
     </div>
-
     <div class="note-box" id="diagramNote"></div>
 
-    <!-- 結果（全確定後に表示） -->
+    <button class="btn btn-green" id="calcBtn" onclick="doCalculate()">
+      <div class="spinner" id="calcSpinner"></div>
+      <span id="calcBtnText">📐 面積を計算する</span>
+    </button>
+
     <div class="result-card hidden" id="resultCard">
       <div class="result-title">計算結果</div>
       <div class="metrics">
@@ -165,14 +154,13 @@ header h1{font-size:16px;font-weight:600}
 </div>
 
 <script>
-let imageBase64=null, imageSrc=null, imageMediaType='image/jpeg';
-let buildingInfo=null, dimensions=[], openings=[];
-let totalWallArea=0, totalOpeningArea=0, paintArea=0;
-let currentEditId=null, currentInputStr='';
+let imageBase64=null,imageSrc=null,imageMediaType='image/jpeg';
+let buildingInfo=null,dimensions=[],openings=[];
+let totalWallArea=0,totalOpeningArea=0,paintArea=0;
+let currentEditId=null,currentInputStr='';
 
-// ファイル選択
-document.getElementById('fileInput').addEventListener('change', function(e){
-  const file=e.target.files[0]; if(!file)return;
+document.getElementById('fileInput').addEventListener('change',function(e){
+  const file=e.target.files[0];if(!file)return;
   const reader=new FileReader();
   reader.onload=function(ev){
     imageSrc=ev.target.result;
@@ -186,25 +174,23 @@ document.getElementById('fileInput').addEventListener('change', function(e){
   reader.readAsDataURL(file);
 });
 
-// AI解析
 async function startAnalyze(){
   setBtn('analyzeBtn','analyzeSpinner','analyzeBtnText','解析中...',true);
   document.getElementById('uploadError').style.display='none';
   try{
     const res=await fetch('/api/analyze',{
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({step:'analyze', imageBase64, imageMediaType})
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({step:'analyze',imageBase64,imageMediaType})
     });
     const data=await res.json();
-    if(!res.ok) throw new Error(data.error);
+    if(!res.ok)throw new Error(data.error);
     buildingInfo=data.buildingInfo;
-    dimensions=data.dimensions.map(d=>({...d, confirmed:false, originalValue:d.value}));
-    openings=data.openings||[];
+    dimensions=data.dimensions.map(d=>({...d,confirmed:false,originalValue:d.value}));
+    openings=(data.openings||[]).map(o=>({...o,confirmed:false}));
     totalWallArea=data.totalWallArea||0;
     totalOpeningArea=data.totalOpeningArea||0;
     paintArea=data.paintArea||0;
-    document.getElementById('diagramNote').textContent=`建物：${buildingInfo.style}　${buildingInfo.note}`;
-    document.getElementById('diagramTitle').textContent=`${buildingInfo.type}（${buildingInfo.floors}階建て）`;
+    document.getElementById('diagramNote').textContent=`建物：${buildingInfo.style}　注意：${buildingInfo.note}`;
     drawDiagram();
     showView('view-diagram');
   }catch(e){
@@ -214,97 +200,107 @@ async function startAnalyze(){
   setBtn('analyzeBtn','analyzeSpinner','analyzeBtnText','AIで解析する',false);
 }
 
-// 立面図を描画
+function confColor(conf,confirmed){
+  if(confirmed)return'#2d9e5a';
+  if(conf==='high')return'#2d9e5a';
+  if(conf==='medium')return'#cc8800';
+  return'#cc3333';
+}
+
 function drawDiagram(){
-  const svg=document.getElementById('diagramSvg');
   const floors=buildingInfo?.floors||2;
-  const W=320, H=240, OX=50, OY=20;
-  const floorH=floors>0?Math.floor(H/floors):120;
+  // SVGサイズ：壁エリア＋左右の寸法線スペース
+  const LM=60,RM=80,TM=30,BM=60;
+  const WW=240,FH=90;
+  const TH=FH*floors;
+  const svgW=LM+WW+RM;
+  const svgH=TM+TH+BM;
+
+  const svg=document.getElementById('diagramSvg');
+  svg.setAttribute('viewBox',`0 0 ${svgW} ${svgH}`);
+  svg.setAttribute('height',svgH);
 
   let s='';
 
-  // 各階の壁
+  // 各階の壁を描画
   for(let f=0;f<floors;f++){
-    const fy=OY+(floors-1-f)*floorH;
-    const col='#e8e4dc';
-    s+=`<rect x="${OX}" y="${fy}" width="${W}" height="${floorH}" fill="${col}" stroke="#aaa" stroke-width="1"/>`;
-    s+=`<text x="${OX+8}" y="${fy+16}" font-size="10" fill="#888">${f+1}F</text>`;
+    const fy=TM+(floors-1-f)*FH;
+    s+=`<rect x="${LM}" y="${fy}" width="${WW}" height="${FH}" fill="#e8e4dc" stroke="#aaa" stroke-width="1"/>`;
+    s+=`<text x="${LM+8}" y="${fy+14}" font-size="10" fill="#999">${f+1}F</text>`;
   }
-
-  // 開口部を描画
-  openings.forEach(op=>{
-    const f=op.floor||1;
-    const fy=OY+(floors-f)*floorH;
-    const wRatio=Math.min(op.width/12, 0.25);
-    const hRatio=Math.min(op.height/3.5, 0.7);
-    const opW=W*wRatio*op.count;
-    const opH=floorH*hRatio;
-    const opX=OX+W/2-opW/2;
-    const opY=fy+floorH*(1-hRatio)-10;
-    const cc=confColor(op.confidence, false);
-    s+=`<rect x="${opX}" y="${opY}" width="${opW}" height="${opH}" fill="#c8d8e8" stroke="${cc}" stroke-width="1.5" rx="2"/>`;
-    s+=`<text x="${opX+opW/2}" y="${opY+opH/2+4}" text-anchor="middle" font-size="9" fill="${cc}">${op.type}</text>`;
-  });
 
   // 地面線
-  s+=`<line x1="${OX-10}" y1="${OY+H}" x2="${OX+W+10}" y2="${OY+H}" stroke="#888" stroke-width="2"/>`;
+  s+=`<line x1="${LM-10}" y1="${TM+TH}" x2="${LM+WW+10}" y2="${TM+TH}" stroke="#666" stroke-width="2"/>`;
 
-  // 寸法線：横幅
+  // 開口部を描画（各階に配置）
+  openings.forEach((op,idx)=>{
+    const f=op.floor||1;
+    const fy=TM+(floors-f)*FH;
+    const maxOpW=WW*0.6/Math.max(op.count,1);
+    const opW=Math.min(op.width*12,maxOpW)*op.count;
+    const opH=Math.min(op.height*22,FH*0.75);
+    const opX=LM+WW/2-opW/2;
+    const opY=fy+FH-opH-8;
+    const cc=confColor(op.confidence,op.confirmed);
+    s+=`<rect x="${opX}" y="${opY}" width="${opW}" height="${opH}" fill="#c8d8e8" stroke="${cc}" stroke-width="1.5" rx="2"/>`;
+    // 開口部ラベル
+    s+=`<text x="${opX+opW/2}" y="${opY-3}" text-anchor="middle" font-size="8" fill="${cc}">${op.type}×${op.count}</text>`;
+    // 開口部幅の寸法
+    s+=`<text x="${opX+opW/2}" y="${opY+opH/2+4}" text-anchor="middle" font-size="9" font-weight="bold" fill="${cc}" style="cursor:pointer" onclick="openModal('${op.id}')">${op.width.toFixed(1)}m</text>`;
+  });
+
+  // 寸法線：横幅（下）
   const wDim=dimensions.find(d=>d.id==='width');
   if(wDim){
-    const col=confColor(wDim.confidence, wDim.confirmed);
-    const sy=OY+H+20;
-    s+=`<line x1="${OX}" y1="${sy}" x2="${OX+W}" y2="${sy}" stroke="${col}" stroke-width="1.5"/>`;
-    s+=`<line x1="${OX}" y1="${sy-5}" x2="${OX}" y2="${sy+5}" stroke="${col}" stroke-width="1.5"/>`;
-    s+=`<line x1="${OX+W}" y1="${sy-5}" x2="${OX+W}" y2="${sy+5}" stroke="${col}" stroke-width="1.5"/>`;
-    s+=`<rect x="${OX+W/2-30}" y="${sy+4}" width="60" height="18" fill="${col}" rx="4" style="cursor:pointer" onclick="openModal('width')"/>`;
-    s+=`<text x="${OX+W/2}" y="${sy+17}" text-anchor="middle" font-size="12" font-weight="bold" fill="white" style="cursor:pointer" onclick="openModal('width')">${wDim.value.toFixed(1)}m${wDim.confirmed?' ✓':''}</text>`;
+    const col=confColor(wDim.confidence,wDim.confirmed);
+    const sy=TM+TH+30;
+    s+=`<line x1="${LM}" y1="${sy}" x2="${LM+WW}" y2="${sy}" stroke="${col}" stroke-width="1.5"/>`;
+    s+=`<line x1="${LM}" y1="${sy-6}" x2="${LM}" y2="${sy+6}" stroke="${col}" stroke-width="1.5"/>`;
+    s+=`<line x1="${LM+WW}" y1="${sy-6}" x2="${LM+WW}" y2="${sy+6}" stroke="${col}" stroke-width="1.5"/>`;
+    const lbl=`横幅：${wDim.value.toFixed(1)}m${wDim.confirmed?' ✓':''}`;
+    s+=`<rect x="${LM+WW/2-32}" y="${sy+6}" width="64" height="18" fill="${col}" rx="4" style="cursor:pointer" onclick="openModal('width')"/>`;
+    s+=`<text x="${LM+WW/2}" y="${sy+19}" text-anchor="middle" font-size="11" font-weight="bold" fill="white" style="cursor:pointer" onclick="openModal('width')">${lbl}</text>`;
   }
 
-  // 寸法線：各階高さ
+  // 寸法線：各階高さ（右側）
   const heightDims=dimensions.filter(d=>d.id!=='width');
   heightDims.forEach((hDim,i)=>{
-    const col=confColor(hDim.confidence, hDim.confirmed);
-    const floorIdx=hDim.id==='height1F'?0:1;
-    const fy=OY+(floors-1-floorIdx)*floorH;
-    const sx=OX+W+20+(i*50);
-    s+=`<line x1="${sx}" y1="${fy}" x2="${sx}" y2="${fy+floorH}" stroke="${col}" stroke-width="1.5"/>`;
+    const col=confColor(hDim.confidence,hDim.confirmed);
+    const floorIdx=hDim.id==='height1F'?0:hDim.id==='height2F'?1:i;
+    const fy=TM+(floors-1-floorIdx)*FH;
+    const sx=LM+WW+20+(i*38);
+    s+=`<line x1="${sx}" y1="${fy}" x2="${sx}" y2="${fy+FH}" stroke="${col}" stroke-width="1.5"/>`;
     s+=`<line x1="${sx-5}" y1="${fy}" x2="${sx+5}" y2="${fy}" stroke="${col}" stroke-width="1.5"/>`;
-    s+=`<line x1="${sx-5}" y1="${fy+floorH}" x2="${sx+5}" y2="${fy+floorH}" stroke="${col}" stroke-width="1.5"/>`;
-    s+=`<rect x="${sx-25}" y="${fy+floorH/2-10}" width="50" height="18" fill="${col}" rx="4" style="cursor:pointer" onclick="openModal('${hDim.id}')"/>`;
-    s+=`<text x="${sx}" y="${fy+floorH/2+3}" text-anchor="middle" font-size="11" font-weight="bold" fill="white" style="cursor:pointer" onclick="openModal('${hDim.id}')">${hDim.value.toFixed(1)}m${hDim.confirmed?' ✓':''}</text>`;
+    s+=`<line x1="${sx-5}" y1="${fy+FH}" x2="${sx+5}" y2="${fy+FH}" stroke="${col}" stroke-width="1.5"/>`;
+    const lbl=`${hDim.label.replace('高さ','')}:${hDim.value.toFixed(1)}m${hDim.confirmed?' ✓':''}`;
+    const ty=fy+FH/2;
+    s+=`<rect x="${sx-24}" y="${ty-10}" width="48" height="18" fill="${col}" rx="4" style="cursor:pointer" onclick="openModal('${hDim.id}')"/>`;
+    s+=`<text x="${sx}" y="${ty+3}" text-anchor="middle" font-size="9" font-weight="bold" fill="white" style="cursor:pointer" onclick="openModal('${hDim.id}')">${lbl}</text>`;
   });
 
   svg.innerHTML=s;
 }
 
-function confColor(conf, confirmed){
-  if(confirmed) return '#2d9e5a';
-  if(conf==='high') return '#2d9e5a';
-  if(conf==='medium') return '#cc8800';
-  return '#cc3333';
-}
-
-// モーダル
 function openModal(id){
   currentEditId=id;
   const dim=dimensions.find(d=>d.id===id);
   const op=openings.find(o=>o.id===id);
   const item=dim||op;
   if(!item)return;
-  document.getElementById('modalTitle').textContent=(dim?dim.label:op.type)+'を入力';
+  const name=dim?dim.label:(op.type+'幅');
+  document.getElementById('modalTitle').textContent=name+'を入力';
   document.getElementById('modalAI').textContent='AI推定：'+item.value.toFixed(1)+'m';
   currentInputStr=item.value.toFixed(1);
   document.getElementById('modalDisplay').textContent=currentInputStr;
   document.getElementById('modalOverlay').classList.add('show');
 }
 
-function closeModalOutside(e){ if(e.target===document.getElementById('modalOverlay')) closeModal(); }
-function closeModal(){ document.getElementById('modalOverlay').classList.remove('show'); }
+function closeModalOutside(e){if(e.target===document.getElementById('modalOverlay'))closeModal();}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('show');}
 
 function keyPress(k){
   if(k==='.'&&currentInputStr.includes('.'))return;
-  if(currentInputStr==='0'&&k!=='.') currentInputStr=k;
+  if(currentInputStr==='0'&&k!=='.')currentInputStr=k;
   else currentInputStr+=k;
   document.getElementById('modalDisplay').textContent=currentInputStr||'—';
 }
@@ -313,47 +309,72 @@ function keyDel(){
   document.getElementById('modalDisplay').textContent=currentInputStr||'—';
 }
 
-async function confirmInput(){
+function confirmInput(){
   const val=parseFloat(currentInputStr);
   if(isNaN(val)||val<=0)return;
   closeModal();
-
   const dim=dimensions.find(d=>d.id===currentEditId);
+  const op=openings.find(o=>o.id===currentEditId);
   if(dim){
-    const oldVal=dim.value;
+    saveLearning(dim.id,dim.value,val);
     dim.value=val;
     dim.confirmed=true;
     dim.confidence='high';
-    drawDiagram();
-    saveLearning(dim.id, oldVal, val);
-    await recalculate();
+  }else if(op){
+    op.width=val;
+    op.area=parseFloat((val*op.height).toFixed(2));
+    op.totalArea=parseFloat((op.area*op.count).toFixed(2));
+    op.confirmed=true;
   }
+  drawDiagram();
 }
 
-async function recalculate(){
+async function doCalculate(){
+  setBtn('calcBtn','calcSpinner','calcBtnText','計算中...',true);
   try{
     const res=await fetch('/api/analyze',{
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({step:'recalculate', imageBase64, imageMediaType, dimensions, openings, buildingInfo})
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({step:'recalculate',imageBase64,imageMediaType,dimensions,openings,buildingInfo})
     });
     const data=await res.json();
-    if(!res.ok)return;
+    if(!res.ok)throw new Error(data.error);
 
     // 未確定の値を更新
-    data.dimensions.forEach(upd=>{
-      const d=dimensions.find(x=>x.id===upd.id);
-      if(d&&!d.confirmed){ d.value=upd.value; d.confidence=upd.confidence; d.note=upd.note; }
-    });
-    data.openings.forEach(upd=>{
-      const o=openings.find(x=>x.id===upd.id);
-      if(o){ o.width=upd.width; o.height=upd.height; o.totalArea=upd.totalArea; o.confidence=upd.confidence; }
-    });
-    totalWallArea=data.totalWallArea||totalWallArea;
-    totalOpeningArea=data.totalOpeningArea||totalOpeningArea;
-    paintArea=data.paintArea||paintArea;
+    if(data.dimensions){
+      data.dimensions.forEach(upd=>{
+        const d=dimensions.find(x=>x.id===upd.id);
+        if(d&&!d.confirmed){d.value=upd.value;d.confidence=upd.confidence;}
+      });
+    }
+    if(data.openings){
+      data.openings.forEach(upd=>{
+        const o=openings.find(x=>x.id===upd.id);
+        if(o&&!o.confirmed){o.width=upd.width;o.height=upd.height;o.totalArea=upd.totalArea;}
+      });
+    }
+
+    // 面積計算（正しい計算式）
+    const w=dimensions.find(d=>d.id==='width')?.value||0;
+    const h1=dimensions.find(d=>d.id==='height1F')?.value||0;
+    const h2=dimensions.find(d=>d.id==='height2F')?.value||0;
+    const totalH=h1+h2;
+    totalWallArea=parseFloat((w*totalH*2).toFixed(1)); // 正面・背面の2面分
+    totalOpeningArea=parseFloat(openings.reduce((s,o)=>s+o.totalArea,0).toFixed(1));
+    paintArea=parseFloat(Math.max(0,totalWallArea-totalOpeningArea).toFixed(1));
+
     drawDiagram();
     showResult();
-  }catch(e){ showResult(); }
+  }catch(e){
+    // APIエラーでもローカル計算で表示
+    const w=dimensions.find(d=>d.id==='width')?.value||0;
+    const h1=dimensions.find(d=>d.id==='height1F')?.value||0;
+    const h2=dimensions.find(d=>d.id==='height2F')?.value||0;
+    totalWallArea=parseFloat((w*(h1+h2)*2).toFixed(1));
+    totalOpeningArea=parseFloat(openings.reduce((s,o)=>s+o.totalArea,0).toFixed(1));
+    paintArea=parseFloat(Math.max(0,totalWallArea-totalOpeningArea).toFixed(1));
+    showResult();
+  }
+  setBtn('calcBtn','calcSpinner','calcBtnText','📐 面積を計算する',false);
 }
 
 function showResult(){
@@ -364,13 +385,15 @@ function showResult(){
   const w=dimensions.find(d=>d.id==='width');
   const h1=dimensions.find(d=>d.id==='height1F');
   const h2=dimensions.find(d=>d.id==='height2F');
-  if(w) document.getElementById('r-width').textContent=w.value.toFixed(1)+' m';
-  const totalH=((h1?.value||0)+(h2?.value||0));
-  document.getElementById('r-height').textContent=totalH.toFixed(1)+' m';
+  if(w)document.getElementById('r-width').textContent=w.value.toFixed(1)+' m';
+  document.getElementById('r-height').textContent=((h1?.value||0)+(h2?.value||0)).toFixed(1)+' m';
   let html='';
-  openings.forEach(o=>{ html+=`<div class="detail-item"><span style="color:rgba(255,255,255,.7)">${o.type} ×${o.count}</span><span>−${o.totalArea.toFixed(1)} m²</span></div>`; });
-  html+=`<div class="detail-item"><span style="color:rgba(255,255,255,.7)">開口部控除</span><span>−${totalOpeningArea.toFixed(1)} m²</span></div>`;
+  openings.forEach(o=>{
+    html+=`<div class="detail-item"><span style="color:rgba(255,255,255,.7)">${o.type} ×${o.count}</span><span>−${o.totalArea.toFixed(1)} m²</span></div>`;
+  });
+  html+=`<div class="detail-item"><span style="color:rgba(255,255,255,.7)">開口部控除 合計</span><span>−${totalOpeningArea.toFixed(1)} m²</span></div>`;
   document.getElementById('r-details').innerHTML=html;
+  document.getElementById('resultCard').scrollIntoView({behavior:'smooth'});
 }
 
 function copyResult(){
@@ -378,7 +401,7 @@ function copyResult(){
   const h1=dimensions.find(d=>d.id==='height1F')?.value||0;
   const h2=dimensions.find(d=>d.id==='height2F')?.value||0;
   let text=`【塗装面積 AI計測結果】\n外壁総面積：${totalWallArea.toFixed(1)} m²\n開口部控除：${totalOpeningArea.toFixed(1)} m²\n塗装面積：${paintArea.toFixed(1)} m²\n横幅：${w.toFixed(1)} m\n総高さ：${(h1+h2).toFixed(1)} m\n`;
-  openings.forEach(o=>{ text+=`　${o.type}×${o.count}：${o.totalArea.toFixed(1)} m²\n`; });
+  openings.forEach(o=>{text+=`　${o.type}×${o.count}：${o.totalArea.toFixed(1)} m²\n`;});
   navigator.clipboard.writeText(text).then(()=>{
     const btn=document.querySelector('.copy-btn');
     btn.textContent='✅ コピーしました！';
@@ -386,14 +409,14 @@ function copyResult(){
   });
 }
 
-async function saveLearning(partId, aiVal, actualVal){
+async function saveLearning(partId,aiVal,actualVal){
   if(!aiVal||aiVal===actualVal)return;
   try{
     await fetch('/api/analyze',{
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({step:'save_learning', imageBase64:null,
-        learningData:{building_type:buildingInfo?.type||'unknown', shoot_angle:buildingInfo?.shootAngle||'unknown',
-          part:partId, ai_value:aiVal, actual_value:actualVal, created_at:new Date().toISOString()}})
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({step:'save_learning',imageBase64:null,
+        learningData:{building_type:buildingInfo?.type||'unknown',shoot_angle:buildingInfo?.shootAngle||'unknown',
+          part:partId,ai_value:aiVal,actual_value:actualVal,created_at:new Date().toISOString()}})
     });
   }catch(e){}
 }
@@ -410,19 +433,19 @@ function showView(id){
 }
 
 function resetAll(){
-  imageBase64=null; imageSrc=null; buildingInfo=null; dimensions=[]; openings=[];
+  imageBase64=null;imageSrc=null;buildingInfo=null;dimensions=[];openings=[];
   const area=document.getElementById('uploadArea');
   area.classList.remove('has-image');
   area.innerHTML=`<div class="upload-icon">🏠</div><div class="upload-text">写真をタップして選択</div><div class="upload-sub">カメラまたはライブラリから</div><input type="file" id="fileInput" accept="image/*" style="display:none">`;
   document.getElementById('fileInput').addEventListener('change',function(e){
-    const file=e.target.files[0]; if(!file)return;
+    const file=e.target.files[0];if(!file)return;
     const reader=new FileReader();
     reader.onload=function(ev){
-      imageSrc=ev.target.result; imageBase64=ev.target.result.split(',')[1]; imageMediaType=file.type||'image/jpeg';
-      const a=document.getElementById('uploadArea'); a.classList.add('has-image');
+      imageSrc=ev.target.result;imageBase64=ev.target.result.split(',')[1];imageMediaType=file.type||'image/jpeg';
+      const a=document.getElementById('uploadArea');a.classList.add('has-image');
       a.innerHTML=`<img src="${imageSrc}" alt="外壁写真">`;
       document.getElementById('analyzeBtn').disabled=false;
-    }; reader.readAsDataURL(file);
+    };reader.readAsDataURL(file);
   });
   document.getElementById('analyzeBtn').disabled=true;
   document.getElementById('resultCard').classList.add('hidden');
