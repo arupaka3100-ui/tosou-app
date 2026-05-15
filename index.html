@@ -640,7 +640,7 @@ function renderDimList(){
   let html='';
   dimensions.forEach(d=>{
     const cls=d.confirmed?'confirmed':d.confidence==='medium'?'medium':'low';
-    const isReq=d.id==='width'&&!d.confirmed;
+    const isReq=(d.id==='width'||d.id==='totalHeight')&&!d.confirmed;
     const req=isReq?'<span class="required-badge">必須</span>':'';
     const extra=d.id==='height1F'||d.id==='height2F'?`<br><span style="font-size:10px;color:var(--muted)">総高さ ${totalH}m</span>`:'';
     html+=`<div class="dim-list-item">
@@ -768,7 +768,7 @@ async function doCalculate(){
     const w=face.dimensions.find(d=>d.id==='width')?.value||0;
     const h1=face.dimensions.find(d=>d.id==='height1F')?.value||0;
     const h2=face.dimensions.find(d=>d.id==='height2F')?.value||0;
-    const wallArea=parseFloat((w*(h1+h2)).toFixed(1));
+    const totalH=thDim?.confirmed?thDim.value:(h1+h2); const wallArea=parseFloat((w*totalH).toFixed(1));
     const openingArea=parseFloat(face.openings.reduce((s,o)=>s+o.totalArea,0).toFixed(1));
     const paintArea=parseFloat(Math.max(0,wallArea-openingArea).toFixed(1));
     allWallArea+=wallArea;allOpeningArea+=openingArea;
