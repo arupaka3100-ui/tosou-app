@@ -39,6 +39,8 @@ header h1{font-size:16px;font-weight:600}
 
 /* 描画エリア */
 .draw-wrap{position:relative;border-radius:8px;overflow:hidden;margin-bottom:10px;touch-action:none;-webkit-user-select:none;user-select:none;background:#000}
+.draw-wrap-zoomable{position:relative;border-radius:8px;overflow:hidden;margin-bottom:10px;-webkit-user-select:none;user-select:none;background:#000;cursor:crosshair}
+.zoom-inner{transform-origin:0 0;transition:none}
 .draw-img{width:100%;display:block}
 .draw-canvas{position:absolute;top:0;left:0;width:100%;height:100%}
 .cursor-indicator{position:absolute;width:20px;height:20px;border:3px solid white;border-radius:50%;pointer-events:none;display:none;transform:translate(-50%,-100%);margin-top:-10px;box-shadow:0 0 0 2px rgba(0,0,0,.5)}
@@ -134,17 +136,25 @@ header h1{font-size:16px;font-weight:600}
   <!-- Step3: 開口部を描く -->
   <div id="step3" class="hidden">
     <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center">
-      <button class="btn btn-outline btn-sm" style="margin:0;width:auto;padding:8px 14px;font-size:12px" onclick="goToStep2()">← 外枠に戻る</button>
+      <button style="flex-shrink:0;border:1.5px solid #e0e0d8;background:white;border-radius:8px;padding:8px 10px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap" onclick="goToStep2()">← 外枠</button>
       <div class="status-bar blue" id="step3Status" style="margin:0;flex:1;font-size:12px;padding:10px">開口部をなぞってください</div>
     </div>
-    <div class="draw-wrap" id="drawWrap3">
-      <img id="drawImg3" class="draw-img">
-      <canvas id="drawCanvas3" class="draw-canvas"></canvas>
+    <div style="display:flex;gap:8px;margin-bottom:6px;align-items:center">
+      <button style="border:none;background:#f0f0e8;border-radius:6px;padding:6px 10px;font-size:12px;cursor:pointer;font-family:inherit" onclick="zoomIn()">＋ 拡大</button>
+      <button style="border:none;background:#f0f0e8;border-radius:6px;padding:6px 10px;font-size:12px;cursor:pointer;font-family:inherit" onclick="zoomOut()">－ 縮小</button>
+      <button style="border:none;background:#f0f0e8;border-radius:6px;padding:6px 10px;font-size:12px;cursor:pointer;font-family:inherit" onclick="resetZoom()">リセット</button>
+      <span style="font-size:11px;color:#888" id="zoomLabel">×1.0</span>
+    </div>
+    <div class="draw-wrap-zoomable" id="drawWrap3">
+      <div class="zoom-inner" id="zoomInner">
+        <img id="drawImg3" class="draw-img">
+        <canvas id="drawCanvas3" class="draw-canvas"></canvas>
+      </div>
       <div class="cursor-indicator" id="cursorIndicator3"></div>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:10px">
-      <button class="btn btn-outline btn-sm" style="margin:0" onclick="clearOpening()">やり直す</button>
-      <button class="btn btn-blue btn-sm" style="margin:0;flex:1" id="confirmOpeningBtn" onclick="confirmOpening()" disabled>この開口部を確定する</button>
+      <button class="btn btn-outline btn-sm" style="margin:0;flex:0 0 80px" onclick="clearOpening()">やり直す</button>
+      <button class="btn btn-blue" style="margin:0;flex:1;padding:11px;font-size:14px" id="confirmOpeningBtn" onclick="confirmOpening()" disabled>この開口部を確定する</button>
     </div>
 
     <!-- 開口部リスト -->
@@ -209,6 +219,76 @@ header h1{font-size:16px;font-weight:600}
 
 <script>
 var COLORS = ['#e94560','#0066cc','#2d9e5a','#cc8800','#9933cc','#cc6600'];
+
+// ===== 拡大機能 =====
+var zoom = { scale: 1.0, maxScale: 4.0, minScale: 1.0 };
+
+function zoomIn() {
+  zoom.scale = Math.min(zoom.maxScale, zoom.scale + 0.5);
+  applyZoom();
+}
+function zoomOut() {
+  zoom.scale = Math.max(zoom.minScale, zoom.scale - 0.5);
+  applyZoom();
+}
+function resetZoom() {
+  zoom.scale = 1.0;
+  applyZoom();
+}
+function applyZoom() {
+  var inner = document.getElementById('zoomInner');
+  if (!inner) return;
+  inner.style.transform = 'scale(' + zoom.scale + ')';
+  inner.style.width = (100 / zoom.scale) + '%';
+  var wrap = document.getElementById('drawWrap3');
+  if (wrap) {
+    var img = document.getElementById('drawImg3');
+    wrap.style.height = (img.offsetHeight * zoom.scale) + 'px';
+  }
+  document.getElementById('zoomLabel').textContent = '×' + zoom.scale.toFixed(1);
+}
+
+// ===== 凸包計算（4点の台形対応） =====
+function convexHull4(pts) {
+  if (pts.length < 3) return pts;
+  // 左上・右上・右下・左下の4点を抽出
+  var minX = Math.min.apply(null, pts.map(function(p){return p.x;}));
+  var maxX = Math.max.apply(null, pts.map(function(p){return p.x;}));
+  var minY = Math.min.apply(null, pts.map(function(p){return p.y;}));
+  var maxY = Math.max.apply(null, pts.map(function(p){return p.y;}));
+
+  // 各コーナーに最も近い点を選ぶ
+  function nearest(tx, ty) {
+    var best = pts[0], bestD = Infinity;
+    pts.forEach(function(p) {
+      var d = (p.x-tx)*(p.x-tx) + (p.y-ty)*(p.y-ty);
+      if (d < bestD) { bestD = d; best = p; }
+    });
+    return best;
+  }
+  var tl = nearest(minX, minY);
+  var tr = nearest(maxX, minY);
+  var br = nearest(maxX, maxY);
+  var bl = nearest(minX, maxY);
+  return [tl, tr, br, bl];
+}
+
+// 点滅アニメーション
+var blinkInterval = null;
+var blinkState = false;
+
+function startBlink() {
+  stopBlink();
+  blinkInterval = setInterval(function() {
+    blinkState = !blinkState;
+    redrawAll3();
+  }, 400);
+}
+function stopBlink() {
+  if (blinkInterval) clearInterval(blinkInterval);
+  blinkInterval = null;
+  blinkState = false;
+}
 
 var state = {
   imageSrc: null,
@@ -277,9 +357,11 @@ function getPos(e, canvas) {
   var scaleX = canvas.width / rect.width;
   var scaleY = canvas.height / rect.height;
   var src = e.touches ? e.touches[0] : e;
+  // 拡大時はzoom.scaleで割る
+  var zs = (canvas.id === 'drawCanvas3') ? zoom.scale : 1.0;
   return {
-    x: (src.clientX - rect.left) * scaleX,
-    y: (src.clientY - rect.top) * scaleY,
+    x: (src.clientX - rect.left) * scaleX / zs,
+    y: (src.clientY - rect.top) * scaleY / zs,
     clientX: src.clientX,
     clientY: src.clientY
   };
@@ -316,6 +398,7 @@ function onDrawEnd(e, canvasId) {
     } else {
       document.getElementById('confirmOpeningBtn').disabled = false;
       document.getElementById('step3Status').textContent = '輪郭が描けました。確定してください。';
+      startBlink(); // 点滅開始
     }
   }
   redrawCanvas(canvasId);
@@ -388,7 +471,7 @@ function drawPolygon(ctx, pts, strokeColor, lineWidth, fillColor) {
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   ctx.stroke();
-  // 始点マークなし
+
 }
 
 function clearOutline() {
@@ -453,17 +536,21 @@ function redrawAll3() {
   // 外枠を薄く表示
   drawPolygon(ctx, state.outlinePoints, 'rgba(255,255,255,0.5)', 2, 'rgba(255,255,255,0.05)');
 
-  // 確定済み開口部（バウンディングボックスで表示）
+  // 確定済み開口部（4点台形で表示）
   state.openings.forEach(function(op, i) {
-    var b = op.bbox;
-    if (!b) return;
-    // 綺麗な四角形で表示
+    var hull = op.hull || [];
+    if (hull.length < 4) return;
+    ctx.beginPath();
+    ctx.moveTo(hull[0].x, hull[0].y);
+    hull.forEach(function(p){ ctx.lineTo(p.x, p.y); });
+    ctx.closePath();
     ctx.strokeStyle = op.color;
     ctx.lineWidth = 3;
-    ctx.strokeRect(b.minX, b.minY, b.maxX - b.minX, b.maxY - b.minY);
+    ctx.stroke();
     ctx.fillStyle = op.color + '22';
-    ctx.fillRect(b.minX, b.minY, b.maxX - b.minX, b.maxY - b.minY);
+    ctx.fill();
     // 番号ラベル
+    var b = op.bbox;
     var cx = (b.minX + b.maxX) / 2;
     var cy = b.minY;
     ctx.fillStyle = op.color;
@@ -475,8 +562,32 @@ function redrawAll3() {
     ctx.fillText(label, cx-tw/2, cy-6);
   });
 
-  // 描画中
-  if (state.isDrawing && state.drawingPoints.length > 1) {
+  // 描画中または点滅中（凸包4点で台形表示）
+  if ((state.isDrawing || blinkInterval) && state.drawingPoints.length > 3) {
+    var col = COLORS[state.openings.length % COLORS.length];
+    var hull = convexHull4(state.drawingPoints);
+    if (blinkInterval && !blinkState) {
+      // 点滅OFF時は薄く
+      ctx.strokeStyle = col;
+      ctx.lineWidth = 2;
+      ctx.setLineDash([8, 4]);
+      ctx.beginPath();
+      ctx.moveTo(hull[0].x, hull[0].y);
+      hull.forEach(function(p){ ctx.lineTo(p.x, p.y); });
+      ctx.closePath(); ctx.stroke(); ctx.setLineDash([]);
+    } else {
+      // 点滅ON時は濃く
+      ctx.strokeStyle = col;
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(hull[0].x, hull[0].y);
+      hull.forEach(function(p){ ctx.lineTo(p.x, p.y); });
+      ctx.closePath();
+      ctx.stroke();
+      ctx.fillStyle = col + '22';
+      ctx.fill();
+    }
+  } else if (state.isDrawing && state.drawingPoints.length > 1) {
     var col = COLORS[state.openings.length % COLORS.length];
     drawPolygon(ctx, state.drawingPoints, col, 2.5, 'rgba(0,0,0,0)');
   }
@@ -508,6 +619,7 @@ function removeOpening(idx) {
 
 function clearOpening() {
   state.drawingPoints = [];
+  stopBlink();
   document.getElementById('confirmOpeningBtn').disabled = true;
   redrawAll3();
 }
@@ -515,24 +627,27 @@ function clearOpening() {
 function confirmOpening() {
   if (state.drawingPoints.length < 3) return;
 
-  // バウンディングボックスを計算
-  var xs = state.drawingPoints.map(function(p){return p.x;});
-  var ys = state.drawingPoints.map(function(p){return p.y;});
+  // 凸包4点で台形対応のバウンディングボックスを計算
+  var hull = convexHull4(state.drawingPoints);
+  var xs = hull.map(function(p){return p.x;});
+  var ys = hull.map(function(p){return p.y;});
   var minX = Math.min.apply(null, xs), maxX = Math.max.apply(null, xs);
   var minY = Math.min.apply(null, ys), maxY = Math.max.apply(null, ys);
 
-  // 種類をAI認識リストから自動判定、なければ番号で管理
+  // 種類をAI認識リストから自動判定
   var col = COLORS[state.openings.length % COLORS.length];
   var opType = '開口部' + (state.openings.length + 1);
   if (state.aiOpenings.length > state.openings.length) {
     opType = state.aiOpenings[state.openings.length].type;
   }
 
+  stopBlink(); // 点滅停止
+
   state.openings.push({
     type: opType,
     count: 1,
     color: col,
-    // バウンディングボックス（綺麗な四角形）
+    hull: hull,  // 4点の台形
     bbox: {minX: minX, minY: minY, maxX: maxX, maxY: maxY},
     widthPx: maxX - minX,
     heightPx: maxY - minY,
@@ -625,15 +740,28 @@ function renderResult(w, h, scaleW, scaleH) {
   // 外枠（白）
   drawPolygon(ctx, state.outlinePoints, 'white', 3, 'rgba(255,255,255,0.05)');
 
-  // 開口部（バウンディングボックスで表示＋サイズラベル）
+  // 開口部（4点台形で表示＋サイズラベル）
   state.openings.forEach(function(op, i) {
+    var hull = op.hull || [];
     var b = op.bbox;
     if (!b) return;
-    ctx.strokeStyle = op.color;
-    ctx.lineWidth = 3;
-    ctx.strokeRect(b.minX, b.minY, b.maxX - b.minX, b.maxY - b.minY);
-    ctx.fillStyle = op.color + '33';
-    ctx.fillRect(b.minX, b.minY, b.maxX - b.minX, b.maxY - b.minY);
+    if (hull.length >= 4) {
+      ctx.beginPath();
+      ctx.moveTo(hull[0].x, hull[0].y);
+      hull.forEach(function(p){ ctx.lineTo(p.x, p.y); });
+      ctx.closePath();
+      ctx.strokeStyle = op.color;
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      ctx.fillStyle = op.color + '33';
+      ctx.fill();
+    } else {
+      ctx.strokeStyle = op.color;
+      ctx.lineWidth = 3;
+      ctx.strokeRect(b.minX, b.minY, b.maxX - b.minX, b.maxY - b.minY);
+      ctx.fillStyle = op.color + '33';
+      ctx.fillRect(b.minX, b.minY, b.maxX - b.minX, b.maxY - b.minY);
+    }
     // サイズラベル（上部に表示）
     var cx = (b.minX + b.maxX) / 2;
     var cy = b.minY;
