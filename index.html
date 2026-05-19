@@ -133,7 +133,10 @@ header h1{font-size:16px;font-weight:600}
 
   <!-- Step3: 開口部を描く -->
   <div id="step3" class="hidden">
-    <div class="status-bar blue" id="step3Status">開口部をなぞってください</div>
+    <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center">
+      <button class="btn btn-outline btn-sm" style="margin:0;width:auto;padding:8px 14px;font-size:12px" onclick="goToStep2()">← 外枠に戻る</button>
+      <div class="status-bar blue" id="step3Status" style="margin:0;flex:1;font-size:12px;padding:10px">開口部をなぞってください</div>
+    </div>
     <div class="draw-wrap" id="drawWrap3">
       <img id="drawImg3" class="draw-img">
       <canvas id="drawCanvas3" class="draw-canvas"></canvas>
@@ -146,9 +149,8 @@ header h1{font-size:16px;font-weight:600}
 
     <!-- 開口部リスト -->
     <div class="card">
-      <div class="card-title">認識した開口部（タップして選択）</div>
-      <div class="opening-list" id="openingList"></div>
-      <button class="btn btn-outline btn-sm" style="margin:0" onclick="addManualOpening()">＋ 手動で開口部を追加</button>
+      <div class="card-title">追加した開口部</div>
+      <div class="opening-list" id="openingList"><div style="font-size:12px;color:#888;padding:8px">写真上の開口部（窓・ドア）をなぞって追加してください</div></div>
     </div>
     <div class="note-box" id="step3Note">開口部（窓・ドア）を1つずつなぞってください。全て完了したら次へ進んでください。</div>
     <button class="btn btn-green" id="step3Next" onclick="goToStep4()">次へ：実測値を入力する →</button>
@@ -386,11 +388,7 @@ function drawPolygon(ctx, pts, strokeColor, lineWidth, fillColor) {
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   ctx.stroke();
-  // 始点マーク
-  ctx.fillStyle = strokeColor;
-  ctx.beginPath();
-  ctx.arc(pts[0].x, pts[0].y, 6, 0, Math.PI*2);
-  ctx.fill();
+  // 始点マークなし
 }
 
 function clearOutline() {
@@ -455,22 +453,26 @@ function redrawAll3() {
   // 外枠を薄く表示
   drawPolygon(ctx, state.outlinePoints, 'rgba(255,255,255,0.5)', 2, 'rgba(255,255,255,0.05)');
 
-  // 確定済み開口部
+  // 確定済み開口部（バウンディングボックスで表示）
   state.openings.forEach(function(op, i) {
-    drawPolygon(ctx, op.points, op.color, 2.5, op.color + '33');
-    if (op.points.length > 0) {
-      var xs = op.points.map(function(p){return p.x;});
-      var ys = op.points.map(function(p){return p.y;});
-      var cx = (Math.min.apply(null,xs)+Math.max.apply(null,xs))/2;
-      var cy = Math.min.apply(null,ys)-8;
-      ctx.fillStyle = op.color;
-      var label = (i+1) + ' ' + op.type;
-      ctx.font = 'bold ' + Math.max(16, canvas.width/40) + 'px sans-serif';
-      var tw = ctx.measureText(label).width;
-      ctx.fillRect(cx-tw/2-4, cy-20, tw+8, 22);
-      ctx.fillStyle = 'white';
-      ctx.fillText(label, cx-tw/2, cy-2);
-    }
+    var b = op.bbox;
+    if (!b) return;
+    // 綺麗な四角形で表示
+    ctx.strokeStyle = op.color;
+    ctx.lineWidth = 3;
+    ctx.strokeRect(b.minX, b.minY, b.maxX - b.minX, b.maxY - b.minY);
+    ctx.fillStyle = op.color + '22';
+    ctx.fillRect(b.minX, b.minY, b.maxX - b.minX, b.maxY - b.minY);
+    // 番号ラベル
+    var cx = (b.minX + b.maxX) / 2;
+    var cy = b.minY;
+    ctx.fillStyle = op.color;
+    var label = (i+1) + ' ' + op.type;
+    ctx.font = 'bold ' + Math.max(14, canvas.width/45) + 'px sans-serif';
+    var tw = ctx.measureText(label).width;
+    ctx.fillRect(cx-tw/2-4, cy-22, tw+8, 20);
+    ctx.fillStyle = 'white';
+    ctx.fillText(label, cx-tw/2, cy-6);
   });
 
   // 描画中
@@ -482,53 +484,26 @@ function redrawAll3() {
 
 function buildOpeningList() {
   var list = document.getElementById('openingList');
-  if (state.openings.length === 0 && state.aiOpenings.length === 0) {
-    list.innerHTML = '<div style="font-size:12px;color:#888;padding:8px">AIが開口部を認識できませんでした。手動で追加してください。</div>';
+  if (state.openings.length === 0) {
+    list.innerHTML = '<div style="font-size:12px;color:#888;padding:8px">写真上の開口部（窓・ドア）をなぞって追加してください</div>';
     return;
   }
-
-  // AIが認識した未描画の開口部
-  var html = '';
-  state.aiOpenings.forEach(function(ai, i) {
-    var drawn = state.openings.find(function(op) { return op.aiId === i; });
-    if (!drawn) {
-      html += '<div class="opening-item" onclick="selectAiOpening(' + i + ')" id="aiOp_' + i + '">' +
-        '<div class="opening-color" style="background:' + COLORS[i % COLORS.length] + '"></div>' +
-        '<div class="opening-label">' + ai.type + (ai.count > 1 ? ' ×' + ai.count : '') + '</div>' +
-        '<div class="opening-status" style="color:#cc8800">未描画</div>' +
-        '</div>';
-    }
-  });
-
-  // 描画済みの開口部
-  state.openings.forEach(function(op, i) {
-    html += '<div class="opening-item done">' +
-      '<div class="opening-color" style="background:' + op.color + '"></div>' +
+  var html = state.openings.map(function(op, i) {
+    var sizeStr = op.widthM ? op.widthM.toFixed(2) + 'm × ' + op.heightM.toFixed(2) + 'm' : '（実測値入力後に計算）';
+    return '<div class="opening-item done" style="cursor:default">' +
+      '<div class="opening-color" style="background:' + op.color + '">' + (i+1) + '</div>' +
       '<div class="opening-label">' + op.type + '</div>' +
-      '<div class="opening-size">' + (op.widthM ? op.widthM.toFixed(2) + 'm × ' + op.heightM.toFixed(2) + 'm' : '') + '</div>' +
-      '<div class="opening-status" style="color:#2d9e5a">✓</div>' +
+      '<div class="opening-size">' + sizeStr + '</div>' +
+      '<button onclick="removeOpening(' + i + ')" style="border:none;background:none;color:#cc3333;font-size:16px;cursor:pointer;padding:0 4px">✕</button>' +
       '</div>';
-  });
-
-  list.innerHTML = html || '<div style="font-size:12px;color:#888;padding:8px">開口部を追加してください</div>';
+  }).join('');
+  list.innerHTML = html;
 }
 
-function selectAiOpening(idx) {
-  state.currentOpeningIdx = idx;
-  var ai = state.aiOpenings[idx];
-  document.getElementById('step3Status').textContent = ai.type + 'の輪郭を指でなぞってください';
-  clearOpening();
-}
-
-function addManualOpening() {
-  var type = prompt('開口部の種類を入力してください（例：引き違い窓、玄関ドア、掃き出し窓）');
-  if (!type) return;
-  state.currentOpeningIdx = -1;
-  state.aiOpenings.push({type: type, count: 1});
-  state.currentOpeningIdx = state.aiOpenings.length - 1;
-  document.getElementById('step3Status').textContent = type + 'の輪郭を指でなぞってください';
-  clearOpening();
+function removeOpening(idx) {
+  state.openings.splice(idx, 1);
   buildOpeningList();
+  redrawAll3();
 }
 
 function clearOpening() {
@@ -539,9 +514,6 @@ function clearOpening() {
 
 function confirmOpening() {
   if (state.drawingPoints.length < 3) return;
-  var idx = state.currentOpeningIdx >= 0 ? state.currentOpeningIdx : state.aiOpenings.length - 1;
-  var ai = state.aiOpenings[idx] || {type: '開口部', count: 1};
-  var col = COLORS[state.openings.length % COLORS.length];
 
   // バウンディングボックスを計算
   var xs = state.drawingPoints.map(function(p){return p.x;});
@@ -549,15 +521,21 @@ function confirmOpening() {
   var minX = Math.min.apply(null, xs), maxX = Math.max.apply(null, xs);
   var minY = Math.min.apply(null, ys), maxY = Math.max.apply(null, ys);
 
+  // 種類をAI認識リストから自動判定、なければ番号で管理
+  var col = COLORS[state.openings.length % COLORS.length];
+  var opType = '開口部' + (state.openings.length + 1);
+  if (state.aiOpenings.length > state.openings.length) {
+    opType = state.aiOpenings[state.openings.length].type;
+  }
+
   state.openings.push({
-    aiId: idx,
-    type: ai.type,
-    count: ai.count || 1,
+    type: opType,
+    count: 1,
     color: col,
-    points: state.drawingPoints.slice(),
+    // バウンディングボックス（綺麗な四角形）
+    bbox: {minX: minX, minY: minY, maxX: maxX, maxY: maxY},
     widthPx: maxX - minX,
     heightPx: maxY - minY,
-    // 外枠に対するx位置の割合（遠近補正用）
     xRatio: ((minX + maxX) / 2) / state.imgNaturalW,
     widthM: null,
     heightM: null
@@ -567,7 +545,7 @@ function confirmOpening() {
   document.getElementById('confirmOpeningBtn').disabled = true;
   buildOpeningList();
   redrawAll3();
-  document.getElementById('step3Status').textContent = '確定しました。次の開口部をなぞるか、次へ進んでください。';
+  document.getElementById('step3Status').textContent = '✓ 確定。次の開口部をなぞるか、次へ進んでください。';
 }
 
 function goToStep4() {
@@ -647,26 +625,33 @@ function renderResult(w, h, scaleW, scaleH) {
   // 外枠（白）
   drawPolygon(ctx, state.outlinePoints, 'white', 3, 'rgba(255,255,255,0.05)');
 
-  // 開口部（色付き枠＋サイズ表示）
+  // 開口部（バウンディングボックスで表示＋サイズラベル）
   state.openings.forEach(function(op, i) {
-    drawPolygon(ctx, op.points, op.color, 3, op.color.replace('#', 'rgba(').replace(/(..)(..)(..)/, function(m,r,g,b){
-      return parseInt(r,16)+','+parseInt(g,16)+','+parseInt(b,16);
-    }) + ',0.2)');
-
-    // サイズラベル
-    var xs = op.points.map(function(p){return p.x;});
-    var ys = op.points.map(function(p){return p.y;});
-    var cx = (Math.min.apply(null,xs)+Math.max.apply(null,xs))/2;
-    var cy = Math.min.apply(null,ys);
-    ctx.fillStyle = op.color;
-    var label = op.widthM.toFixed(2) + 'm×' + op.heightM.toFixed(2) + 'm';
-    var fs = Math.max(14, canvas.width/50);
+    var b = op.bbox;
+    if (!b) return;
+    ctx.strokeStyle = op.color;
+    ctx.lineWidth = 3;
+    ctx.strokeRect(b.minX, b.minY, b.maxX - b.minX, b.maxY - b.minY);
+    ctx.fillStyle = op.color + '33';
+    ctx.fillRect(b.minX, b.minY, b.maxX - b.minX, b.maxY - b.minY);
+    // サイズラベル（上部に表示）
+    var cx = (b.minX + b.maxX) / 2;
+    var cy = b.minY;
+    var fs = Math.max(14, canvas.width / 50);
     ctx.font = 'bold ' + fs + 'px sans-serif';
+    var label = '幅' + op.widthM.toFixed(2) + 'm × 高' + op.heightM.toFixed(2) + 'm';
     var tw = ctx.measureText(label).width;
+    ctx.fillStyle = op.color;
     ctx.fillRect(cx-tw/2-4, cy-fs-8, tw+8, fs+6);
     ctx.fillStyle = 'white';
     ctx.fillText(label, cx-tw/2, cy-6);
   });
+  // 説明テキスト
+  ctx.fillStyle = 'rgba(0,0,0,0.6)';
+  ctx.fillRect(0, canvas.height-30, canvas.width, 30);
+  ctx.fillStyle = 'white';
+  ctx.font = 'bold 14px sans-serif';
+  ctx.fillText('表示：幅（横）× 高さ（縦）', 10, canvas.height-10);
 }
 
 function copyResult() {
