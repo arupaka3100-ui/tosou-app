@@ -127,8 +127,8 @@ header h1{font-size:16px;font-weight:600}
       <div class="cursor-indicator" id="cursorIndicator"></div>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:10px">
-      <button class="btn btn-outline btn-sm" style="margin:0" onclick="clearOutline()">やり直す</button>
-      <button class="btn btn-primary btn-sm" style="margin:0;flex:1" id="confirmOutlineBtn" onclick="confirmOutline()" disabled>外枠を確定する</button>
+      <button class="btn btn-outline" style="margin:0;flex:0 0 90px;padding:12px;font-size:13px" onclick="clearOutline()">やり直す</button>
+      <button class="btn btn-primary" style="margin:0;flex:1;padding:15px;font-size:15px" id="confirmOutlineBtn" onclick="confirmOutline()" disabled>外枠を確定する →</button>
     </div>
     <div class="note-box">外壁全体（塗装する範囲）の外側を指でなぞってください。指の上に現在位置が表示されます。</div>
   </div>
@@ -533,8 +533,21 @@ function redrawAll3() {
   var ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // 外枠を薄く表示
-  drawPolygon(ctx, state.outlinePoints, 'rgba(255,255,255,0.5)', 2, 'rgba(255,255,255,0.05)');
+  // 外枠を固定表示（点滅しない）
+  if (state.outlinePoints.length > 3) {
+    var ohull = convexHull4(state.outlinePoints);
+    ctx.beginPath();
+    ctx.moveTo(ohull[0].x, ohull[0].y);
+    ohull.forEach(function(p){ ctx.lineTo(p.x, p.y); });
+    ctx.closePath();
+    ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([6, 3]);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(255,255,255,0.04)';
+    ctx.fill();
+  }
 
   // 確定済み開口部（4点台形で表示）
   state.openings.forEach(function(op, i) {
@@ -562,7 +575,7 @@ function redrawAll3() {
     ctx.fillText(label, cx-tw/2, cy-6);
   });
 
-  // 描画中または点滅中（凸包4点で台形表示）
+  // 描画中または点滅中（開口部のみ、外枠キャンバスでは動作しない）
   if ((state.isDrawing || blinkInterval) && state.drawingPoints.length > 3) {
     var col = COLORS[state.openings.length % COLORS.length];
     var hull = convexHull4(state.drawingPoints);
