@@ -122,8 +122,8 @@ header h1{font-size:16px;font-weight:600}
       <button class="btn-sm-outline" onclick="goS2()">← 外枠</button>
       <div class="status-bar s-blue" id="s3Status" style="margin:0;flex:1;font-size:12px;padding:10px">開口部をなぞって指定してください</div>
     </div>
-    <div class="photo-wrap" id="wrap3">
-      <img id="img3" class="photo-img">
+    <div class="photo-wrap" id="wrap3" style="min-height:200px">
+      <img id="img3" class="photo-img" style="width:100%;display:block">
       <canvas id="cv3" class="photo-canvas"></canvas>
     </div>
     <div class="btn-row">
@@ -350,34 +350,34 @@ function confirmS2(){
 function goS3(){
   show('step3');
   buildOpList();
-  // 画像を確実に表示してからキャンバスを初期化
   var img=document.getElementById('img3');
-  img.onload=null; // 既存のハンドラをクリア
-  img.src=''; // 一旦クリア
-  setTimeout(function(){
-    img.onload=function(){
-      G.imgW=img.naturalWidth;
-      G.imgH=img.naturalHeight;
-      var cv=document.getElementById('cv3');
-      cv.width=img.naturalWidth;
-      cv.height=img.naturalHeight;
-      // イベントは毎回登録しない（重複防止）
-      if(!cv._eventsSet){
-        cv._eventsSet=true;
-        cv.addEventListener('touchstart',function(e){e.preventDefault();onDS(e,'cv3');},{passive:false});
-        cv.addEventListener('touchmove',function(e){e.preventDefault();onDM(e,'cv3');},{passive:false});
-        cv.addEventListener('touchend',function(e){onDE(e,'cv3');},{passive:false});
-        cv.addEventListener('mousedown',function(e){onDS(e,'cv3');});
-        cv.addEventListener('mousemove',function(e){onDM(e,'cv3');});
-        cv.addEventListener('mouseup',function(e){onDE(e,'cv3');});
-      }
-      G.drawPts=[];
-      document.getElementById('s3Confirm').disabled=true;
-      document.getElementById('s3Status').textContent='開口部をなぞって指定してください';
-      drawS3();
-    };
-    img.src=G.src;
-  },50);
+  var cv=document.getElementById('cv3');
+  img.onload=null;
+
+  function setupS3(){
+    G.imgW=img.naturalWidth;
+    G.imgH=img.naturalHeight;
+    cv.width=img.naturalWidth;
+    cv.height=img.naturalHeight;
+    if(!cv._eventsSet){
+      cv._eventsSet=true;
+      cv.addEventListener('touchstart',function(e){e.preventDefault();onDS(e,'cv3');},{passive:false});
+      cv.addEventListener('touchmove',function(e){e.preventDefault();onDM(e,'cv3');},{passive:false});
+      cv.addEventListener('touchend',function(e){onDE(e,'cv3');},{passive:false});
+      cv.addEventListener('mousedown',function(e){onDS(e,'cv3');});
+      cv.addEventListener('mousemove',function(e){onDM(e,'cv3');});
+      cv.addEventListener('mouseup',function(e){onDE(e,'cv3');});
+    }
+    G.drawPts=[];stopBlink();
+    document.getElementById('s3Confirm').disabled=true;
+    document.getElementById('s3Status').textContent='開口部をなぞって指定してください';
+    drawS3();
+  }
+
+  img.onload=function(){ setupS3(); };
+  img.src=G.src;
+  // すでに読み込み済みの場合
+  if(img.complete && img.naturalWidth>0){ setupS3(); }
 }
 
 function drawS3(){
