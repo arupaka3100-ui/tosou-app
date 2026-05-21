@@ -348,15 +348,22 @@ function confirmS2(){
 
 // ===== Step3: 開口部指定 =====
 function goS3(){
+  show('step3');
   var img=document.getElementById('img3');
-  img.src=G.src;
-  img.onload=function(){
+  if(img.src===G.src&&img.complete&&img.naturalWidth>0){
+    // 既に読み込み済み
     initCanvas('cv3','wrap3');
     clearDrawing();
     drawS3();
-  };
+  }else{
+    img.onload=function(){
+      initCanvas('cv3','wrap3');
+      clearDrawing();
+      drawS3();
+    };
+    img.src=G.src;
+  }
   buildOpList();
-  show('step3');
 }
 
 function drawS3(){
