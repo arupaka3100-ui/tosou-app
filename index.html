@@ -14,19 +14,16 @@ header h1{font-size:16px;font-weight:600}
 .card{background:white;border-radius:12px;padding:18px;margin-bottom:14px;border:1px solid #e0e0d8}
 .card-title{font-size:12px;font-weight:600;color:#888;margin-bottom:12px}
 .note-box{background:#fffbf0;border:1px solid #f0e0a0;border-radius:8px;padding:12px;font-size:12px;color:#886600;margin-bottom:14px;line-height:1.6}
-.warn-box{background:#fff0f0;border:1px solid #ffcccc;border-radius:8px;padding:12px;font-size:12px;color:#cc3333;margin-bottom:10px;display:none}
+.err-box{background:#fff0f0;border:1px solid #ffcccc;border-radius:8px;padding:12px;font-size:12px;color:#cc3333;margin-bottom:10px;display:none}
 .btn{width:100%;border:none;border-radius:12px;padding:15px;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;font-family:inherit}
 .btn-primary{background:#e94560;color:white}
 .btn-green{background:#2d9e5a;color:white}
 .btn-blue{background:#0066cc;color:white}
 .btn-outline{background:white;color:#1a1a2e;border:1.5px solid #e0e0d8}
-.btn-sm{padding:10px;font-size:13px;border-radius:8px}
 .btn:disabled{opacity:.4;cursor:not-allowed}
 .hidden{display:none}
 .spinner{width:17px;height:17px;border:2px solid rgba(255,255,255,.4);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;display:none}
 @keyframes spin{to{transform:rotate(360deg)}}
-
-/* ローディング */
 .loading-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(26,26,46,.92);z-index:500;display:none;flex-direction:column;align-items:center;justify-content:center;gap:20px}
 .loading-overlay.show{display:flex}
 .loading-text{color:white;font-size:15px;font-weight:600}
@@ -35,69 +32,54 @@ header h1{font-size:16px;font-weight:600}
 .brush-track{position:absolute;bottom:10px;left:0;width:100%;height:8px;background:rgba(255,255,255,.15);border-radius:4px}
 .brush-paint{position:absolute;bottom:10px;left:0;width:0%;height:8px;background:linear-gradient(90deg,#8B4513,#e07000,#ff9900);border-radius:4px}
 .brush-icon{position:absolute;bottom:12px;font-size:26px;left:0}
-
-/* 写真キャンバスエリア */
-.photo-wrap{position:relative;border-radius:8px;overflow:hidden;margin-bottom:10px;background:#000;touch-action:none;-webkit-user-select:none;user-select:none}
+.photo-wrap{position:relative;border-radius:8px;overflow:hidden;margin-bottom:8px;background:#000;touch-action:none;-webkit-user-select:none;user-select:none}
 .photo-img{width:100%;display:block}
 .photo-canvas{position:absolute;top:0;left:0;width:100%;height:100%}
-.cursor-dot{position:fixed;width:16px;height:16px;border:3px solid #e94560;border-radius:50%;pointer-events:none;display:none;z-index:999;transform:translate(-50%,-150%);background:rgba(233,69,96,0.3)}
-
-/* ステータス */
-.status-bar{border-radius:8px;padding:12px;margin-bottom:10px;font-size:13px;font-weight:600;text-align:center;color:white}
-.status-primary{background:#e94560}
-.status-blue{background:#0066cc}
-.status-green{background:#2d9e5a}
-
-/* 開口部リスト */
-.op-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1.5px solid #e0e0d8;margin-bottom:8px}
-.op-item.confirmed{border-color:#2d9e5a;background:#f0fff4}
-.op-item.ai-suggest{border-color:#cc8800;background:#fffbf0}
-.op-item.editing{border-color:#0066cc;background:#f0f8ff}
-.op-color{width:14px;height:14px;border-radius:3px;flex-shrink:0}
-.op-label{flex:1;font-size:13px;font-weight:600}
-.op-size{font-size:11px;color:#888}
-.op-actions{display:flex;gap:6px}
-.op-btn{border:none;border-radius:6px;padding:5px 9px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit}
-.op-btn-confirm{background:#2d9e5a;color:white}
-.op-btn-redraw{background:#0066cc;color:white}
-.op-btn-del{background:#cc3333;color:white}
-
-/* 実測入力 */
+.cursor-dot{position:fixed;width:18px;height:18px;border:3px solid #e94560;border-radius:50%;pointer-events:none;display:none;z-index:999;transform:translate(-50%,-180%);background:rgba(233,69,96,0.25);box-shadow:0 0 0 2px rgba(0,0,0,.4)}
+.status-bar{border-radius:8px;padding:11px 14px;margin-bottom:8px;font-size:13px;font-weight:600;text-align:center;color:white}
+.s-red{background:#e94560}.s-blue{background:#0066cc}.s-green{background:#2d9e5a}.s-orange{background:#e07000}
+.btn-row{display:flex;gap:8px;margin-bottom:10px}
+.btn-sm-outline{flex:0 0 auto;border:1.5px solid #e0e0d8;background:white;border-radius:8px;padding:9px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap}
+.btn-sm-primary{flex:1;border:none;border-radius:8px;padding:11px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;color:white}
+.op-item{display:flex;align-items:center;gap:8px;padding:10px;border-radius:8px;border:1.5px solid #e0e0d8;margin-bottom:8px}
+.op-item.done{border-color:#2d9e5a;background:#f0fff4}
+.op-item.drawing{border-color:#0066cc;background:#f0f8ff;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{border-color:#0066cc}50%{border-color:#88bbff}}
+.op-color{width:12px;height:12px;border-radius:3px;flex-shrink:0}
+.op-info{flex:1;min-width:0}
+.op-type{font-size:13px;font-weight:600}
+.op-size{font-size:11px;color:#888;margin-top:2px}
+.op-actions{display:flex;gap:4px;flex-shrink:0}
+.op-btn{border:none;border-radius:6px;padding:5px 8px;font-size:11px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap}
+.ob-confirm{background:#2d9e5a;color:white}
+.ob-redraw{background:#0066cc;color:white}
+.ob-del{background:#cc3333;color:white}
 .measure-card{background:#f0f8ff;border:2px solid #0066cc;border-radius:12px;padding:16px;margin-bottom:14px}
 .measure-title{font-size:13px;font-weight:700;color:#0066cc;margin-bottom:12px}
-.measure-row{margin-bottom:12px;display:flex;align-items:center;gap:10px}
-.measure-label{font-size:13px;font-weight:600;min-width:80px}
-.req{font-size:10px;background:#cc3333;color:white;padding:1px 6px;border-radius:8px;margin-left:4px}
-.measure-input{flex:1;border:2px solid #b8d8f8;border-radius:8px;padding:11px;font-size:20px;font-family:inherit;background:white;text-align:center;font-weight:700;-webkit-appearance:none}
-.measure-input:focus{outline:none;border-color:#0066cc}
-.measure-unit{font-size:13px;color:#888;min-width:18px}
-
-/* 結果 */
+.measure-row{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.m-label{font-size:13px;font-weight:600;min-width:60px}
+.req{font-size:10px;background:#cc3333;color:white;padding:1px 5px;border-radius:6px;margin-left:4px}
+.m-input{flex:1;border:2px solid #b8d8f8;border-radius:8px;padding:11px;font-size:20px;font-family:inherit;background:white;text-align:center;font-weight:700;-webkit-appearance:none}
+.m-input:focus{outline:none;border-color:#0066cc}
+.m-unit{font-size:13px;color:#888}
 .result-card{background:#1a1a2e;color:white;border-radius:12px;padding:18px;margin-bottom:14px}
 .metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
 .metric{background:rgba(255,255,255,.08);border-radius:8px;padding:11px}
 .metric-label{font-size:11px;color:rgba(255,255,255,.6);margin-bottom:3px}
 .metric-value{font-size:20px;font-weight:700}
 .metric-value.red{color:#ff6b7a}
-.detail-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:12px}
-.detail-row:last-child{border-bottom:none}
+.d-row{display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:12px}
+.d-row:last-child{border-bottom:none}
 .copy-btn{width:100%;background:rgba(255,255,255,.12);color:white;border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:11px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;margin-top:10px}
 </style>
 </head>
 <body>
-
 <div class="loading-overlay" id="loadingOverlay">
-  <div class="brush-wrap">
-    <div class="brush-track"></div>
-    <div class="brush-paint" id="brushPaint"></div>
-    <div class="brush-icon" id="brushIcon">🖌️</div>
-  </div>
-  <div class="loading-text" id="loadingText">AI解析中...</div>
+  <div class="brush-wrap"><div class="brush-track"></div><div class="brush-paint" id="brushPaint"></div><div class="brush-icon" id="brushIcon">🖌️</div></div>
+  <div class="loading-text" id="loadingText">計算中...</div>
   <div class="loading-sub" id="loadingSub">しばらくお待ちください</div>
 </div>
-
 <div class="cursor-dot" id="cursorDot"></div>
-
 <header><h1>塗装面積 AI計測</h1><span class="beta">Beta</span></header>
 <div class="container">
 
@@ -106,583 +88,586 @@ header h1{font-size:16px;font-weight:600}
     <div class="card">
       <div class="card-title">外壁写真をアップロード</div>
       <div style="position:relative;border:2px dashed #e0e0d8;border-radius:8px;background:white;overflow:hidden">
-        <div id="uploadPlaceholder" style="padding:40px 20px;text-align:center">
+        <div id="upPh" style="padding:40px 20px;text-align:center">
           <div style="font-size:40px;margin-bottom:10px">🏠</div>
           <div style="font-size:15px;font-weight:600;margin-bottom:6px">写真をタップして選択</div>
           <div style="font-size:12px;color:#888">カメラまたはライブラリから</div>
         </div>
-        <img id="uploadPreview" style="width:100%;display:none;border-radius:8px">
-        <input type="file" id="fileInput" accept="image/*" style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer" onchange="onFileChange(this)">
+        <img id="upPrev" style="width:100%;display:none;border-radius:8px">
+        <input type="file" id="fileInput" accept="image/*" style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer" onchange="onFile(this)">
       </div>
-      <button class="btn btn-outline btn-sm" id="retakeBtn" style="display:none;margin-top:8px" onclick="document.getElementById('fileInput').click()">📷 撮り直す</button>
+      <button class="btn btn-outline" id="retakeBtn" style="display:none;margin-top:8px;padding:10px;font-size:13px" onclick="document.getElementById('fileInput').click()">📷 撮り直す</button>
     </div>
     <div class="note-box">建物全体が写るよう少し離れて撮影してください。</div>
-    <button class="btn btn-primary" id="step1Next" onclick="startDetect()" disabled>
-      <div class="spinner" id="detectSpinner"></div>
-      <span id="detectBtnText">AIで開口部を認識する →</span>
-    </button>
+    <button class="btn btn-primary" id="s1Next" onclick="goS2()" disabled>次へ：外枠を選択する →</button>
   </div>
 
-  <!-- Step2: AI認識結果を確認・修正 -->
+  <!-- Step2: 外枠選択 -->
   <div id="step2" class="hidden">
-    <div class="status-bar status-blue" id="step2Status">AIが認識した開口部を確認してください</div>
-
-    <div class="photo-wrap" id="photoWrap">
-      <img id="photoImg" class="photo-img">
-      <canvas id="photoCanvas" class="photo-canvas"></canvas>
+    <div class="status-bar s-red" id="s2Status">外壁の外枠を指でなぞって囲んでください</div>
+    <div class="photo-wrap" id="wrap2">
+      <img id="img2" class="photo-img">
+      <canvas id="cv2" class="photo-canvas"></canvas>
     </div>
-
-    <div style="display:flex;gap:8px;margin-bottom:10px">
-      <button style="flex:0 0 80px;border:1.5px solid #e0e0d8;background:white;border-radius:8px;padding:9px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit" onclick="clearRedraw()">やり直す</button>
-      <button class="btn btn-blue btn-sm" style="margin:0;flex:1" id="confirmRedrawBtn" onclick="confirmRedraw()" disabled>なぞり直しを確定</button>
+    <div class="btn-row">
+      <button class="btn-sm-outline" onclick="clearS2()">やり直す</button>
+      <button class="btn-sm-primary" id="s2Confirm" style="background:#e94560" onclick="confirmS2()" disabled>外枠を確定する →</button>
     </div>
-
-    <div class="card">
-      <div class="card-title">認識した開口部一覧</div>
-      <div id="opList"></div>
-      <button class="btn btn-outline btn-sm" style="margin-top:8px;margin-bottom:0" onclick="addOpening()">＋ 開口部を手動追加</button>
-    </div>
-
-    <div class="note-box">
-      ✓確定：AIの認識が正しい場合<br>
-      なぞり直し：位置がずれている場合は写真上でなぞり直してください<br>
-      削除：誤認識の場合
-    </div>
-    <button class="btn btn-green" onclick="goToStep3()">次へ：実測値を入力する →</button>
+    <div class="note-box">塗装する壁の範囲全体を囲んでください。斜めでもOKです。</div>
   </div>
 
-  <!-- Step3: 実測値入力・計算 -->
+  <!-- Step3: 開口部指定 -->
   <div id="step3" class="hidden">
-    <div class="measure-card">
-      <div class="measure-title">📏 外壁の実測値を入力</div>
-      <div class="measure-row">
-        <label class="measure-label">横幅<span class="req">必須</span></label>
-        <input type="number" class="measure-input" id="widthInput" placeholder="8.0" step="0.1" min="0.1" inputmode="decimal">
-        <span class="measure-unit">m</span>
-      </div>
-      <div class="measure-row">
-        <label class="measure-label">高さ<span class="req">必須</span></label>
-        <input type="number" class="measure-input" id="heightInput" placeholder="5.0" step="0.1" min="0.1" inputmode="decimal">
-        <span class="measure-unit">m</span>
-      </div>
-      <button class="btn btn-green" id="calcBtn" onclick="doCalc()">
-        <div class="spinner" id="calcSpinner"></div>
-        <span id="calcBtnText">📐 AIで面積を計算する</span>
-      </button>
-      <div class="warn-box" id="calcErr"></div>
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
+      <button class="btn-sm-outline" onclick="goS2()">← 外枠</button>
+      <div class="status-bar s-blue" id="s3Status" style="margin:0;flex:1;font-size:12px;padding:10px">開口部をなぞって指定してください</div>
     </div>
+    <div class="photo-wrap" id="wrap3">
+      <img id="img3" class="photo-img">
+      <canvas id="cv3" class="photo-canvas"></canvas>
+    </div>
+    <div class="btn-row">
+      <button class="btn-sm-outline" onclick="clearDrawing()">やり直す</button>
+      <button class="btn-sm-primary" id="s3Confirm" style="background:#0066cc" onclick="confirmDrawing()" disabled>この開口部を追加</button>
+    </div>
+    <div class="card">
+      <div class="card-title">指定した開口部</div>
+      <div id="opList"><div style="font-size:12px;color:#888;padding:6px">まだ指定されていません</div></div>
+      <button class="btn btn-outline" style="margin-top:8px;margin-bottom:0;padding:10px;font-size:13px" onclick="addManual()">＋ 開口部を追加する</button>
+    </div>
+    <div class="note-box">窓・ドアを1つずつなぞって指定してください。種類名を入力して追加します。</div>
+    <button class="btn btn-green" onclick="goS4()">次へ：実測値を入力する →</button>
+  </div>
+
+  <!-- Step4: 実測値入力・計算 -->
+  <div id="step4" class="hidden">
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px">
+      <button class="btn-sm-outline" onclick="goS3()">← 開口部</button>
+      <div style="font-size:13px;font-weight:600;color:#1a1a2e">実測値を入力してください</div>
+    </div>
+    <div class="measure-card">
+      <div class="measure-title">📏 外枠の実測値</div>
+      <div class="measure-row">
+        <label class="m-label">横幅<span class="req">必須</span></label>
+        <input type="number" class="m-input" id="wInput" placeholder="8.0" step="0.1" min="0.1" inputmode="decimal">
+        <span class="m-unit">m</span>
+      </div>
+      <div class="measure-row" style="margin-bottom:0">
+        <label class="m-label">高さ<span class="req">必須</span></label>
+        <input type="number" class="m-input" id="hInput" placeholder="5.0" step="0.1" min="0.1" inputmode="decimal">
+        <span class="m-unit">m</span>
+      </div>
+    </div>
+    <button class="btn btn-green" id="calcBtn" onclick="doCalc()">
+      <div class="spinner" id="calcSp"></div>
+      <span id="calcTxt">📐 AIで面積を計算する</span>
+    </button>
+    <div class="err-box" id="calcErr"></div>
 
     <!-- 結果写真 -->
-    <div id="resultPhotoWrap" class="hidden">
+    <div id="resultPhoto" class="hidden">
       <div class="card">
         <div class="card-title">計算結果（写真上に表示）</div>
         <div style="position:relative;border-radius:8px;overflow:hidden">
-          <img id="resultImg" style="width:100%;display:block">
-          <canvas id="resultCanvas" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none"></canvas>
+          <img id="resImg" style="width:100%;display:block">
+          <canvas id="resCv" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none"></canvas>
         </div>
-        <div style="font-size:11px;color:#888;text-align:center;margin-top:6px">表示：幅（横）× 高さ（縦）</div>
+        <div style="font-size:11px;color:#888;text-align:center;margin-top:6px">表示：幅（横）× 高さ（縦）　⚠=要確認</div>
       </div>
     </div>
 
     <!-- 数値結果 -->
-    <div id="resultCard" class="hidden">
+    <div id="resultNum" class="hidden">
       <div class="result-card">
         <div class="metrics">
           <div class="metric"><div class="metric-label">外壁面積</div><div class="metric-value" id="rWall">—</div></div>
           <div class="metric"><div class="metric-label">塗装面積</div><div class="metric-value red" id="rPaint">—</div></div>
         </div>
         <div id="rDetails"></div>
-        <button class="copy-btn" onclick="copyResult()">📋 jimuuにコピーする</button>
+        <button class="copy-btn" onclick="copyRes()">📋 jimuuにコピーする</button>
       </div>
       <div class="note-box" id="rNote" style="display:none"></div>
     </div>
 
-    <button class="btn btn-outline" onclick="goBackStep2()">← 開口部を修正する</button>
-    <button class="btn btn-outline" onclick="resetAll()">最初からやり直す</button>
+    <button class="btn btn-outline" style="margin-top:4px" onclick="resetAll()">最初からやり直す</button>
   </div>
 
 </div>
-
 <script>
-var COLORS = ['#e94560','#0066cc','#2d9e5a','#cc8800','#9933cc','#e07000'];
-
-var state = {
-  imageSrc: null, imageBase64: null, imageMediaType: 'image/jpeg',
-  imgW: 0, imgH: 0,
-  openings: [],      // [{id, type, bbox, confirmed, color, widthM, heightM}]
-  editingId: null,   // なぞり直し中の開口部ID
-  drawPoints: [],    // なぞり中の点列
-  isDrawing: false,
-  blinkTimer: null, blinkOn: false,
-  brushTimer: null,
-  calcResult: null
+var COLORS=['#e94560','#0066cc','#2d9e5a','#cc8800','#9933cc','#e07000'];
+var G={
+  src:null,b64:null,mtype:'image/jpeg',
+  imgW:0,imgH:0,
+  outline:null,      // {pts:[], bbox:{x,y,w,h}px}
+  openings:[],       // [{id,type,pts,bbox,color,confirmed,widthM,heightM,areaM,warning}]
+  drawing:false,
+  drawPts:[],
+  editId:null,       // なぞり直し中の開口部ID
+  blinkT:null,blinkOn:false,
+  brushT:null,
+  calcRes:null
 };
 
 // ===== ファイル選択 =====
-function onFileChange(input) {
-  var file = input.files[0]; if (!file) return;
-  var reader = new FileReader();
-  reader.onload = function(ev) {
-    state.imageSrc = ev.target.result;
-    state.imageBase64 = ev.target.result.split(',')[1];
-    state.imageMediaType = file.type || 'image/jpeg';
-    document.getElementById('uploadPlaceholder').style.display = 'none';
-    document.getElementById('uploadPreview').src = state.imageSrc;
-    document.getElementById('uploadPreview').style.display = 'block';
-    document.getElementById('retakeBtn').style.display = 'flex';
-    document.getElementById('step1Next').disabled = false;
+function onFile(inp){
+  var f=inp.files[0];if(!f)return;
+  var r=new FileReader();
+  r.onload=function(ev){
+    G.src=ev.target.result;
+    G.b64=ev.target.result.split(',')[1];
+    G.mtype=f.type||'image/jpeg';
+    document.getElementById('upPh').style.display='none';
+    document.getElementById('upPrev').src=G.src;
+    document.getElementById('upPrev').style.display='block';
+    document.getElementById('retakeBtn').style.display='flex';
+    document.getElementById('s1Next').disabled=false;
   };
-  reader.readAsDataURL(file);
+  r.readAsDataURL(f);
 }
 
-// ===== AI認識 =====
-async function startDetect() {
-  document.getElementById('detectSpinner').style.display = 'block';
-  document.getElementById('detectBtnText').textContent = '解析中...';
-  document.getElementById('step1Next').disabled = true;
-  showLoading('AI解析中...', '開口部（窓・ドア）を認識しています');
-  try {
-    var res = await fetch('/api/analyze', {
-      method: 'POST', headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({step: 'detect', imageBase64: state.imageBase64, imageMediaType: state.imageMediaType})
-    });
-    var data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'APIエラー');
-    // 開口部データを初期化
-    state.openings = (data.openings || []).map(function(op, i) {
-      return {
-        id: op.id || ('op' + i),
-        type: op.type,
-        bbox: op.bbox,
-        confidence: op.confidence,
-        note: op.note,
-        confirmed: false,
-        color: COLORS[i % COLORS.length],
-        widthM: null, heightM: null
-      };
-    });
-    state.buildingInfo = data.buildingInfo;
-    hideLoading();
-    goToStep2();
-  } catch(e) {
-    hideLoading();
-    alert('エラー：' + e.message);
-    document.getElementById('detectSpinner').style.display = 'none';
-    document.getElementById('detectBtnText').textContent = 'AIで開口部を認識する →';
-    document.getElementById('step1Next').disabled = false;
-  }
-}
-
-// ===== Step2: 確認・修正 =====
-function goToStep2() {
-  var img = document.getElementById('photoImg');
-  img.src = state.imageSrc;
-  img.onload = function() {
-    state.imgW = img.naturalWidth;
-    state.imgH = img.naturalHeight;
-    var canvas = document.getElementById('photoCanvas');
-    canvas.width = state.imgW;
-    canvas.height = state.imgH;
-    setupDrawEvents();
-    renderPhoto();
-    buildOpList();
+// ===== Step2: 外枠選択 =====
+function goS2(){
+  var img=document.getElementById('img2');
+  img.src=G.src;
+  img.onload=function(){
+    G.imgW=img.naturalWidth;G.imgH=img.naturalHeight;
+    initCanvas('cv2','wrap2');
+    clearS2();
   };
   show('step2');
 }
 
-function setupDrawEvents() {
-  var canvas = document.getElementById('photoCanvas');
-  canvas.addEventListener('touchstart', function(e) { e.preventDefault(); onDS(e); }, {passive:false});
-  canvas.addEventListener('touchmove', function(e) { e.preventDefault(); onDM(e); }, {passive:false});
-  canvas.addEventListener('touchend', function(e) { onDE(e); }, {passive:false});
-  canvas.addEventListener('mousedown', onDS);
-  canvas.addEventListener('mousemove', onDM);
-  canvas.addEventListener('mouseup', onDE);
+function initCanvas(cvId,wrapId){
+  var img=document.getElementById(cvId==='cv2'?'img2':'img3');
+  var cv=document.getElementById(cvId);
+  cv.width=img.naturalWidth;cv.height=img.naturalHeight;
+  cv.addEventListener('touchstart',function(e){e.preventDefault();onDS(e,cvId);},{passive:false});
+  cv.addEventListener('touchmove',function(e){e.preventDefault();onDM(e,cvId);},{passive:false});
+  cv.addEventListener('touchend',function(e){onDE(e,cvId);},{passive:false});
+  cv.addEventListener('mousedown',function(e){onDS(e,cvId);});
+  cv.addEventListener('mousemove',function(e){onDM(e,cvId);});
+  cv.addEventListener('mouseup',function(e){onDE(e,cvId);});
 }
 
-function getP(e) {
-  var canvas = document.getElementById('photoCanvas');
-  var rect = canvas.getBoundingClientRect();
-  var sx = canvas.width / rect.width, sy = canvas.height / rect.height;
-  var src = e.touches ? e.touches[0] : e;
-  return {x: (src.clientX - rect.left) * sx, y: (src.clientY - rect.top) * sy, cx: src.clientX, cy: src.clientY};
+function gP(e,cvId){
+  var cv=document.getElementById(cvId);
+  var r=cv.getBoundingClientRect();
+  var sx=cv.width/r.width,sy=cv.height/r.height;
+  var s=e.touches?e.touches[0]:e;
+  return{x:(s.clientX-r.left)*sx,y:(s.clientY-r.top)*sy,cx:s.clientX,cy:s.clientY};
 }
 
-function onDS(e) {
-  if (!state.editingId) return;
-  state.isDrawing = true;
-  state.drawPoints = [];
-  var p = getP(e);
-  state.drawPoints.push(p);
-  moveCursor(p.cx, p.cy);
+function onDS(e,cvId){
+  G.drawing=true;G.drawPts=[];
+  var p=gP(e,cvId);G.drawPts.push(p);
+  showCursor(p.cx,p.cy);
 }
-
-function onDM(e) {
-  if (!state.isDrawing) return;
-  var p = getP(e);
-  state.drawPoints.push(p);
-  moveCursor(p.cx, p.cy);
-  renderPhoto();
+function onDM(e,cvId){
+  if(!G.drawing)return;
+  var p=gP(e,cvId);G.drawPts.push(p);
+  showCursor(p.cx,p.cy);
+  if(cvId==='cv2')drawS2();else drawS3();
 }
-
-function onDE(e) {
-  if (!state.isDrawing) return;
-  state.isDrawing = false;
-  hideCursor();
-  if (state.drawPoints.length > 3) {
-    document.getElementById('confirmRedrawBtn').disabled = false;
-    document.getElementById('step2Status').textContent = 'なぞり直しができました。確定してください。';
-    startBlink();
-  }
-  renderPhoto();
-}
-
-function moveCursor(cx, cy) {
-  var dot = document.getElementById('cursorDot');
-  dot.style.display = 'block';
-  dot.style.left = cx + 'px';
-  dot.style.top = cy + 'px';
-}
-function hideCursor() { document.getElementById('cursorDot').style.display = 'none'; }
-
-function startBlink() {
-  stopBlink();
-  state.blinkTimer = setInterval(function() {
-    state.blinkOn = !state.blinkOn;
-    renderPhoto();
-  }, 400);
-}
-function stopBlink() {
-  if (state.blinkTimer) clearInterval(state.blinkTimer);
-  state.blinkTimer = null; state.blinkOn = false;
-}
-
-// 写真上に全開口部を描画
-function renderPhoto() {
-  var canvas = document.getElementById('photoCanvas');
-  var ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  // 確定済み・AI認識済みの開口部を描画
-  state.openings.forEach(function(op) {
-    if (!op.bbox) return;
-    var b = op.bbox;
-    var x = b.x / 100 * canvas.width;
-    var y = b.y / 100 * canvas.height;
-    var w = b.w / 100 * canvas.width;
-    var h = b.h / 100 * canvas.height;
-    var col = op.color;
-    var alpha = op.confirmed ? '99' : '66';
-
-    // 編集中は点滅
-    if (op.id === state.editingId && state.blinkOn) {
-      ctx.strokeStyle = col; ctx.lineWidth = 3;
-      ctx.setLineDash([8,4]); ctx.strokeRect(x, y, w, h); ctx.setLineDash([]);
-    } else if (op.id === state.editingId && !state.blinkOn) {
-      // 点滅OFF
-    } else {
-      ctx.strokeStyle = col; ctx.lineWidth = op.confirmed ? 3 : 2;
-      ctx.strokeRect(x, y, w, h);
-      ctx.fillStyle = col + '22'; ctx.fillRect(x, y, w, h);
+function onDE(e,cvId){
+  if(!G.drawing)return;
+  G.drawing=false;hideCursor();
+  if(G.drawPts.length>3){
+    if(cvId==='cv2'){
+      document.getElementById('s2Confirm').disabled=false;
+      document.getElementById('s2Status').textContent='外枠が選択されました。確定してください。';
+    }else{
+      document.getElementById('s3Confirm').disabled=false;
+      document.getElementById('s3Status').textContent='輪郭が描けました。「この開口部を追加」をタップしてください。';
+      startBlink();
     }
+  }
+  if(cvId==='cv2')drawS2();else drawS3();
+}
+
+function showCursor(cx,cy){
+  var d=document.getElementById('cursorDot');
+  d.style.display='block';d.style.left=cx+'px';d.style.top=cy+'px';
+}
+function hideCursor(){document.getElementById('cursorDot').style.display='none';}
+
+function startBlink(){
+  stopBlink();
+  G.blinkT=setInterval(function(){G.blinkOn=!G.blinkOn;drawS3();},400);
+}
+function stopBlink(){
+  if(G.blinkT)clearInterval(G.blinkT);
+  G.blinkT=null;G.blinkOn=false;
+}
+
+// 外枠の描画
+function drawS2(){
+  var cv=document.getElementById('cv2'),ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,cv.width,cv.height);
+  var pts=G.drawPts;
+  if(pts.length<2)return;
+  // 自由多角形をそのまま描画
+  ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);
+  for(var i=1;i<pts.length;i++)ctx.lineTo(pts[i].x,pts[i].y);
+  ctx.closePath();
+  ctx.strokeStyle='#ffffff';ctx.lineWidth=3;ctx.lineCap='round';ctx.lineJoin='round';ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,0.08)';ctx.fill();
+}
+
+// 確定した外枠を描画（Step3で表示）
+function drawOutlineOnS3(ctx){
+  if(!G.outline||!G.outline.pts||G.outline.pts.length<3)return;
+  var pts=G.outline.pts;
+  ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);
+  for(var i=1;i<pts.length;i++)ctx.lineTo(pts[i].x,pts[i].y);
+  ctx.closePath();
+  ctx.strokeStyle='rgba(255,255,255,0.5)';ctx.lineWidth=2;ctx.setLineDash([6,3]);ctx.stroke();ctx.setLineDash([]);
+}
+
+function clearS2(){
+  G.drawPts=[];
+  var cv=document.getElementById('cv2');
+  cv.getContext('2d').clearRect(0,0,cv.width,cv.height);
+  document.getElementById('s2Confirm').disabled=true;
+  document.getElementById('s2Status').textContent='外壁の外枠を指でなぞって囲んでください';
+}
+
+function confirmS2(){
+  if(G.drawPts.length<3)return;
+  var pts=G.drawPts;
+  var xs=pts.map(function(p){return p.x;}),ys=pts.map(function(p){return p.y;});
+  G.outline={
+    pts:pts.slice(),
+    bbox:{
+      x:Math.min.apply(null,xs),y:Math.min.apply(null,ys),
+      w:Math.max.apply(null,xs)-Math.min.apply(null,xs),
+      h:Math.max.apply(null,ys)-Math.min.apply(null,ys)
+    }
+  };
+  goS3();
+}
+
+// ===== Step3: 開口部指定 =====
+function goS3(){
+  var img=document.getElementById('img3');
+  img.src=G.src;
+  img.onload=function(){
+    initCanvas('cv3','wrap3');
+    clearDrawing();
+    drawS3();
+  };
+  buildOpList();
+  show('step3');
+}
+
+function drawS3(){
+  var cv=document.getElementById('cv3'),ctx=cv.getContext('2d');
+  ctx.clearRect(0,0,cv.width,cv.height);
+
+  // 外枠を薄く表示
+  drawOutlineOnS3(ctx);
+
+  // 確定済み開口部（自由多角形＋バウンディングボックス）
+  G.openings.forEach(function(op,i){
+    if(!op.bbox)return;
+    var b=op.bbox;
+    var isEditing=(op.id===G.editId);
+    var col=op.color;
+
+    // 自由多角形
+    if(op.pts&&op.pts.length>2){
+      ctx.beginPath();ctx.moveTo(op.pts[0].x,op.pts[0].y);
+      op.pts.forEach(function(p){ctx.lineTo(p.x,p.y);});
+      ctx.closePath();
+      ctx.strokeStyle=col;ctx.lineWidth=2;ctx.setLineDash([4,3]);ctx.stroke();ctx.setLineDash([]);
+      ctx.fillStyle=col+'18';ctx.fill();
+    }
+    // バウンディングボックス（実線）
+    ctx.strokeStyle=col;ctx.lineWidth=2.5;
+    ctx.strokeRect(b.x,b.y,b.w,b.h);
 
     // ラベル
-    if (!(op.id === state.editingId && !state.blinkOn)) {
-      var fs = Math.max(13, canvas.width / 45);
-      ctx.font = 'bold ' + fs + 'px sans-serif';
-      var label = op.type + (op.confirmed ? ' ✓' : ' ?');
-      var tw = ctx.measureText(label).width;
-      ctx.fillStyle = col;
-      ctx.fillRect(x, y - fs - 4, tw + 8, fs + 4);
-      ctx.fillStyle = 'white';
-      ctx.fillText(label, x + 4, y - 4);
-    }
+    var fs=Math.max(13,cv.width/45);
+    ctx.font='bold '+fs+'px sans-serif';
+    var lbl=(i+1)+'. '+op.type+(op.confirmed?' ✓':'');
+    var tw=ctx.measureText(lbl).width;
+    ctx.fillStyle=col;ctx.fillRect(b.x,b.y-fs-4,tw+8,fs+4);
+    ctx.fillStyle='white';ctx.fillText(lbl,b.x+4,b.y-4);
   });
 
-  // なぞり直し中の線
-  if (state.isDrawing && state.drawPoints.length > 1 || (state.drawPoints.length > 3 && state.blinkTimer)) {
-    var pts = state.drawPoints;
-    var xs = pts.map(function(p){return p.x;}), ys = pts.map(function(p){return p.y;});
-    var x = Math.min.apply(null,xs), y = Math.min.apply(null,ys);
-    var w = Math.max.apply(null,xs)-x, h = Math.max.apply(null,ys)-y;
-    if (state.blinkOn || state.isDrawing) {
-      ctx.strokeStyle = '#e94560'; ctx.lineWidth = 3;
-      ctx.strokeRect(x, y, w, h);
-      ctx.fillStyle = 'rgba(233,69,96,0.1)'; ctx.fillRect(x, y, w, h);
+  // 現在描画中・点滅
+  if(G.drawPts.length>1){
+    var pts=G.drawPts;
+    var xs=pts.map(function(p){return p.x;}),ys=pts.map(function(p){return p.y;});
+    var bx=Math.min.apply(null,xs),by=Math.min.apply(null,ys);
+    var bw=Math.max.apply(null,xs)-bx,bh=Math.max.apply(null,ys)-by;
+    var col=COLORS[G.openings.length%COLORS.length];
+
+    // 自由多角形
+    ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);
+    pts.forEach(function(p){ctx.lineTo(p.x,p.y);});
+    ctx.closePath();
+    ctx.strokeStyle=col;ctx.lineWidth=2;ctx.setLineDash([4,3]);ctx.stroke();ctx.setLineDash([]);
+
+    // バウンディングボックス（点滅）
+    if(G.blinkT){
+      if(G.blinkOn){
+        ctx.strokeStyle=col;ctx.lineWidth=3;
+        ctx.strokeRect(bx,by,bw,bh);
+        ctx.fillStyle=col+'22';ctx.fillRect(bx,by,bw,bh);
+      }
+    }else if(G.drawing){
+      ctx.strokeStyle=col;ctx.lineWidth=2;ctx.setLineDash([6,3]);
+      ctx.strokeRect(bx,by,bw,bh);ctx.setLineDash([]);
     }
   }
 }
 
-// 開口部リストを構築
-function buildOpList() {
-  var list = document.getElementById('opList');
-  if (state.openings.length === 0) {
-    list.innerHTML = '<div style="font-size:12px;color:#888;padding:8px">開口部が認識されませんでした。手動で追加してください。</div>';
+function clearDrawing(){
+  G.drawPts=[];G.editId=null;stopBlink();
+  document.getElementById('s3Confirm').disabled=true;
+  document.getElementById('s3Status').textContent='開口部をなぞって指定してください';
+  drawS3();
+}
+
+function confirmDrawing(){
+  if(G.drawPts.length<3)return;
+  var pts=G.drawPts;
+  var xs=pts.map(function(p){return p.x;}),ys=pts.map(function(p){return p.y;});
+  var bx=Math.min.apply(null,xs),by=Math.min.apply(null,ys);
+  var bw=Math.max.apply(null,xs)-bx,bh=Math.max.apply(null,ys)-by;
+
+  var type=prompt('この開口部の種類を入力してください\n例：引き違い窓、玄関ドア、掃き出し窓、FIX窓、小窓');
+  if(!type){return;}
+
+  stopBlink();
+  if(G.editId){
+    // なぞり直し
+    var op=G.openings.find(function(o){return o.id===G.editId;});
+    if(op){
+      op.pts=pts.slice();
+      op.bbox={x:bx,y:by,w:bw,h:bh};
+      op.type=type;
+      op.confirmed=true;
+    }
+    G.editId=null;
+  }else{
+    var id='op_'+Date.now();
+    G.openings.push({
+      id:id,type:type,
+      pts:pts.slice(),
+      bbox:{x:bx,y:by,w:bw,h:bh},
+      color:COLORS[G.openings.length%COLORS.length],
+      confirmed:true,
+      widthM:null,heightM:null,areaM:null,warning:null
+    });
+  }
+  G.drawPts=[];
+  document.getElementById('s3Confirm').disabled=true;
+  document.getElementById('s3Status').textContent='追加しました。次の開口部をなぞるか、次へ進んでください。';
+  buildOpList();drawS3();
+}
+
+function addManual(){
+  var type=prompt('開口部の種類を入力してください\n例：引き違い窓、玄関ドア、掃き出し窓');
+  if(!type)return;
+  document.getElementById('s3Status').textContent=type+'の範囲を写真上でなぞってください';
+  G.drawPts=[];G.editId=null;stopBlink();
+  document.getElementById('s3Confirm').disabled=true;
+  // 次になぞった時にこのtypeで登録できるよう一時保存
+  G._pendingType=type;
+  drawS3();
+}
+
+function buildOpList(){
+  var el=document.getElementById('opList');
+  if(G.openings.length===0){
+    el.innerHTML='<div style="font-size:12px;color:#888;padding:6px">まだ指定されていません</div>';
     return;
   }
-  list.innerHTML = state.openings.map(function(op, i) {
-    var statusColor = op.confirmed ? '#2d9e5a' : '#cc8800';
-    var statusText = op.confirmed ? '✓確定' : (op.confidence === 'low' ? '要確認' : 'AI推定');
-    var isEditing = op.id === state.editingId;
-    return '<div class="op-item ' + (op.confirmed ? 'confirmed' : isEditing ? 'editing' : 'ai-suggest') + '">' +
-      '<div class="op-color" style="background:' + op.color + '"></div>' +
-      '<div>' +
-        '<div class="op-label">' + (i+1) + '. ' + op.type + '</div>' +
-        '<div class="op-size" style="color:' + statusColor + '">' + statusText +
-          (op.note ? ' ・' + op.note : '') + '</div>' +
+  el.innerHTML=G.openings.map(function(op,i){
+    return '<div class="op-item done">' +
+      '<div class="op-color" style="background:'+op.color+'"></div>' +
+      '<div class="op-info">' +
+        '<div class="op-type">'+(i+1)+'. '+op.type+'</div>' +
+        '<div class="op-size">'+(op.widthM?'幅'+op.widthM.toFixed(2)+'m × 高'+op.heightM.toFixed(2)+'m':'（計算前）')+(op.warning?' ⚠':'')+'</div>' +
       '</div>' +
       '<div class="op-actions">' +
-        (!op.confirmed ? '<button class="op-btn op-btn-confirm" onclick="confirmOp(\'' + op.id + '\')">✓確定</button>' : '') +
-        '<button class="op-btn op-btn-redraw" onclick="startRedraw(\'' + op.id + '\')">' + (isEditing ? '描画中' : 'なぞり直し') + '</button>' +
-        '<button class="op-btn op-btn-del" onclick="deleteOp(\'' + op.id + '\')">削除</button>' +
+        '<button class="op-btn ob-redraw" onclick="redrawOp(\''+op.id+'\')">修正</button>' +
+        '<button class="op-btn ob-del" onclick="delOp(\''+op.id+'\')">削除</button>' +
       '</div>' +
     '</div>';
   }).join('');
 }
 
-function confirmOp(id) {
-  var op = state.openings.find(function(o){return o.id===id;});
-  if (op) { op.confirmed = true; }
-  buildOpList(); renderPhoto();
+function redrawOp(id){
+  G.editId=id;G.drawPts=[];stopBlink();
+  document.getElementById('s3Confirm').disabled=true;
+  document.getElementById('s3Status').textContent='修正する開口部をなぞり直してください';
+  drawS3();
 }
 
-function startRedraw(id) {
-  state.editingId = id;
-  state.drawPoints = [];
-  stopBlink();
-  document.getElementById('confirmRedrawBtn').disabled = true;
-  document.getElementById('step2Status').textContent = '写真上で開口部の範囲をなぞってください';
-  buildOpList(); renderPhoto();
+function delOp(id){
+  G.openings=G.openings.filter(function(o){return o.id!==id;});
+  buildOpList();drawS3();
 }
 
-function clearRedraw() {
-  state.drawPoints = [];
-  state.editingId = null;
-  stopBlink();
-  document.getElementById('confirmRedrawBtn').disabled = true;
-  document.getElementById('step2Status').textContent = 'AIが認識した開口部を確認してください';
-  buildOpList(); renderPhoto();
-}
+function goS4(){show('step4');}
+function goS3(){show('step3');buildOpList();drawS3();}
 
-function confirmRedraw() {
-  if (!state.editingId || state.drawPoints.length < 3) return;
-  var op = state.openings.find(function(o){return o.id===state.editingId;});
-  if (op) {
-    var pts = state.drawPoints;
-    var xs = pts.map(function(p){return p.x;}), ys = pts.map(function(p){return p.y;});
-    var minX = Math.min.apply(null,xs), maxX = Math.max.apply(null,xs);
-    var minY = Math.min.apply(null,ys), maxY = Math.max.apply(null,ys);
-    var canvas = document.getElementById('photoCanvas');
-    op.bbox = {
-      x: minX/canvas.width*100, y: minY/canvas.height*100,
-      w: (maxX-minX)/canvas.width*100, h: (maxY-minY)/canvas.height*100
-    };
-    op.confirmed = true;
-  }
-  state.editingId = null;
-  state.drawPoints = [];
-  stopBlink();
-  document.getElementById('confirmRedrawBtn').disabled = true;
-  document.getElementById('step2Status').textContent = '修正しました。他の開口部も確認してください。';
-  buildOpList(); renderPhoto();
-}
+// ===== Step4: 計算 =====
+async function doCalc(){
+  var w=parseFloat(document.getElementById('wInput').value);
+  var h=parseFloat(document.getElementById('hInput').value);
+  var err=document.getElementById('calcErr');err.style.display='none';
+  if(!w||w<=0){err.textContent='横幅を入力してください';err.style.display='block';return;}
+  if(!h||h<=0){err.textContent='高さを入力してください';err.style.display='block';return;}
+  if(!G.outline){err.textContent='外枠が選択されていません';err.style.display='block';return;}
 
-function deleteOp(id) {
-  state.openings = state.openings.filter(function(o){return o.id!==id;});
-  if (state.editingId === id) { state.editingId = null; stopBlink(); }
-  buildOpList(); renderPhoto();
-}
+  var btn=document.getElementById('calcBtn'),sp=document.getElementById('calcSp'),bt=document.getElementById('calcTxt');
+  btn.disabled=true;sp.style.display='block';bt.textContent='AIが計算・判断中...';
+  showLoading('AIで計算中...','遠近補正・妥当性チェックを行っています');
 
-function addOpening() {
-  var type = prompt('開口部の種類を入力してください\n例：引き違い窓、玄関ドア、掃き出し窓、FIX窓、小窓');
-  if (!type) return;
-  var newId = 'manual_' + Date.now();
-  state.openings.push({
-    id: newId, type: type,
-    bbox: {x: 35, y: 35, w: 15, h: 20},
-    confidence: 'manual', note: '手動追加',
-    confirmed: false, color: COLORS[state.openings.length % COLORS.length],
-    widthM: null, heightM: null
-  });
-  buildOpList(); renderPhoto();
-  startRedraw(newId);
-}
-
-// ===== Step3: 実測値入力・AI計算 =====
-function goToStep3() {
-  show('step3');
-  document.getElementById('resultImg').src = state.imageSrc;
-}
-
-function goBackStep2() {
-  show('step2');
-  buildOpList(); renderPhoto();
-}
-
-async function doCalc() {
-  var w = parseFloat(document.getElementById('widthInput').value);
-  var h = parseFloat(document.getElementById('heightInput').value);
-  var err = document.getElementById('calcErr');
-  err.style.display = 'none';
-  if (!w || w <= 0) { err.textContent = '横幅を入力してください'; err.style.display = 'block'; return; }
-  if (!h || h <= 0) { err.textContent = '高さを入力してください'; err.style.display = 'block'; return; }
-
-  var confirmedOps = state.openings.filter(function(op){ return op.confirmed || op.confidence !== 'manual'; });
-  if (confirmedOps.length === 0) { err.textContent = '開口部を1つ以上確定してください'; err.style.display = 'block'; return; }
-
-  var btn = document.getElementById('calcBtn');
-  var sp = document.getElementById('calcSpinner');
-  var bt = document.getElementById('calcBtnText');
-  btn.disabled = true; sp.style.display = 'block'; bt.textContent = 'AIが計算中...';
-  showLoading('AIで面積計算中...', '遠近補正・標準サイズ照合を行っています');
-
-  try {
-    var res = await fetch('/api/analyze', {
-      method: 'POST', headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({
-        step: 'calculate',
-        imageBase64: state.imageBase64,
-        imageMediaType: state.imageMediaType,
-        width: w, height: h,
-        openings: confirmedOps.map(function(op) {
-          return {id: op.id, type: op.type, bbox: op.bbox};
-        })
-      })
+  try{
+    var outlinePx={w:G.outline.bbox.w,h:G.outline.bbox.h};
+    var ops=G.openings.map(function(op){
+      return{id:op.id,type:op.type,widthPx:op.bbox.w,heightPx:op.bbox.h};
     });
-    var data = await res.json();
-    if (!res.ok) throw new Error(data.error || '計算エラー');
+    var res=await fetch('/api/analyze',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({step:'calculate',imageBase64:G.b64,imageMediaType:G.mtype,
+        width:w,height:h,outlinePx:outlinePx,openings:ops})
+    });
+    var data=await res.json();
+    if(!res.ok)throw new Error(data.error||'計算エラー');
     hideLoading();
 
-    // 結果を開口部に反映
-    (data.openings || []).forEach(function(r) {
-      var op = state.openings.find(function(o){return o.id===r.id;});
-      if (op) { op.widthM = r.widthM; op.heightM = r.heightM; op.areaM = r.areaM; op.warning = r.warning; }
+    // 結果を反映
+    (data.openings||[]).forEach(function(r){
+      var op=G.openings.find(function(o){return o.id===r.id;});
+      if(op){op.widthM=r.widthM;op.heightM=r.heightM;op.areaM=r.areaM;op.warning=r.warning;}
+    });
+    G.calcRes=data;
+    renderResPhoto(w,h);
+    renderResNum(w,h,data);
+  }catch(e){
+    hideLoading();
+    err.textContent='エラー：'+e.message;err.style.display='block';
+  }
+  btn.disabled=false;sp.style.display='none';bt.textContent='📐 AIで面積を計算する';
+}
+
+function renderResPhoto(w,h){
+  var img=document.getElementById('resImg');
+  img.src=G.src;
+  img.onload=function(){
+    var cv=document.getElementById('resCv');
+    cv.width=img.naturalWidth;cv.height=img.naturalHeight;
+    var ctx=cv.getContext('2d');
+    ctx.clearRect(0,0,cv.width,cv.height);
+    // スケール変換（canvas座標→結果写真座標）
+    var sx=cv.width/G.imgW,sy=cv.height/G.imgH;
+
+    // 外枠
+    if(G.outline&&G.outline.pts){
+      ctx.beginPath();ctx.moveTo(G.outline.pts[0].x*sx,G.outline.pts[0].y*sy);
+      G.outline.pts.forEach(function(p){ctx.lineTo(p.x*sx,p.y*sy);});
+      ctx.closePath();ctx.strokeStyle='white';ctx.lineWidth=2;ctx.setLineDash([6,3]);ctx.stroke();ctx.setLineDash([]);
+    }
+
+    // 開口部
+    G.openings.forEach(function(op){
+      if(!op.bbox||!op.widthM)return;
+      var b=op.bbox;
+      var x=b.x*sx,y=b.y*sy,bw=b.w*sx,bh=b.h*sy;
+      ctx.strokeStyle=op.color;ctx.lineWidth=3;
+      ctx.strokeRect(x,y,bw,bh);
+      ctx.fillStyle=op.color+'33';ctx.fillRect(x,y,bw,bh);
+      // サイズラベル
+      var fs=Math.max(13,cv.width/50);
+      ctx.font='bold '+fs+'px sans-serif';
+      var lbl='幅'+op.widthM.toFixed(2)+'m × 高'+op.heightM.toFixed(2)+'m'+(op.warning?' ⚠':'');
+      var tw=ctx.measureText(lbl).width;
+      ctx.fillStyle=op.warning?'#cc3333':op.color;
+      ctx.fillRect(x,y-fs-6,tw+8,fs+6);
+      ctx.fillStyle='white';ctx.fillText(lbl,x+4,y-4);
     });
 
-    state.calcResult = data;
-    renderResultPhoto(w, h);
-    showResult(w, h, data);
-
-  } catch(e) {
-    hideLoading();
-    err.textContent = 'エラー：' + e.message; err.style.display = 'block';
-  }
-  btn.disabled = false; sp.style.display = 'none'; bt.textContent = '📐 AIで面積を計算する';
+    // 凡例
+    ctx.fillStyle='rgba(0,0,0,0.65)';ctx.fillRect(0,cv.height-28,cv.width,28);
+    ctx.fillStyle='white';ctx.font='bold 13px sans-serif';
+    ctx.fillText('表示：幅（横）× 高さ（縦）　⚠=要確認',8,cv.height-9);
+  };
+  document.getElementById('resultPhoto').classList.remove('hidden');
 }
 
-function renderResultPhoto(w, h) {
-  var img = document.getElementById('resultImg');
-  var canvas = document.getElementById('resultCanvas');
-  canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
-  var ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  state.openings.forEach(function(op) {
-    if (!op.bbox || !op.widthM) return;
-    var b = op.bbox;
-    var x = b.x/100*canvas.width, y = b.y/100*canvas.height;
-    var bw = b.w/100*canvas.width, bh = b.h/100*canvas.height;
-    ctx.strokeStyle = op.color; ctx.lineWidth = 3;
-    ctx.strokeRect(x, y, bw, bh);
-    ctx.fillStyle = op.color + '33'; ctx.fillRect(x, y, bw, bh);
-
-    // サイズラベル
-    var fs = Math.max(13, canvas.width/50);
-    ctx.font = 'bold ' + fs + 'px sans-serif';
-    var label = '幅' + op.widthM.toFixed(2) + 'm × 高' + op.heightM.toFixed(2) + 'm';
-    if (op.warning) label += ' ⚠';
-    var tw = ctx.measureText(label).width;
-    ctx.fillStyle = op.warning ? '#cc3333' : op.color;
-    ctx.fillRect(x, y - fs - 6, tw + 8, fs + 6);
-    ctx.fillStyle = 'white'; ctx.fillText(label, x + 4, y - 4);
-  });
-
-  // 凡例
-  ctx.fillStyle = 'rgba(0,0,0,0.65)';
-  ctx.fillRect(0, canvas.height - 28, canvas.width, 28);
-  ctx.fillStyle = 'white'; ctx.font = 'bold 13px sans-serif';
-  ctx.fillText('表示：幅（横）× 高さ（縦）', 8, canvas.height - 9);
-
-  document.getElementById('resultPhotoWrap').classList.remove('hidden');
-}
-
-function showResult(w, h, data) {
-  var wallArea = (data.wallArea || w * h).toFixed(1);
-  var paintArea = (data.paintArea || 0).toFixed(1);
-  document.getElementById('rWall').textContent = wallArea + ' m²';
-  document.getElementById('rPaint').textContent = paintArea + ' m²';
-
-  var details = '';
-  state.openings.forEach(function(op, i) {
-    if (!op.widthM) return;
-    var warn = op.warning ? '<span style="color:#ff6b7a"> ⚠' + op.warning + '</span>' : '';
-    details += '<div class="detail-row">' +
-      '<span style="color:rgba(255,255,255,.7)">' + (i+1) + ' ' + op.type + '</span>' +
-      '<span>' + op.widthM.toFixed(2) + 'm×' + op.heightM.toFixed(2) + 'm =' + (op.areaM||0).toFixed(1) + 'm²' + warn + '</span>' +
-      '</div>';
-  });
-  details += '<div class="detail-row"><span style="color:rgba(255,255,255,.6)">開口部合計</span><span>−' + (data.totalOpeningArea||0).toFixed(1) + ' m²</span></div>';
-  document.getElementById('rDetails').innerHTML = details;
-
-  if (data.note) {
-    document.getElementById('rNote').textContent = 'AI注記：' + data.note;
-    document.getElementById('rNote').style.display = 'block';
-  }
-
-  document.getElementById('resultCard').classList.remove('hidden');
-  document.getElementById('resultCard').scrollIntoView({behavior: 'smooth'});
-}
-
-function copyResult() {
-  var w = parseFloat(document.getElementById('widthInput').value);
-  var h = parseFloat(document.getElementById('heightInput').value);
-  var d = state.calcResult;
-  var text = '【塗装面積 AI計測結果】\n横幅：' + w + 'm　高さ：' + h + 'm\n外壁面積：' + (d.wallArea||w*h).toFixed(1) + ' m²\n';
-  state.openings.forEach(function(op,i){
+function renderResNum(w,h,data){
+  var wallArea=(data.wallArea||w*h).toFixed(1);
+  var paintArea=(data.paintArea||0).toFixed(1);
+  document.getElementById('rWall').textContent=wallArea+' m²';
+  document.getElementById('rPaint').textContent=paintArea+' m²';
+  var det='';
+  G.openings.forEach(function(op,i){
     if(!op.widthM)return;
-    text += (i+1)+' '+op.type+'：'+op.widthM.toFixed(2)+'m×'+op.heightM.toFixed(2)+'m ='+(op.areaM||0).toFixed(1)+' m²\n';
+    var warn=op.warning?'<span style="color:#ff6b7a"> ⚠'+op.warning+'</span>':'';
+    det+='<div class="d-row"><span style="color:rgba(255,255,255,.7)">'+(i+1)+' '+op.type+'</span>'+
+      '<span>'+op.widthM.toFixed(2)+'×'+op.heightM.toFixed(2)+'m ='+(op.areaM||0).toFixed(1)+'m²'+warn+'</span></div>';
   });
-  text += '開口部合計：' + (d.totalOpeningArea||0).toFixed(1) + ' m²\n塗装面積：' + (d.paintArea||0).toFixed(1) + ' m²';
+  det+='<div class="d-row"><span style="color:rgba(255,255,255,.6)">開口部合計</span><span>−'+(data.totalOpeningArea||0).toFixed(1)+' m²</span></div>';
+  document.getElementById('rDetails').innerHTML=det;
+  if(data.scaleNote){document.getElementById('rNote').textContent='AI注記：'+data.scaleNote;document.getElementById('rNote').style.display='block';}
+  document.getElementById('resultNum').classList.remove('hidden');
+  document.getElementById('resultNum').scrollIntoView({behavior:'smooth'});
+}
+
+function copyRes(){
+  var w=parseFloat(document.getElementById('wInput').value);
+  var h=parseFloat(document.getElementById('hInput').value);
+  var d=G.calcRes;
+  var text='【塗装面積 AI計測結果】\n横幅：'+w+'m　高さ：'+h+'m\n外壁面積：'+(d.wallArea||w*h).toFixed(1)+' m²\n';
+  G.openings.forEach(function(op,i){
+    if(!op.widthM)return;
+    text+=(i+1)+' '+op.type+'：'+op.widthM.toFixed(2)+'m×'+op.heightM.toFixed(2)+'m ='+(op.areaM||0).toFixed(1)+' m²'+(op.warning?' ⚠'+op.warning:'')+'\n';
+  });
+  text+='開口部合計：'+(d.totalOpeningArea||0).toFixed(1)+' m²\n塗装面積：'+(d.paintArea||0).toFixed(1)+' m²';
   navigator.clipboard.writeText(text).then(function(){
-    var btn = document.querySelector('.copy-btn');
-    btn.textContent = '✅ コピーしました！';
-    setTimeout(function(){ btn.textContent = '📋 jimuuにコピーする'; }, 2000);
+    var btn=document.querySelector('.copy-btn');btn.textContent='✅ コピーしました！';
+    setTimeout(function(){btn.textContent='📋 jimuuにコピーする';},2000);
   });
 }
 
-// ===== ローディング =====
-function showLoading(text, sub) {
-  document.getElementById('loadingText').textContent = text;
-  document.getElementById('loadingSub').textContent = sub;
+function showLoading(text,sub){
+  document.getElementById('loadingText').textContent=text;
+  document.getElementById('loadingSub').textContent=sub;
   document.getElementById('loadingOverlay').classList.add('show');
-  var p = 0, paint = document.getElementById('brushPaint'), icon = document.getElementById('brushIcon');
-  state.brushTimer = setInterval(function(){ p+=1.5; if(p>100)p=0; paint.style.width=p+'%'; icon.style.left='calc('+p+'% - 14px)'; }, 30);
+  var p=0,paint=document.getElementById('brushPaint'),icon=document.getElementById('brushIcon');
+  G.brushT=setInterval(function(){p+=1.5;if(p>100)p=0;paint.style.width=p+'%';icon.style.left='calc('+p+'% - 14px)';},30);
 }
-function hideLoading() {
-  clearInterval(state.brushTimer);
+function hideLoading(){
+  clearInterval(G.brushT);
   document.getElementById('loadingOverlay').classList.remove('show');
-  document.getElementById('brushPaint').style.width = '0%';
-  document.getElementById('brushIcon').style.left = '0px';
+  document.getElementById('brushPaint').style.width='0%';
+  document.getElementById('brushIcon').style.left='0px';
 }
 
-function show(id) {
-  ['step1','step2','step3'].forEach(function(s){ document.getElementById(s).classList.toggle('hidden', s!==id); });
+function show(id){
+  ['step1','step2','step3','step4'].forEach(function(s){
+    document.getElementById(s).classList.toggle('hidden',s!==id);
+  });
   window.scrollTo(0,0);
 }
 
-function resetAll() {
-  state.imageSrc=null; state.imageBase64=null; state.openings=[]; state.editingId=null;
-  state.drawPoints=[]; stopBlink(); hideLoading();
-  document.getElementById('uploadPlaceholder').style.display='block';
-  document.getElementById('uploadPreview').style.display='none';
-  document.getElementById('uploadPreview').src='';
+function resetAll(){
+  G.src=null;G.b64=null;G.outline=null;G.openings=[];
+  G.drawPts=[];G.editId=null;stopBlink();hideLoading();
+  document.getElementById('upPh').style.display='block';
+  document.getElementById('upPrev').style.display='none';
+  document.getElementById('upPrev').src='';
   document.getElementById('retakeBtn').style.display='none';
   document.getElementById('fileInput').value='';
-  document.getElementById('step1Next').disabled=true;
-  document.getElementById('detectSpinner').style.display='none';
-  document.getElementById('detectBtnText').textContent='AIで開口部を認識する →';
-  document.getElementById('resultPhotoWrap').classList.add('hidden');
-  document.getElementById('resultCard').classList.add('hidden');
+  document.getElementById('s1Next').disabled=true;
+  document.getElementById('resultPhoto').classList.add('hidden');
+  document.getElementById('resultNum').classList.add('hidden');
+  document.getElementById('rNote').style.display='none';
   show('step1');
 }
 </script>
