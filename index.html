@@ -350,7 +350,6 @@ function confirmS2(){
 function goS3(){
   show('step3');
   buildOpList();
-
   var img=document.getElementById('img3');
   var cv=document.getElementById('cv3');
 
@@ -374,24 +373,11 @@ function goS3(){
     drawS3();
   }
 
-  // srcが同じ場合はonloadが発火しないのでcreateObjectURLで再生成
-  var blob=dataURLtoBlob(G.src);
-  var objUrl=URL.createObjectURL(blob);
-  img.onload=function(){
-    setupS3();
-    URL.revokeObjectURL(objUrl);
-  };
-  img.src=objUrl;
-}
-
-function dataURLtoBlob(dataURL){
-  var arr=dataURL.split(',');
-  var mime=arr[0].match(/:(.*?);/)[1];
-  var bstr=atob(arr[1]);
-  var n=bstr.length;
-  var u8arr=new Uint8Array(n);
-  for(var i=0;i<n;i++)u8arr[i]=bstr.charCodeAt(i);
-  return new Blob([u8arr],{type:mime});
+  img.onload=function(){ setupS3(); };
+  img.onerror=function(){ console.error('画像読み込みエラー'); };
+  // srcを空にしてから再設定することでonloadを確実に発火
+  img.src='';
+  img.src=G.src;
 }
 
 function drawS3(){
