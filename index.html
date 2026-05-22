@@ -227,6 +227,14 @@ function onFile(inp){
 
 // ===== Step2: 外枠選択 =====
 function goS2(){
+  // wrap2をstep2に戻す
+  var wrap2=document.getElementById('wrap2');
+  var step2=document.getElementById('step2');
+  // wrap2がstep2の外にある場合は戻す
+  if(!step2.contains(wrap2)){
+    var s2Status=document.getElementById('s2Status');
+    s2Status.insertAdjacentElement('afterend', wrap2);
+  }
   var img=document.getElementById('img2');
   img.src=G.src;
   img.onload=function(){
@@ -238,7 +246,7 @@ function goS2(){
 }
 
 function initCanvas(cvId,wrapId){
-  var img=document.getElementById(cvId==='cv2'?'img2':'img3');
+  var img=document.getElementById('img2');
   var cv=document.getElementById(cvId);
   cv.width=img.naturalWidth;cv.height=img.naturalHeight;
   cv.addEventListener('touchstart',function(e){e.preventDefault();onDS(e,cvId);},{passive:false});
@@ -352,49 +360,34 @@ function confirmS2(){
 
 // ===== Step3: 開口部指定 =====
 function goS3(){
-  // まずStep3を表示
   show('step3');
   buildOpList();
-
-  var img3=document.getElementById('img3');
-  var cv=document.getElementById('cv3');
-
-  function initS3(){
-    cv.width=G.imgW;
-    cv.height=G.imgH;
-    setupCv3(cv);
-    G.drawPts=[];stopBlink();
-    document.getElementById('s3Confirm').disabled=true;
-    document.getElementById('s3Status').textContent='開口部をなぞって指定してください';
-    drawS3();
+  // wrap2をsharedWrap3に移動して表示
+  var wrap2=document.getElementById('wrap2');
+  var shared=document.getElementById('sharedWrap3');
+  shared.innerHTML='';
+  shared.appendChild(wrap2);
+  // cv2のイベントをStep3用に更新
+  var cv2=document.getElementById('cv2');
+  if(!cv2._s3EventsSet){
+    cv2._s3EventsSet=true;
+    cv2.addEventListener('touchstart',function(e){e.preventDefault();onDS(e,'cv2');},{passive:false});
+    cv2.addEventListener('touchmove',function(e){e.preventDefault();onDM(e,'cv2');},{passive:false});
+    cv2.addEventListener('touchend',function(e){onDE(e,'cv2');},{passive:false});
+    cv2.addEventListener('mousedown',function(e){onDS(e,'cv2');});
+    cv2.addEventListener('mousemove',function(e){onDM(e,'cv2');});
+    cv2.addEventListener('mouseup',function(e){onDE(e,'cv2');});
   }
-
-  // G.imgWが既に設定されている場合（confirmS2後）
-  if(G.imgW>0 && img3.src===G.src){
-    initS3();
-  } else {
-    img3.onload=function(){
-      G.imgW=img3.naturalWidth;
-      G.imgH=img3.naturalHeight;
-      initS3();
-    };
-    img3.src=G.src;
-  }
+  G.drawPts=[];stopBlink();
+  document.getElementById('s3Confirm').disabled=true;
+  document.getElementById('s3Status').textContent='開口部をなぞって指定してください';
+  drawS3();
 }
 
-function setupCv3(cv){
-  if(cv._eventsSet)return;
-  cv._eventsSet=true;
-  cv.addEventListener('touchstart',function(e){e.preventDefault();onDS(e,'cv3');},{passive:false});
-  cv.addEventListener('touchmove',function(e){e.preventDefault();onDM(e,'cv3');},{passive:false});
-  cv.addEventListener('touchend',function(e){onDE(e,'cv3');},{passive:false});
-  cv.addEventListener('mousedown',function(e){onDS(e,'cv3');});
-  cv.addEventListener('mousemove',function(e){onDM(e,'cv3');});
-  cv.addEventListener('mouseup',function(e){onDE(e,'cv3');});
-}
+
 
 function drawS3(){
-  var cv=document.getElementById('cv3'),ctx=cv.getContext('2d');
+  var cv=document.getElementById('cv2'),ctx=cv.getContext('2d');
   ctx.clearRect(0,0,cv.width,cv.height);
 
   // 外枠を薄く表示
