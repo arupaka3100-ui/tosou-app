@@ -122,10 +122,7 @@ header h1{font-size:16px;font-weight:600}
       <button class="btn-sm-outline" onclick="goS2()">← 外枠</button>
       <div class="status-bar s-blue" id="s3Status" style="margin:0;flex:1;font-size:12px;padding:10px">開口部をなぞって指定してください</div>
     </div>
-    <div class="photo-wrap" id="wrap3">
-      <img id="img3" class="photo-img" style="width:100%;display:block">
-      <canvas id="cv3" class="photo-canvas"></canvas>
-    </div>
+    <div id="sharedWrap3"></div>
     <div class="btn-row">
       <button class="btn-sm-outline" onclick="clearDrawing()">やり直す</button>
       <button class="btn-sm-primary" id="s3Confirm" style="background:#0066cc" onclick="confirmDrawing()" disabled>この開口部を追加</button>
@@ -360,13 +357,13 @@ function confirmS2(){
 
 // ===== Step3: 開口部指定 =====
 function goS3(){
-  show('step3');
-  buildOpList();
-  // wrap2をsharedWrap3に移動して表示
+  // wrap2をsharedWrap3に移動してからstep3を表示
   var wrap2=document.getElementById('wrap2');
   var shared=document.getElementById('sharedWrap3');
   shared.innerHTML='';
   shared.appendChild(wrap2);
+  show('step3');
+  buildOpList();
   // cv2のイベントをStep3用に更新
   var cv2=document.getElementById('cv2');
   if(!cv2._s3EventsSet){
