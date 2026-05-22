@@ -343,39 +343,40 @@ function confirmS2(){
       h:Math.max.apply(null,ys)-Math.min.apply(null,ys)
     }
   };
+  // img2のサイズをG.imgW/Hに保存
+  var img2=document.getElementById('img2');
+  G.imgW=img2.naturalWidth;
+  G.imgH=img2.naturalHeight;
   goS3();
 }
 
 // ===== Step3: 開口部指定 =====
 function goS3(){
+  // まずStep3を表示
   show('step3');
   buildOpList();
-  // img2と同じ画像をimg3にも使う（既に読み込み済みのimg2を利用）
-  var img2=document.getElementById('img2');
+
   var img3=document.getElementById('img3');
   var cv=document.getElementById('cv3');
 
-  // img2が読み込み済みならそのサイズを使う
-  if(img2.naturalWidth>0){
-    G.imgW=img2.naturalWidth;
-    G.imgH=img2.naturalHeight;
-    img3.src=G.src;
+  function initS3(){
     cv.width=G.imgW;
     cv.height=G.imgH;
     setupCv3(cv);
     G.drawPts=[];stopBlink();
     document.getElementById('s3Confirm').disabled=true;
+    document.getElementById('s3Status').textContent='開口部をなぞって指定してください';
     drawS3();
+  }
+
+  // G.imgWが既に設定されている場合（confirmS2後）
+  if(G.imgW>0 && img3.src===G.src){
+    initS3();
   } else {
     img3.onload=function(){
       G.imgW=img3.naturalWidth;
       G.imgH=img3.naturalHeight;
-      cv.width=G.imgW;
-      cv.height=G.imgH;
-      setupCv3(cv);
-      G.drawPts=[];stopBlink();
-      document.getElementById('s3Confirm').disabled=true;
-      drawS3();
+      initS3();
     };
     img3.src=G.src;
   }
