@@ -415,12 +415,18 @@ function drawAll3(){
     for(var i=1;i<op.length;i++)ctx.lineTo(op[i].x,op[i].y);
     ctx.closePath();ctx.strokeStyle='rgba(255,255,255,0.5)';ctx.lineWidth=2;ctx.setLineDash([6,3]);ctx.stroke();ctx.setLineDash([]);
   }
-  // 確定済み開口部
+  // 確定済み開口部（なぞった輪郭そのまま表示）
   G.openings.forEach(function(op,i){
+    var pts=op.pts;
     var b=op.bbox;
-    ctx.strokeStyle=op.color;ctx.lineWidth=2.5;
-    ctx.strokeRect(b.x,b.y,b.w,b.h);
-    ctx.fillStyle=op.color+'22';ctx.fillRect(b.x,b.y,b.w,b.h);
+    if(!pts||pts.length<3)return;
+    // 輪郭を描画
+    ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);
+    for(var j=1;j<pts.length;j++)ctx.lineTo(pts[j].x,pts[j].y);
+    ctx.closePath();
+    ctx.strokeStyle=op.color;ctx.lineWidth=2.5;ctx.stroke();
+    ctx.fillStyle=op.color+'22';ctx.fill();
+    // ラベル（輪郭の上端に表示）
     var fs=Math.max(13,cv.width/45);
     ctx.font='bold '+fs+'px sans-serif';
     var lbl=(i+1)+'. '+op.type;
@@ -463,14 +469,24 @@ async function doCalc(){
   showLoading('AIで計算中...','遠近補正・妥当性チェックを行っています');
   try{
     var ops=G.openings.map(function(op){return{id:op.id,type:op.type,widthPx:op.bbox.w,heightPx:op.bbox.h};});
-    var res=await fetch('/api/analyze',{
-      method:'POST',headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({step:'calculate',imageBase64:G.b64,imageMediaType:G.mtype,
-        width:w,height:h,
-        outlinePx:{w:G.outline.bbox.w,h:G.outline.bbox.h},
-        openings:ops})
-    });
-    var data=await res.json();
+    // Overload時は最大3回リトライ
+    var res,data;
+    for(var retry=0;retry<3;retry++){
+      if(retry>0){
+        bt.textContent='リトライ中（'+(retry+1)+'/3）...';
+        await new Promise(function(r){setTimeout(r,2000);});
+      }
+      res=await fetch('/api/analyze',{
+        method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({step:'calculate',imageBase64:G.b64,imageMediaType:G.mtype,
+          width:w,height:h,
+          outlinePx:{w:G.outline.bbox.w,h:G.outline.bbox.h},
+          openings:ops})
+      });
+      data=await res.json();
+      if(res.ok)break;
+      if(!data.error||!data.error.includes('verload'))break;
+    }
     if(!res.ok)throw new Error(data.error||'計算エラー');
     hideLoading();
     (data.openings||[]).forEach(function(r){
@@ -503,11 +519,18 @@ function renderResPhoto(w,h){
     }
     G.openings.forEach(function(op){
       if(!op.widthM)return;
+      var pts=op.pts;
       var b=op.bbox;
-      var x=b.x*sx,y=b.y*sy,bw=b.w*sx,bh=b.h*sy;
-      ctx.strokeStyle=op.color;ctx.lineWidth=3;
-      ctx.strokeRect(x,y,bw,bh);
-      ctx.fillStyle=op.color+'33';ctx.fillRect(x,y,bw,bh);
+      // 輪郭そのまま表示
+      if(pts&&pts.length>2){
+        ctx.beginPath();ctx.moveTo(pts[0].x*sx,pts[0].y*sy);
+        for(var j=1;j<pts.length;j++)ctx.lineTo(pts[j].x*sx,pts[j].y*sy);
+        ctx.closePath();
+        ctx.strokeStyle=op.color;ctx.lineWidth=3;ctx.stroke();
+        ctx.fillStyle=op.color+'33';ctx.fill();
+      }
+      // サイズラベル
+      var x=b.x*sx,y=b.y*sy;
       var fs=Math.max(13,cv.width/50);
       ctx.font='bold '+fs+'px sans-serif';
       var lbl='幅'+op.widthM.toFixed(2)+'m × 高'+op.heightM.toFixed(2)+'m'+(op.warning?' ⚠':'');
