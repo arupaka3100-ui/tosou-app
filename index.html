@@ -495,8 +495,9 @@ async function doCalc(){
     }
     if(!res.ok)throw new Error(data.error||'計算エラー');
     hideLoading();
-    (data.openings||[]).forEach(function(r){
-      var op=G.openings.find(function(o){return o.id===r.id;});
+    // IDではなくインデックスで照合（AIが異なるIDを返すため）
+    (data.openings||[]).forEach(function(r,i){
+      var op=G.openings[i];
       if(op){op.widthM=r.widthM;op.heightM=r.heightM;op.areaM=r.areaM;op.warning=r.warning;}
     });
     G.calcRes=data;
