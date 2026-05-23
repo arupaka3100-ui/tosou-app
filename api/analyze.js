@@ -83,12 +83,12 @@ JSONのみで返答：
       const serverWallArea = parseFloat((w2 * h2).toFixed(1));
       
       // 開口部の合計面積もサーバーで計算
-      const openingsOut = (result.openings || []).map(op => ({
-        ...op,
-        widthM: parseFloat(parseFloat(op.widthM || 0).toFixed(2)),
-        heightM: parseFloat(parseFloat(op.heightM || 0).toFixed(2)),
-        areaM: parseFloat(parseFloat(op.areaM || 0).toFixed(2))
-      }));
+      const openingsOut = (result.openings || []).map(op => {
+        const wM = parseFloat(parseFloat(op.widthM || 0).toFixed(2));
+        const hM = parseFloat(parseFloat(op.heightM || 0).toFixed(2));
+        const aM = parseFloat((wM * hM).toFixed(2));
+        return { ...op, widthM: wM, heightM: hM, areaM: aM };
+      });
       const totalOpening = parseFloat(openingsOut.reduce((s,o) => s + (o.areaM||0), 0).toFixed(1));
       const paintArea = parseFloat(Math.max(0, serverWallArea - totalOpening).toFixed(1));
       
