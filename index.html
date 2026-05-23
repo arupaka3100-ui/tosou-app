@@ -166,6 +166,8 @@ header h1{font-size:16px;font-weight:600}
         <canvas id="resCv" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none"></canvas>
       </div>
       <div style="font-size:11px;color:#888;text-align:center;margin-top:6px">表示：幅（横）× 高さ（縦）　⚠=要確認</div>
+      <!-- 開口部サイズ一覧 -->
+      <div id="opSizeList" style="margin-top:12px"></div>
     </div>
   </div>
   <div id="resultNum" class="hidden">
@@ -564,6 +566,31 @@ function renderResNum(w,h,data){
   var paintArea=(data.paintArea||0).toFixed(1);
   document.getElementById('rWall').textContent=wallArea+' m²';
   document.getElementById('rPaint').textContent=paintArea+' m²';
+
+  // 開口部サイズ一覧（写真の下）
+  var opSizeEl=document.getElementById('opSizeList');
+  if(opSizeEl){
+    var opHtml='<table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:4px">';
+    opHtml+='<thead><tr style="background:#f0f0e8">';
+    opHtml+='<th style="padding:6px 8px;text-align:left;border-bottom:1px solid #e0e0d8;color:#888">開口部</th>';
+    opHtml+='<th style="padding:6px 8px;text-align:center;border-bottom:1px solid #e0e0d8;color:#888">幅</th>';
+    opHtml+='<th style="padding:6px 8px;text-align:center;border-bottom:1px solid #e0e0d8;color:#888">高さ</th>';
+    opHtml+='<th style="padding:6px 8px;text-align:center;border-bottom:1px solid #e0e0d8;color:#888">面積</th>';
+    opHtml+='</tr></thead><tbody>';
+    G.openings.forEach(function(op,i){
+      if(!op.widthM)return;
+      var warn=op.warning?' ⚠':'';
+      var warnColor=op.warning?'color:#cc3333':'';
+      opHtml+='<tr style="border-bottom:1px solid #f0f0e8">';
+      opHtml+='<td style="padding:7px 8px;'+warnColor+'"><span style="display:inline-block;width:10px;height:10px;background:'+op.color+';border-radius:2px;margin-right:5px;vertical-align:middle"></span>'+(i+1)+'. '+op.type+warn+'</td>';
+      opHtml+='<td style="padding:7px 8px;text-align:center;font-weight:700;'+warnColor+'">'+op.widthM.toFixed(2)+'m</td>';
+      opHtml+='<td style="padding:7px 8px;text-align:center;font-weight:700;'+warnColor+'">'+op.heightM.toFixed(2)+'m</td>';
+      opHtml+='<td style="padding:7px 8px;text-align:center;'+warnColor+'">'+(op.areaM||0).toFixed(2)+'m²</td>';
+      opHtml+='</tr>';
+    });
+    opHtml+='</tbody></table>';
+    opSizeEl.innerHTML=opHtml;
+  }
   var det='';
   G.openings.forEach(function(op,i){
     if(!op.widthM)return;
