@@ -76,7 +76,29 @@ JSONのみで返答：
       const data = await response.json();
       if (!response.ok) throw new Error(data.error?.message || 'APIエラー');
       const result = JSON.parse(data.content.map(i => i.text||'').join('').replace(/```json|```/g,'').trim());
-      return res.status(200).json(result);
+      
+      // wallAreaをサーバー側で計算（AIの返す値に依存しない）
+      const w2 = parseFloat(width);
+      const h2 = parseFloat(height);
+      const serverWallArea = parseFloat((w2 * h2).toFixed(1));
+      
+      // 開口部の合計面積もサーバーで計算
+      const openingsOut = (result.openings || []).map(op => ({
+        ...op,
+        widthM: parseFloat(parseFloat(op.widthM || 0).toFixed(2)),
+        heightM: parseFloat(parseFloat(op.heightM || 0).toFixed(2)),
+        areaM: parseFloat(parseFloat(op.areaM || 0).toFixed(2))
+      }));
+      const totalOpening = parseFloat(openingsOut.reduce((s,o) => s + (o.areaM||0), 0).toFixed(1));
+      const paintArea = parseFloat(Math.max(0, serverWallArea - totalOpening).toFixed(1));
+      
+      return res.status(200).json({
+        ...result,
+        openings: openingsOut,
+        wallArea: serverWallArea,
+        totalOpeningArea: totalOpening,
+        paintArea: paintArea
+      });
     } catch(e) {
       return res.status(500).json({ error: e.message });
     }
