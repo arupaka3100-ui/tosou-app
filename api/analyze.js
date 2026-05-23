@@ -11,9 +11,9 @@ export default async function handler(req, res) {
     const h = parseFloat(height);
 
     // 外枠の左端・右端それぞれの縮尺を計算（遠近補正）
-    const outlineWpx = outlinePx?.w || 1;
-    const leftHpx = outlinePx?.leftH || outlinePx?.h || 1;
-    const rightHpx = outlinePx?.rightH || outlinePx?.h || 1;
+    const outlineWpx = (outlinePx && outlinePx.w) || 1;
+    const leftHpx = (outlinePx && outlinePx.leftH) || (outlinePx && outlinePx.h) || 1;
+    const rightHpx = (outlinePx && outlinePx.rightH) || (outlinePx && outlinePx.h) || 1;
 
     // 左端・右端の縮尺（m/px）
     const scaleLeft = h / leftHpx;
@@ -22,7 +22,7 @@ export default async function handler(req, res) {
 
     // 各開口部のpxを実寸に変換（X位置で縮尺を補間）
     const openingDesc = (openings || []).map((op, i) => {
-      const xRatio = op.xRatio ?? 0.5;
+      const xRatio = (op.xRatio != null ? op.xRatio : 0.5);
       // X位置に応じて左右の縮尺を線形補間
       const scaleH = scaleLeft + (scaleRight - scaleLeft) * xRatio;
       const wM = parseFloat((op.widthPx * scaleW).toFixed(3));
@@ -81,8 +81,13 @@ JSONのみで返答：
         })
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error?.message || 'APIエラー');
-      const result = JSON.parse(data.content.map(i => i.text||'').join('').replace(/```json|```/g,'').trim());
+      if (!response.ok) throw new Error(data.error && data.error.message || 'APIエラー');
+      let result;
+      try {
+        result = JSON.parse(data.content.map(i => i.text||'').join('').replace(/```json|```/g,'').trim());
+      } catch(parseErr) {
+        return res.status(500).json({ error: 'AIの応答をJSONに変換できませんでした: ' + parseErr.message });
+      }
       
       // wallAreaをサーバー側で計算（AIの返す値に依存しない）
       const w2 = parseFloat(width);
@@ -90,9 +95,18 @@ JSONのみで返答：
       const serverWallArea = parseFloat((w2 * h2).toFixed(1));
       
       // 開口部の合計面積もサーバーで計算
-      const openingsOut = (result.openings || []).map(op => {
-        const wM = parseFloat(parseFloat(op.widthM || 0).toFixed(2));
-        const hM = parseFloat(parseFloat(op.heightM || 0).toFixed(2));
+      const       openingsOut = (result.openings || []).map((op, i) => {
+        const origOp = (openings || [])[i] || {};
+        const xRatio = (origOp.xRatio != null ? origOp.xRatio : 0.5);
+        const scaleH = scaleLeft + (scaleRight - scaleLeft) * xRatio;
+        // px換算値を計算
+        const pxW = parseFloat((origOp.widthPx * scaleW).toFixed(2));
+        const pxH = parseFloat((origOp.heightPx * scaleH).toFixed(2));
+        // AIの値とpx換算値を比較し、30%以上乖離ならpx換算値を採用
+        let wM = parseFloat(parseFloat(op.widthM || pxW).toFixed(2));
+        let hM = parseFloat(parseFloat(op.heightM || pxH).toFixed(2));
+        if (pxW > 0 && Math.abs(wM - pxW) / pxW > 0.3) wM = pxW;
+        if (pxH > 0 && Math.abs(hM - pxH) / pxH > 0.3) hM = pxH;
         const aM = parseFloat((wM * hM).toFixed(2));
         return { ...op, widthM: wM, heightM: hM, areaM: aM };
       });
