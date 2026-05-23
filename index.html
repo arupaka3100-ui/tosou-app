@@ -308,7 +308,7 @@ function buildOpList(){
       '<div class="op-col" style="background:'+op.color+'"></div>'+
       '<div class="op-info">'+
         '<div class="op-type">'+(i+1)+'. '+op.type+'</div>'+
-        '<div class="op-size">'+(op.widthM?'幅'+op.widthM.toFixed(2)+'m × 高'+op.heightM.toFixed(2)+'m':'（計算前）')+(op.warning?' ⚠':'')+'</div>'+
+        '<div class="op-size">'+(op.widthM?'幅'+parseFloat(op.widthM).toFixed(2)+'m × 高'+parseFloat(op.heightM).toFixed(2)+'m':'（計算前）')+(op.warning?' ⚠':'')+'</div>'+
       '</div>'+
       '<div class="op-actions">'+
         '<button class="op-btn ob-r" onclick="redrawOp(\''+op.id+'\')">修正</button>'+
@@ -565,7 +565,7 @@ function loadImgTo(img,cb){
 
 function renderResNum(w,h,data){
   var wallArea=parseFloat(data.wallArea||(w*h)).toFixed(1);
-  var paintArea=(data.paintArea||0).toFixed(1);
+  var paintArea=parseFloat(data.paintArea||0).toFixed(1);
   document.getElementById('rWall').textContent=wallArea+' m²';
   document.getElementById('rPaint').textContent=paintArea+' m²';
 
@@ -575,9 +575,9 @@ function renderResNum(w,h,data){
     if(!op.widthM)return;
     var warn=op.warning?'<span style="color:#ff6b7a"> ⚠'+op.warning+'</span>':'';
     det+='<div class="dr"><span style="color:rgba(255,255,255,.7)">'+(i+1)+' '+op.type+'</span>'+
-      '<span>'+op.widthM.toFixed(2)+'×'+op.heightM.toFixed(2)+'m ='+(op.areaM||0).toFixed(1)+'m²'+warn+'</span></div>';
+      '<span>'+parseFloat(op.widthM).toFixed(2)+'×'+parseFloat(op.heightM).toFixed(2)+'m ='+parseFloat(op.areaM||0).toFixed(1)+'m²'+warn+'</span></div>';
   });
-  det+='<div class="dr"><span style="color:rgba(255,255,255,.6)">開口部合計</span><span>−'+(data.totalOpeningArea||0).toFixed(1)+' m²</span></div>';
+  det+='<div class="dr"><span style="color:rgba(255,255,255,.6)">開口部合計</span><span>−'+parseFloat(data.totalOpeningArea||0).toFixed(1)+' m²</span></div>';
   document.getElementById('rDetails').innerHTML=det;
   if(data.scaleNote){document.getElementById('rNote').textContent='AI注記：'+data.scaleNote;document.getElementById('rNote').style.display='block';}
   document.getElementById('resultNum').classList.remove('hidden');
@@ -599,9 +599,9 @@ function renderResNum(w,h,data){
         var wc=op.warning?'color:#cc3333':'';
         opHtml+='<tr style="border-bottom:1px solid #f0f0e8">';
         opHtml+='<td style="padding:7px 8px;'+wc+'"><span style="display:inline-block;width:10px;height:10px;background:'+op.color+';border-radius:2px;margin-right:5px;vertical-align:middle"></span>'+op.type+warn+'</td>';
-        opHtml+='<td style="padding:7px 8px;text-align:center;font-weight:700;'+wc+'">'+op.widthM.toFixed(2)+'m</td>';
-        opHtml+='<td style="padding:7px 8px;text-align:center;font-weight:700;'+wc+'">'+op.heightM.toFixed(2)+'m</td>';
-        opHtml+='<td style="padding:7px 8px;text-align:center;'+wc+'">'+(op.areaM||0).toFixed(2)+'m²</td>';
+        opHtml+='<td style="padding:7px 8px;text-align:center;font-weight:700;'+wc+'">'+parseFloat(op.widthM).toFixed(2)+'m</td>';
+        opHtml+='<td style="padding:7px 8px;text-align:center;font-weight:700;'+wc+'">'+parseFloat(op.heightM).toFixed(2)+'m</td>';
+        opHtml+='<td style="padding:7px 8px;text-align:center;'+wc+'">'+parseFloat(op.areaM||0).toFixed(2)+'m²</td>';
         opHtml+='</tr>';
       });
       opHtml+='</tbody></table>';
@@ -616,12 +616,12 @@ function copyRes(){
   var w=parseFloat(document.getElementById('wInput').value);
   var h=parseFloat(document.getElementById('hInput').value);
   var d=G.calcRes;
-  var text='【塗装面積 AI計測結果】\n横幅：'+w+'m　高さ：'+h+'m\n外壁面積：'+(d.wallArea||w*h).toFixed(1)+' m²\n';
+  var text='【塗装面積 AI計測結果】\n横幅：'+w+'m　高さ：'+h+'m\n外壁面積：'+parseFloat(d.wallArea||(w*h)).toFixed(1)+' m²\n';
   G.openings.forEach(function(op,i){
     if(!op.widthM)return;
-    text+=(i+1)+' '+op.type+'：'+op.widthM.toFixed(2)+'m×'+op.heightM.toFixed(2)+'m ='+(op.areaM||0).toFixed(1)+' m²'+(op.warning?' ⚠'+op.warning:'')+'\n';
+    text+=(i+1)+' '+op.type+'：'+parseFloat(op.widthM).toFixed(2)+'m×'+parseFloat(op.heightM).toFixed(2)+'m ='+parseFloat(op.areaM||0).toFixed(1)+' m²'+(op.warning?' ⚠'+op.warning:'')+'\n';
   });
-  text+='開口部合計：'+(d.totalOpeningArea||0).toFixed(1)+' m²\n塗装面積：'+(d.paintArea||0).toFixed(1)+' m²';
+  text+='開口部合計：'+parseFloat(d.totalOpeningArea||0).toFixed(1)+' m²\n塗装面積：'+parseFloat(d.paintArea||0).toFixed(1)+' m²';
   navigator.clipboard.writeText(text).then(function(){
     var btn=document.querySelector('.cb');btn.textContent='✅ コピーしました！';
     setTimeout(function(){btn.textContent='📋 jimuuにコピーする';},2000);
