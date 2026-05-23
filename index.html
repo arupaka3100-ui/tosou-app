@@ -474,7 +474,19 @@ async function doCalc(){
   btn.disabled=true;sp.style.display='block';bt.textContent='AIが計算・判断中...';
   showLoading('AIで計算中...','遠近補正・妥当性チェックを行っています');
   try{
-    var ops=G.openings.map(function(op){return{id:op.id,type:op.type,widthPx:op.bbox.w,heightPx:op.bbox.h};});
+    // 外枠の左端・右端X位置
+    var outlineXs = G.outline.pts.map(function(p){return p.x;});
+    var outlineLeft = Math.min.apply(null, outlineXs);
+    var outlineRight = Math.max.apply(null, outlineXs);
+    var outlineWidth = outlineRight - outlineLeft;
+
+    var ops=G.openings.map(function(op){
+      // 開口部の中心X位置が外枠内で何割の位置か（0=左端, 1=右端）
+      var centerX = op.bbox.x + op.bbox.w / 2;
+      var xRatio = outlineWidth > 0 ? (centerX - outlineLeft) / outlineWidth : 0.5;
+      xRatio = Math.max(0, Math.min(1, xRatio));
+      return {id:op.id, type:op.type, widthPx:op.bbox.w, heightPx:op.bbox.h, xRatio:xRatio};
+    });
     // Overload時は最大3回リトライ
     var res,data;
     for(var retry=0;retry<3;retry++){
@@ -486,7 +498,16 @@ async function doCalc(){
         method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({step:'calculate',imageBase64:G.b64,imageMediaType:G.mtype,
           width:w,height:h,
-          outlinePx:{w:G.outline.bbox.w,h:G.outline.bbox.h},
+          outlinePx:{w:G.outline.bbox.w,h:G.outline.bbox.h,
+            leftH:(function(){
+              var lPts=G.outline.pts.filter(function(p){return p.x<outlineLeft+outlineWidth*0.3;});
+              return lPts.length>1?Math.max.apply(null,lPts.map(function(p){return p.y;}))-Math.min.apply(null,lPts.map(function(p){return p.y;})):G.outline.bbox.h;
+            })(),
+            rightH:(function(){
+              var rPts=G.outline.pts.filter(function(p){return p.x>outlineLeft+outlineWidth*0.7;});
+              return rPts.length>1?Math.max.apply(null,rPts.map(function(p){return p.y;}))-Math.min.apply(null,rPts.map(function(p){return p.y;})):G.outline.bbox.h;
+            })()
+          },
           openings:ops})
       });
       data=await res.json();
