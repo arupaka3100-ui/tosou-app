@@ -10,17 +10,24 @@ export default async function handler(req, res) {
     const w = parseFloat(width);
     const h = parseFloat(height);
 
-    // 縮尺計算（外枠pxと実測値から）
+    // 外枠の左端・右端それぞれの縮尺を計算（遠近補正）
     const outlineWpx = outlinePx?.w || 1;
-    const outlineHpx = outlinePx?.h || 1;
-    const scaleW = w / outlineWpx; // m/px（横）
-    const scaleH = h / outlineHpx; // m/px（縦）
+    const leftHpx = outlinePx?.leftH || outlinePx?.h || 1;
+    const rightHpx = outlinePx?.rightH || outlinePx?.h || 1;
 
-    // 各開口部のpxを実寸に変換してAIに渡す
+    // 左端・右端の縮尺（m/px）
+    const scaleLeft = h / leftHpx;
+    const scaleRight = h / rightHpx;
+    const scaleW = w / outlineWpx;
+
+    // 各開口部のpxを実寸に変換（X位置で縮尺を補間）
     const openingDesc = (openings || []).map((op, i) => {
+      const xRatio = op.xRatio ?? 0.5;
+      // X位置に応じて左右の縮尺を線形補間
+      const scaleH = scaleLeft + (scaleRight - scaleLeft) * xRatio;
       const wM = parseFloat((op.widthPx * scaleW).toFixed(3));
       const hM = parseFloat((op.heightPx * scaleH).toFixed(3));
-      return `開口部${i+1}（${op.type}）: 幅${wM}m × 高さ${hM}m（px換算値）`;
+      return `開口部${i+1}（${op.type}）: 幅${wM}m × 高さ${hM}m（X位置${(xRatio*100).toFixed(0)}%、縮尺h=${scaleH.toFixed(4)}m/px）`;
     }).join('\n');
 
     const prompt = `あなたは塗装業の見積り専門AIです。
