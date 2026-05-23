@@ -498,8 +498,8 @@ async function doCalc(){
       if(op){op.widthM=r.widthM;op.heightM=r.heightM;op.areaM=r.areaM;op.warning=r.warning;}
     });
     G.calcRes=data;
-    renderResPhoto(w,h);
-    renderResNum(w,h,data);
+    renderResNum(w,h,data);  // 先に数値結果を表示
+    renderResPhoto(w,h);     // 写真は非同期で表示
   }catch(e){
     hideLoading();
     err.textContent='エラー：'+e.message;err.style.display='block';
@@ -533,21 +533,23 @@ function renderResPhoto(w,h){
         ctx.strokeStyle=op.color;ctx.lineWidth=3;ctx.stroke();
         ctx.fillStyle=op.color+'33';ctx.fill();
       }
-      // サイズラベル
-      var x=b.x*sx,y=b.y*sy;
-      var fs=Math.max(13,cv.width/50);
-      ctx.font='bold '+fs+'px sans-serif';
-      var lbl='幅'+op.widthM.toFixed(2)+'m × 高'+op.heightM.toFixed(2)+'m'+(op.warning?' ⚠':'');
-      var tw=ctx.measureText(lbl).width;
-      ctx.fillStyle=op.warning?'#cc3333':op.color;
-      ctx.fillRect(x,y-fs-6,tw+8,fs+6);
-      ctx.fillStyle='white';ctx.fillText(lbl,x+4,y-4);
+      // 番号のみ表示
+      var idx=G.openings.indexOf(op);
+      var cx=(b.x+b.w/2)*sx, cy=(b.y+b.h/2)*sy;
+      var fs=Math.max(14,cv.width/40);
+      ctx.fillStyle=op.color;
+      ctx.beginPath();ctx.arc(cx,cy,fs,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='white';ctx.font='bold '+fs+'px sans-serif';
+      ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText((idx+1)+'',cx,cy);
+      ctx.textAlign='left';ctx.textBaseline='alphabetic';
     });
     ctx.fillStyle='rgba(0,0,0,0.65)';ctx.fillRect(0,cv.height-28,cv.width,28);
     ctx.fillStyle='white';ctx.font='bold 13px sans-serif';
     ctx.fillText('表示：幅（横）× 高さ（縦）　⚠=要確認',8,cv.height-9);
   });
   document.getElementById('resultPhoto').classList.remove('hidden');
+  document.getElementById('resultPhoto').scrollIntoView({behavior:'smooth'});
 }
 
 function loadImgTo(img,cb){
@@ -607,7 +609,7 @@ function renderResNum(w,h,data){
     }
   }
 
-  document.getElementById('resultNum').scrollIntoView({behavior:'smooth'});
+  // scrollはrenderResPhotoのimg.onload後に実行
 }
 
 function copyRes(){
