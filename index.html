@@ -278,9 +278,11 @@ function confirmDraw(){
   var type=prompt('この開口部の種類を入力してください\n例：引き違い窓、玄関ドア、掃き出し窓、FIX窓');
   if(!type)return;
   stopBlink();
+  // pts からキャンバス座標のみ抽出（cx,cyはクライアント座標なので除外）
+  var canvasPts=pts.map(function(p){return{x:p.x,y:p.y};});
   G.openings.push({
     id:'op_'+Date.now(),type:type,
-    pts:pts.slice(),bbox:{x:bx,y:by,w:bw,h:bh},
+    pts:canvasPts,bbox:{x:bx,y:by,w:bw,h:bh},
     color:COLORS[G.openings.length%COLORS.length],
     widthM:null,heightM:null,areaM:null,warning:null
   });
@@ -558,7 +560,7 @@ function loadImgTo(img,cb){
 }
 
 function renderResNum(w,h,data){
-  var wallArea=(data.wallArea||w*h).toFixed(1);
+  var wallArea=parseFloat(data.wallArea||(w*h)).toFixed(1);
   var paintArea=(data.paintArea||0).toFixed(1);
   document.getElementById('rWall').textContent=wallArea+' m²';
   document.getElementById('rPaint').textContent=paintArea+' m²';
