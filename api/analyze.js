@@ -36,8 +36,8 @@ export default async function handler(req, res) {
 - 横幅：${w}m
 - 高さ：${h}m
 
-外枠のピクセルサイズ：幅${outlineWpx}px × 高さ${outlineHpx}px
-縮尺：横${scaleW.toFixed(4)}m/px、縦${scaleH.toFixed(4)}m/px
+外枠のピクセルサイズ：幅${outlineWpx}px
+縮尺（横）：${scaleW.toFixed(4)}m/px、縮尺（左端縦）：${scaleLeft.toFixed(4)}m/px、縮尺（右端縦）：${scaleRight.toFixed(4)}m/px
 
 人間が指定した各開口部のpx換算値：
 ${openingDesc}
