@@ -3,17 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>塗装面積 AI計測v2</title>
+<title>塗装面積 AI計測 v2</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Hiragino Kaku Gothic ProN',sans-serif;background:#f5f5f0;min-height:100vh;padding-bottom:80px}
 header{background:#1a1a2e;color:white;padding:14px 20px;display:flex;align-items:center;justify-content:space-between}
 header h1{font-size:16px;font-weight:600}
-.beta{font-size:11px;background:#e94560;padding:2px 8px;border-radius:20px}
+.badge{font-size:11px;background:#2d9e5a;padding:2px 8px;border-radius:20px}
 .container{padding:16px;max-width:600px;margin:0 auto}
 .card{background:white;border-radius:12px;padding:18px;margin-bottom:14px;border:1px solid #e0e0d8}
 .card-title{font-size:12px;font-weight:600;color:#888;margin-bottom:12px}
 .note-box{background:#fffbf0;border:1px solid #f0e0a0;border-radius:8px;padding:12px;font-size:12px;color:#886600;margin-bottom:14px;line-height:1.6}
+.info-box{background:#f0f8ff;border:1px solid #b8d8f8;border-radius:8px;padding:12px;font-size:12px;color:#0066cc;margin-bottom:14px;line-height:1.6}
+.a4-box{background:#f0fff4;border:2px solid #2d9e5a;border-radius:8px;padding:12px;font-size:12px;color:#1a6b3a;margin-bottom:14px;line-height:1.6}
 .btn{width:100%;border:none;border-radius:12px;padding:15px;font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:10px;font-family:inherit}
 .btn-primary{background:#e94560;color:white}
 .btn-green{background:#2d9e5a;color:white}
@@ -31,10 +33,17 @@ header h1{font-size:16px;font-weight:600}
 .brush-track{position:absolute;bottom:10px;left:0;width:100%;height:8px;background:rgba(255,255,255,.15);border-radius:4px}
 .brush-paint{position:absolute;bottom:10px;left:0;width:0%;height:8px;background:linear-gradient(90deg,#8B4513,#e07000,#ff9900);border-radius:4px}
 .brush-icon{position:absolute;bottom:12px;font-size:26px;left:0}
+.upload-box{position:relative;border:2px dashed #e0e0d8;border-radius:8px;background:white;overflow:hidden;margin-bottom:8px}
+.upload-placeholder{padding:30px 20px;text-align:center}
+.upload-placeholder img{width:100%;display:block;border-radius:6px}
+.upload-file{position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.upload-label{font-size:14px;font-weight:600;margin-bottom:4px}
+.upload-sub{font-size:12px;color:#888}
+.a4-badge{display:inline-block;background:#2d9e5a;color:white;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;margin-top:6px}
 .photo-wrap{position:relative;border-radius:8px;overflow:hidden;margin-bottom:8px;touch-action:none;-webkit-user-select:none;user-select:none}
 .photo-wrap img{width:100%;display:block}
 .photo-wrap canvas{position:absolute;top:0;left:0;width:100%;height:100%;background:transparent}
-.cursor-dot{position:fixed;width:18px;height:18px;border:3px solid #e94560;border-radius:50%;pointer-events:none;display:none;z-index:999;transform:translate(-50%,-180%);background:rgba(233,69,96,0.25);box-shadow:0 0 0 2px rgba(0,0,0,.4)}
+.cursor-dot{position:fixed;width:18px;height:18px;border:3px solid #e94560;border-radius:50%;pointer-events:none;display:none;z-index:999;transform:translate(-50%,-180%);background:rgba(233,69,96,0.25)}
 .sbar{border-radius:8px;padding:11px 14px;margin-bottom:8px;font-size:13px;font-weight:600;text-align:center;color:white}
 .s-red{background:#e94560}.s-blue{background:#0066cc}.s-green{background:#2d9e5a}
 .btn-row{display:flex;gap:8px;margin-bottom:10px}
@@ -53,6 +62,7 @@ header h1{font-size:16px;font-weight:600}
 .mr{display:flex;align-items:center;gap:10px;margin-bottom:12px}
 .ml{font-size:13px;font-weight:600;min-width:60px}
 .req{font-size:10px;background:#cc3333;color:white;padding:1px 5px;border-radius:6px;margin-left:4px}
+.opt{font-size:10px;background:#888;color:white;padding:1px 5px;border-radius:6px;margin-left:4px}
 .mi{flex:1;border:2px solid #b8d8f8;border-radius:8px;padding:11px;font-size:20px;font-family:inherit;background:white;text-align:center;font-weight:700;-webkit-appearance:none}
 .mi:focus{outline:none;border-color:#0066cc}
 .mu{font-size:13px;color:#888}
@@ -66,38 +76,64 @@ header h1{font-size:16px;font-weight:600}
 .dr:last-child{border-bottom:none}
 .cb{width:100%;background:rgba(255,255,255,.12);color:white;border:1px solid rgba(255,255,255,.2);border-radius:8px;padding:11px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;margin-top:10px}
 .eb{background:#fff0f0;border:1px solid #ffcccc;border-radius:8px;padding:12px;font-size:12px;color:#cc3333;margin-bottom:10px;display:none}
+.op-tbl{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:14px;background:white;border-radius:8px;overflow:hidden;border:1px solid #e0e0d8}
+.op-tbl th{background:#f0f0e8;padding:7px 10px;text-align:left;font-weight:600;color:#888;border-bottom:1px solid #e0e0d8}
+.op-tbl td{padding:8px 10px;border-bottom:1px solid #f0f0e8}
+.op-tbl tr:last-child td{border-bottom:none}
 </style>
 </head>
 <body>
 <div class="loading-overlay" id="loadingOverlay">
   <div class="brush-wrap"><div class="brush-track"></div><div class="brush-paint" id="brushPaint"></div><div class="brush-icon" id="brushIcon">🖌️</div></div>
-  <div class="loading-text" id="loadingText">計算中...</div>
+  <div class="loading-text" id="loadingText">AI解析中...</div>
   <div class="loading-sub" id="loadingSub">しばらくお待ちください</div>
 </div>
 <div class="cursor-dot" id="cursorDot"></div>
-<header><h1>塗装面積 AI計測</h1><span class="beta">Beta</span></header>
+<header><h1>塗装面積 AI計測</h1><span class="badge">v2 A4基準</span></header>
 <div class="container">
 
-<!-- Step1 -->
+<!-- Step1: 写真アップロード -->
 <div id="step1">
-  <div class="card">
-    <div class="card-title">外壁写真をアップロード</div>
-    <div style="position:relative;border:2px dashed #e0e0d8;border-radius:8px;background:white;overflow:hidden">
-      <div id="upPh" style="padding:40px 20px;text-align:center">
-        <div style="font-size:40px;margin-bottom:10px">🏠</div>
-        <div style="font-size:15px;font-weight:600;margin-bottom:6px">写真をタップして選択</div>
-        <div style="font-size:12px;color:#888">カメラまたはライブラリから</div>
-      </div>
-      <img id="upPrev" style="width:100%;display:none">
-      <input type="file" id="fileInput" accept="image/*" style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer" onchange="onFile(this)">
-    </div>
-    <button class="btn btn-outline" id="retakeBtn" style="display:none;margin-top:8px;padding:10px;font-size:13px" onclick="document.getElementById('fileInput').click()">📷 撮り直す</button>
+  <div class="a4-box">
+    📄 <strong>A4用紙を壁に貼ってから撮影してください</strong><br>
+    A4用紙（210×297mm）を塗装面の壁に貼ることで、正確な縮尺計算が可能になります。<br>
+    角度を変えて2枚撮影するとさらに精度が向上します。
   </div>
-  <div class="note-box">建物全体が写るよう少し離れて撮影してください。</div>
-  <button class="btn btn-primary" id="s1Next" onclick="goS2()" disabled>次へ：外枠を選択する →</button>
+  <div class="card">
+    <div class="card-title">📷 写真1枚目（必須）</div>
+    <div class="upload-box" id="box1">
+      <div id="ph1" class="upload-placeholder">
+        <div style="font-size:36px;margin-bottom:8px">📸</div>
+        <div class="upload-label">A4紙を貼った壁の写真</div>
+        <div class="upload-sub">タップして選択</div>
+        <div class="a4-badge">A4紙必須</div>
+      </div>
+      <img id="prev1" style="width:100%;display:none">
+      <input type="file" id="file1" accept="image/*" class="upload-file" onchange="onFile1(this)">
+    </div>
+    <button class="btn btn-outline" id="retake1" style="display:none;padding:8px;font-size:12px;margin-bottom:0" onclick="document.getElementById('file1').click()">📷 撮り直す</button>
+  </div>
+  <div class="card">
+    <div class="card-title">📷 写真2枚目（任意・角度を変えて）</div>
+    <div class="upload-box" id="box2">
+      <div id="ph2" class="upload-placeholder">
+        <div style="font-size:36px;margin-bottom:8px">📸</div>
+        <div class="upload-label">別角度からの写真</div>
+        <div class="upload-sub">タップして選択（省略可）</div>
+      </div>
+      <img id="prev2" style="width:100%;display:none">
+      <input type="file" id="file2" accept="image/*" class="upload-file" onchange="onFile2(this)">
+    </div>
+    <button class="btn btn-outline" id="retake2" style="display:none;padding:8px;font-size:12px;margin-bottom:0" onclick="document.getElementById('file2').click()">📷 撮り直す</button>
+  </div>
+  <div class="note-box">建物全体が写るよう少し離れて撮影してください。A4用紙は窓や壁の近くに貼ってください。</div>
+  <button class="btn btn-primary" id="s1Next" onclick="startAnalyze()" disabled>
+    <div class="spinner" id="s1Sp"></div>
+    <span id="s1Txt">AIで解析する →</span>
+  </button>
 </div>
 
-<!-- Step2 -->
+<!-- Step2: 外枠選択 -->
 <div id="step2" class="hidden">
   <div class="sbar s-red" id="s2Status">外壁の外枠を指でなぞって囲んでください</div>
   <div class="photo-wrap" id="wrap2">
@@ -108,10 +144,11 @@ header h1{font-size:16px;font-weight:600}
     <button class="bso" onclick="clearS2()">やり直す</button>
     <button class="bsp" id="s2Confirm" style="background:#e94560" onclick="confirmS2()" disabled>外枠を確定する →</button>
   </div>
+  <div id="a4Info" class="a4-box hidden"></div>
   <div class="note-box">塗装する壁の範囲全体を囲んでください。斜めでもOKです。</div>
 </div>
 
-<!-- Step3 -->
+<!-- Step3: 開口部指定 -->
 <div id="step3" class="hidden">
   <div style="display:flex;gap:8px;align-items:center;margin-bottom:8px">
     <button class="bso" onclick="goS2()">← 外枠</button>
@@ -134,7 +171,7 @@ header h1{font-size:16px;font-weight:600}
   <button class="btn btn-green" onclick="goS4()">次へ：実測値を入力する →</button>
 </div>
 
-<!-- Step4 -->
+<!-- Step4: 実測値・計算 -->
 <div id="step4" class="hidden">
   <div style="display:flex;gap:8px;align-items:center;margin-bottom:14px">
     <button class="bso" onclick="goS3back()">← 開口部</button>
@@ -158,6 +195,7 @@ header h1{font-size:16px;font-weight:600}
     <span id="calcTxt">📐 AIで面積を計算する</span>
   </button>
   <div class="eb" id="calcErr"></div>
+
   <div id="resultPhoto" class="hidden">
     <div class="card">
       <div class="card-title">計算結果（写真上に表示）</div>
@@ -166,11 +204,10 @@ header h1{font-size:16px;font-weight:600}
         <canvas id="resCv" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none"></canvas>
       </div>
       <div style="font-size:11px;color:#888;text-align:center;margin-top:6px">表示：幅（横）× 高さ（縦）　⚠=要確認</div>
-
     </div>
   </div>
-  <!-- 開口部サイズ一覧（常に表示） -->
-  <div id="opSizeList" class="hidden" style="margin-bottom:14px;background:white;border-radius:12px;padding:16px;border:1px solid #e0e0d8"></div>
+
+  <div id="opSizeList" class="hidden" style="margin-bottom:14px"></div>
 
   <div id="resultNum" class="hidden">
     <div class="rc">
@@ -191,29 +228,61 @@ header h1{font-size:16px;font-weight:600}
 var COLORS=['#e94560','#0066cc','#2d9e5a','#cc8800','#9933cc','#e07000'];
 var G={
   src:null,b64:null,mtype:'image/jpeg',
+  src2:null,b64_2:null,mtype2:'image/jpeg',
   imgW:0,imgH:0,
   outline:null,
   openings:[],
+  aiResult:null,
   drawing:false,drawPts:[],
   blinkT:null,blinkOn:false,
   brushT:null,calcRes:null
 };
 
-// ===== Step1: ファイル選択 =====
-function onFile(inp){
+// ===== ファイル選択 =====
+function onFile1(inp){
   var f=inp.files[0];if(!f)return;
   var r=new FileReader();
   r.onload=function(ev){
-    G.src=ev.target.result;
-    G.b64=ev.target.result.split(',')[1];
-    G.mtype=f.type||'image/jpeg';
-    document.getElementById('upPh').style.display='none';
-    document.getElementById('upPrev').src=G.src;
-    document.getElementById('upPrev').style.display='block';
-    document.getElementById('retakeBtn').style.display='flex';
+    G.src=ev.target.result;G.b64=ev.target.result.split(',')[1];G.mtype=f.type||'image/jpeg';
+    document.getElementById('ph1').style.display='none';
+    document.getElementById('prev1').src=G.src;document.getElementById('prev1').style.display='block';
+    document.getElementById('retake1').style.display='flex';
     document.getElementById('s1Next').disabled=false;
-  };
-  r.readAsDataURL(f);
+  };r.readAsDataURL(f);
+}
+function onFile2(inp){
+  var f=inp.files[0];if(!f)return;
+  var r=new FileReader();
+  r.onload=function(ev){
+    G.src2=ev.target.result;G.b64_2=ev.target.result.split(',')[1];G.mtype2=f.type||'image/jpeg';
+    document.getElementById('ph2').style.display='none';
+    document.getElementById('prev2').src=G.src2;document.getElementById('prev2').style.display='block';
+    document.getElementById('retake2').style.display='flex';
+  };r.readAsDataURL(f);
+}
+
+// ===== AI解析 =====
+async function startAnalyze(){
+  document.getElementById('s1Sp').style.display='block';
+  document.getElementById('s1Txt').textContent='解析中...';
+  document.getElementById('s1Next').disabled=true;
+  showLoading('AI解析中...','A4紙を検出・開口部を認識しています');
+  try{
+    var body={step:'analyze',imageBase64:G.b64,imageMediaType:G.mtype};
+    if(G.b64_2){body.image2Base64=G.b64_2;body.image2MediaType=G.mtype2;}
+    var res=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    var data=await res.json();
+    if(!res.ok)throw new Error(data.error||'APIエラー');
+    G.aiResult=data;
+    hideLoading();
+    goS2();
+  }catch(e){
+    hideLoading();
+    alert('エラー：'+e.message);
+    document.getElementById('s1Sp').style.display='none';
+    document.getElementById('s1Txt').textContent='AIで解析する →';
+    document.getElementById('s1Next').disabled=false;
+  }
 }
 
 // ===== Step2: 外枠 =====
@@ -221,12 +290,22 @@ function goS2(){
   show('step2');
   loadImg('img2','cv2',function(){
     clearS2();
+    // A4情報を表示
+    var ai=G.aiResult;
+    var infoEl=document.getElementById('a4Info');
+    if(ai&&ai.a4Found){
+      infoEl.innerHTML='✅ A4用紙を検出しました！縮尺：幅'+ai.scaleWmm+'mm/px 高'+ai.scaleHmm+'mm/px<br>'+ai.a4Note;
+      infoEl.classList.remove('hidden');
+    }else{
+      infoEl.innerHTML='⚠ A4用紙が見つかりませんでした。外枠の実測値から計算します。';
+      infoEl.classList.remove('hidden');
+    }
   });
 }
 
 function clearS2(){
   G.drawPts=[];G.drawing=false;
-  clearCanvas('cv2');
+  clearCv('cv2');
   document.getElementById('s2Confirm').disabled=true;
   document.getElementById('s2Status').textContent='外壁の外枠を指でなぞって囲んでください';
 }
@@ -235,36 +314,23 @@ function confirmS2(){
   if(G.drawPts.length<3)return;
   var pts=G.drawPts;
   var xs=pts.map(function(p){return p.x;}),ys=pts.map(function(p){return p.y;});
-  G.outline={pts:pts.slice(),bbox:{
-    x:Math.min.apply(null,xs),y:Math.min.apply(null,ys),
-    w:Math.max.apply(null,xs)-Math.min.apply(null,xs),
-    h:Math.max.apply(null,ys)-Math.min.apply(null,ys)
-  }};
+  G.outline={pts:pts.slice(),bbox:{x:Math.min.apply(null,xs),y:Math.min.apply(null,ys),w:Math.max.apply(null,xs)-Math.min.apply(null,xs),h:Math.max.apply(null,ys)-Math.min.apply(null,ys)}};
   goS3();
 }
 
 // ===== Step3: 開口部 =====
 function goS3(){
   show('step3');
-  loadImg('img3','cv3',function(){
-    clearDraw();
-    drawAll3();
-  });
+  loadImg('img3','cv3',function(){clearDraw();drawAll3();});
   buildOpList();
+  // AIが認識した開口部を表示
+  var ai=G.aiResult;
+  if(ai&&ai.openings&&ai.openings.length>0){
+    document.getElementById('s3Status').textContent='AIが'+ai.openings.length+'個の開口部を認識しました。なぞって確定してください。';
+  }
 }
 
-function goS3back(){
-  show('step3');
-  var img3=document.getElementById('img3');
-  if(img3.naturalWidth>0){
-    drawAll3();
-  } else {
-    loadImg('img3','cv3',function(){
-      drawAll3();
-    });
-  }
-  buildOpList();
-}
+function goS3back(){show('step3');buildOpList();drawAll3();}
 
 function clearDraw(){
   G.drawPts=[];G.drawing=false;stopBlink();
@@ -279,10 +345,13 @@ function confirmDraw(){
   var xs=pts.map(function(p){return p.x;}),ys=pts.map(function(p){return p.y;});
   var bx=Math.min.apply(null,xs),by=Math.min.apply(null,ys);
   var bw=Math.max.apply(null,xs)-bx,bh=Math.max.apply(null,ys)-by;
-  var type=prompt('この開口部の種類を入力してください\n例：引き違い窓、玄関ドア、掃き出し窓、FIX窓');
-  if(!type)return;
+
+  // AIが認識した順に種類を割り当て
+  var aiOps=G.aiResult&&G.aiResult.openings||[];
+  var defaultType=aiOps[G.openings.length]?aiOps[G.openings.length].type:'開口部'+(G.openings.length+1);
+  var type=prompt('この開口部の種類を入力してください\n例：引き違い窓、玄関ドア、掃き出し窓、FIX窓\n\nAI推定：「'+defaultType+'」（変更可）')||defaultType;
+
   stopBlink();
-  // pts からキャンバス座標のみ抽出（cx,cyはクライアント座標なので除外）
   var canvasPts=pts.map(function(p){return{x:p.x,y:p.y};});
   G.openings.push({
     id:'op_'+Date.now(),type:type,
@@ -308,33 +377,22 @@ function buildOpList(){
   el.innerHTML=G.openings.map(function(op,i){
     return '<div class="op-item">'+
       '<div class="op-col" style="background:'+op.color+'"></div>'+
-      '<div class="op-info">'+
-        '<div class="op-type">'+(i+1)+'. '+op.type+'</div>'+
-        '<div class="op-size">'+(op.widthM?'幅'+parseFloat(op.widthM).toFixed(2)+'m × 高'+parseFloat(op.heightM).toFixed(2)+'m':'（計算前）')+(op.warning?' ⚠':'')+'</div>'+
-      '</div>'+
+      '<div class="op-info"><div class="op-type">'+(i+1)+'. '+op.type+'</div>'+
+      '<div class="op-size">'+(op.widthM?'幅'+parseFloat(op.widthM).toFixed(2)+'m × 高'+parseFloat(op.heightM).toFixed(2)+'m':'（計算前）')+(op.warning?' ⚠':'')+'</div></div>'+
       '<div class="op-actions">'+
         '<button class="op-btn ob-r" onclick="redrawOp(\''+op.id+'\')">修正</button>'+
         '<button class="op-btn ob-d" onclick="delOp(\''+op.id+'\')">削除</button>'+
-      '</div>'+
-    '</div>';
+      '</div></div>';
   }).join('');
 }
 
-function redrawOp(id){
-  G.openings=G.openings.filter(function(o){return o.id!==id;});
-  buildOpList();drawAll3();
-  document.getElementById('s3Status').textContent='修正する開口部をなぞり直してください';
-}
-function delOp(id){
-  G.openings=G.openings.filter(function(o){return o.id!==id;});
-  buildOpList();drawAll3();
-}
+function redrawOp(id){G.openings=G.openings.filter(function(o){return o.id!==id;});buildOpList();drawAll3();}
+function delOp(id){G.openings=G.openings.filter(function(o){return o.id!==id;});buildOpList();drawAll3();}
 
 // ===== 画像読み込み =====
 function loadImg(imgId,cvId,cb){
   var img=document.getElementById(imgId);
   var cv=document.getElementById(cvId);
-  // BlobURLで確実にonloadを発火
   var byteStr=atob(G.b64);
   var ab=new ArrayBuffer(byteStr.length);
   var ia=new Uint8Array(ab);
@@ -345,13 +403,11 @@ function loadImg(imgId,cvId,cb){
     URL.revokeObjectURL(url);
     G.imgW=img.naturalWidth;G.imgH=img.naturalHeight;
     cv.width=G.imgW;cv.height=G.imgH;
-    setupEvents(cv,cvId);
-    if(cb)cb();
-  };
-  img.src=url;
+    setupEv(cv,cvId);if(cb)cb();
+  };img.src=url;
 }
 
-function setupEvents(cv,cvId){
+function setupEv(cv,cvId){
   if(cv._evSet)return;cv._evSet=true;
   cv.addEventListener('touchstart',function(e){e.preventDefault();onDS(e,cvId);},{passive:false});
   cv.addEventListener('touchmove',function(e){e.preventDefault();onDM(e,cvId);},{passive:false});
@@ -361,19 +417,18 @@ function setupEvents(cv,cvId){
   cv.addEventListener('mouseup',function(e){onDE(e,cvId);});
 }
 
-// ===== 描画イベント =====
-function getP(e,cvId){
+// ===== 描画 =====
+function gP(e,cvId){
   var cv=document.getElementById(cvId);
   var r=cv.getBoundingClientRect();
   var sx=cv.width/r.width,sy=cv.height/r.height;
   var s=e.touches?e.touches[0]:e;
   return{x:(s.clientX-r.left)*sx,y:(s.clientY-r.top)*sy,cx:s.clientX,cy:s.clientY};
 }
-
-function onDS(e,cvId){G.drawing=true;G.drawPts=[];var p=getP(e,cvId);G.drawPts.push(p);showCursor(p.cx,p.cy);}
+function onDS(e,cvId){G.drawing=true;G.drawPts=[];var p=gP(e,cvId);G.drawPts.push(p);showCursor(p.cx,p.cy);}
 function onDM(e,cvId){
   if(!G.drawing)return;
-  var p=getP(e,cvId);G.drawPts.push(p);showCursor(p.cx,p.cy);
+  var p=gP(e,cvId);G.drawPts.push(p);showCursor(p.cx,p.cy);
   if(cvId==='cv2')drawS2();else drawAll3();
 }
 function onDE(e,cvId){
@@ -390,15 +445,12 @@ function onDE(e,cvId){
   }
   if(cvId==='cv2')drawS2();else drawAll3();
 }
-
 function showCursor(cx,cy){var d=document.getElementById('cursorDot');d.style.display='block';d.style.left=cx+'px';d.style.top=cy+'px';}
 function hideCursor(){document.getElementById('cursorDot').style.display='none';}
 function startBlink(){stopBlink();G.blinkT=setInterval(function(){G.blinkOn=!G.blinkOn;drawAll3();},400);}
 function stopBlink(){if(G.blinkT)clearInterval(G.blinkT);G.blinkT=null;G.blinkOn=false;}
+function clearCv(cvId){var cv=document.getElementById(cvId);if(cv.width)cv.getContext('2d').clearRect(0,0,cv.width,cv.height);}
 
-function clearCanvas(cvId){var cv=document.getElementById(cvId);if(cv.width)cv.getContext('2d').clearRect(0,0,cv.width,cv.height);}
-
-// Step2の描画
 function drawS2(){
   var cv=document.getElementById('cv2'),ctx=cv.getContext('2d');
   ctx.clearRect(0,0,cv.width,cv.height);
@@ -409,30 +461,24 @@ function drawS2(){
   ctx.fillStyle='rgba(255,255,255,0.08)';ctx.fill();
 }
 
-// Step3の描画
 function drawAll3(){
   var cv=document.getElementById('cv3'),ctx=cv.getContext('2d');
   if(!cv.width)return;
   ctx.clearRect(0,0,cv.width,cv.height);
-  // 外枠（薄い白線）
   if(G.outline&&G.outline.pts.length>2){
     var op=G.outline.pts;
     ctx.beginPath();ctx.moveTo(op[0].x,op[0].y);
     for(var i=1;i<op.length;i++)ctx.lineTo(op[i].x,op[i].y);
     ctx.closePath();ctx.strokeStyle='rgba(255,255,255,0.5)';ctx.lineWidth=2;ctx.setLineDash([6,3]);ctx.stroke();ctx.setLineDash([]);
   }
-  // 確定済み開口部（なぞった輪郭そのまま表示）
   G.openings.forEach(function(op,i){
-    var pts=op.pts;
-    var b=op.bbox;
-    if(!pts||pts.length<3)return;
-    // 輪郭を描画
-    ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);
-    for(var j=1;j<pts.length;j++)ctx.lineTo(pts[j].x,pts[j].y);
-    ctx.closePath();
-    ctx.strokeStyle=op.color;ctx.lineWidth=2.5;ctx.stroke();
-    ctx.fillStyle=op.color+'22';ctx.fill();
-    // ラベル（輪郭の上端に表示）
+    var pts=op.pts,b=op.bbox;
+    if(pts&&pts.length>2){
+      ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);
+      pts.forEach(function(p){ctx.lineTo(p.x,p.y);});
+      ctx.closePath();ctx.strokeStyle=op.color;ctx.lineWidth=2.5;ctx.stroke();
+      ctx.fillStyle=op.color+'22';ctx.fill();
+    }
     var fs=Math.max(13,cv.width/45);
     ctx.font='bold '+fs+'px sans-serif';
     var lbl=(i+1)+'. '+op.type;
@@ -440,22 +486,17 @@ function drawAll3(){
     ctx.fillStyle=op.color;ctx.fillRect(b.x,b.y-fs-4,tw+8,fs+4);
     ctx.fillStyle='white';ctx.fillText(lbl,b.x+4,b.y-4);
   });
-  // 描画中
   if(G.drawPts.length>1){
     var pts=G.drawPts;
-    var xs=pts.map(function(p){return p.x;}),ys=pts.map(function(p){return p.y;});
-    var bx=Math.min.apply(null,xs),by=Math.min.apply(null,ys);
-    var bw=Math.max.apply(null,xs)-bx,bh=Math.max.apply(null,ys)-by;
     var col=COLORS[G.openings.length%COLORS.length];
-    // 自由線
     ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);
     pts.forEach(function(p){ctx.lineTo(p.x,p.y);});
     ctx.strokeStyle=col;ctx.lineWidth=2;ctx.setLineDash([4,3]);ctx.stroke();ctx.setLineDash([]);
-    // バウンディングボックス（点滅）
     if(!G.drawing&&G.blinkOn){
+      var xs=pts.map(function(p){return p.x;}),ys=pts.map(function(p){return p.y;});
+      var bx=Math.min.apply(null,xs),by=Math.min.apply(null,ys);
       ctx.strokeStyle=col;ctx.lineWidth=3;
-      ctx.strokeRect(bx,by,bw,bh);
-      ctx.fillStyle=col+'22';ctx.fillRect(bx,by,bw,bh);
+      ctx.strokeRect(bx,by,Math.max.apply(null,xs)-bx,Math.max.apply(null,ys)-by);
     }
   }
 }
@@ -470,60 +511,56 @@ async function doCalc(){
   if(!w||w<=0){err.textContent='横幅を入力してください';err.style.display='block';return;}
   if(!h||h<=0){err.textContent='高さを入力してください';err.style.display='block';return;}
   if(!G.outline){err.textContent='外枠が選択されていません';err.style.display='block';return;}
-  var btn=document.getElementById('calcBtn'),sp=document.getElementById('calcSp'),bt=document.getElementById('calcTxt');
-  btn.disabled=true;sp.style.display='block';bt.textContent='AIが計算・判断中...';
-  showLoading('AIで計算中...','遠近補正・妥当性チェックを行っています');
-  try{
-    // 外枠の左端・右端X位置
-    var outlineXs = G.outline.pts.map(function(p){return p.x;});
-    var outlineLeft = Math.min.apply(null, outlineXs);
-    var outlineRight = Math.max.apply(null, outlineXs);
-    var outlineWidth = outlineRight - outlineLeft;
 
-    var ops=G.openings.map(function(op){
-      // 開口部の中心X位置が外枠内で何割の位置か（0=左端, 1=右端）
-      var centerX = op.bbox.x + op.bbox.w / 2;
-      var xRatio = outlineWidth > 0 ? (centerX - outlineLeft) / outlineWidth : 0.5;
-      xRatio = Math.max(0, Math.min(1, xRatio));
-      return {id:op.id, type:op.type, widthPx:op.bbox.w, heightPx:op.bbox.h, xRatio:xRatio};
+  var btn=document.getElementById('calcBtn'),sp=document.getElementById('calcSp'),bt=document.getElementById('calcTxt');
+  btn.disabled=true;sp.style.display='block';bt.textContent='AIが計算中...';
+  showLoading('AIで計算中...','A4縮尺・遠近補正・妥当性チェックを行っています');
+
+  // 外枠の左右高さpx計算
+  var oxs=G.outline.pts.map(function(p){return p.x;});
+  var outlineLeft=Math.min.apply(null,oxs);
+  var outlineRight=Math.max.apply(null,oxs);
+  var outlineWidth=outlineRight-outlineLeft;
+  var lPts=G.outline.pts.filter(function(p){return p.x<outlineLeft+outlineWidth*0.3;});
+  var rPts=G.outline.pts.filter(function(p){return p.x>outlineLeft+outlineWidth*0.7;});
+  var leftHpx=lPts.length>1?Math.max.apply(null,lPts.map(function(p){return p.y;}))-Math.min.apply(null,lPts.map(function(p){return p.y;})):G.outline.bbox.h;
+  var rightHpx=rPts.length>1?Math.max.apply(null,rPts.map(function(p){return p.y;}))-Math.min.apply(null,rPts.map(function(p){return p.y;})):G.outline.bbox.h;
+
+  var ai=G.aiResult;
+  var ops=G.openings.map(function(op){
+    var cx=op.bbox.x+op.bbox.w/2;
+    var xRatio=outlineWidth>0?(cx-outlineLeft)/outlineWidth:0.5;
+    xRatio=Math.max(0,Math.min(1,xRatio));
+    var r={id:op.id,type:op.type,widthPx:op.bbox.w,heightPx:op.bbox.h,xRatio:xRatio};
+    // A4縮尺がある場合は開口部のpxサイズも送る
+    if(ai&&ai.a4Found){r.a4WidthPx=op.bbox.w;r.a4HeightPx=op.bbox.h;}
+    return r;
+  });
+
+  try{
+    var outlinePxData={
+      w:G.outline.bbox.w,h:G.outline.bbox.h,
+      leftH:leftHpx,rightH:rightHpx,
+      a4ScaleW:ai&&ai.a4Found?ai.scaleWmm:null,
+      a4ScaleH:ai&&ai.a4Found?ai.scaleHmm:null
+    };
+
+    var res=await fetch('/api/analyze',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({step:'calculate',imageBase64:G.b64,imageMediaType:G.mtype,
+        width:w,height:h,outlinePx:outlinePxData,openings:ops})
     });
-    // Overload時は最大3回リトライ
-    var res,data;
-    for(var retry=0;retry<3;retry++){
-      if(retry>0){
-        bt.textContent='リトライ中（'+(retry+1)+'/3）...';
-        await new Promise(function(r){setTimeout(r,2000);});
-      }
-      res=await fetch('/api/analyze',{
-        method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({step:'calculate',imageBase64:G.b64,imageMediaType:G.mtype,
-          width:w,height:h,
-          outlinePx:{w:G.outline.bbox.w,h:G.outline.bbox.h,
-            leftH:(function(){
-              var lPts=G.outline.pts.filter(function(p){return p.x<outlineLeft+outlineWidth*0.3;});
-              return lPts.length>1?Math.max.apply(null,lPts.map(function(p){return p.y;}))-Math.min.apply(null,lPts.map(function(p){return p.y;})):G.outline.bbox.h;
-            })(),
-            rightH:(function(){
-              var rPts=G.outline.pts.filter(function(p){return p.x>outlineLeft+outlineWidth*0.7;});
-              return rPts.length>1?Math.max.apply(null,rPts.map(function(p){return p.y;}))-Math.min.apply(null,rPts.map(function(p){return p.y;})):G.outline.bbox.h;
-            })()
-          },
-          openings:ops})
-      });
-      data=await res.json();
-      if(res.ok)break;
-      if(!data.error||!data.error.includes('verload'))break;
-    }
+    var data=await res.json();
     if(!res.ok)throw new Error(data.error||'計算エラー');
     hideLoading();
-    // IDではなくインデックスで照合（AIが異なるIDを返すため）
+
     (data.openings||[]).forEach(function(r,i){
       var op=G.openings[i];
       if(op){op.widthM=r.widthM;op.heightM=r.heightM;op.areaM=r.areaM;op.warning=r.warning;}
     });
     G.calcRes=data;
-    renderResNum(w,h,data);  // 先に数値結果を表示
-    renderResPhoto(w,h);     // 写真は非同期で表示
+    renderResNum(w,h,data);
+    renderResPhoto(w,h);
   }catch(e){
     hideLoading();
     err.textContent='エラー：'+e.message;err.style.display='block';
@@ -531,9 +568,52 @@ async function doCalc(){
   btn.disabled=false;sp.style.display='none';bt.textContent='📐 AIで面積を計算する';
 }
 
+function renderResNum(w,h,data){
+  var wallArea=parseFloat(data.wallArea!=null?data.wallArea:w*h).toFixed(1);
+  var paintArea=parseFloat(data.paintArea||0).toFixed(1);
+  document.getElementById('rWall').textContent=wallArea+' m²';
+  document.getElementById('rPaint').textContent=paintArea+' m²';
+  var det='';
+  G.openings.forEach(function(op,i){
+    if(!op.widthM)return;
+    var warn=op.warning?'<span style="color:#ff6b7a"> ⚠'+op.warning+'</span>':'';
+    det+='<div class="dr"><span style="color:rgba(255,255,255,.7)">'+(i+1)+' '+op.type+'</span>'+
+      '<span>'+parseFloat(op.widthM).toFixed(2)+'×'+parseFloat(op.heightM).toFixed(2)+'m ='+parseFloat(op.areaM||0).toFixed(1)+'m²'+warn+'</span></div>';
+  });
+  det+='<div class="dr"><span style="color:rgba(255,255,255,.6)">開口部合計</span><span>−'+parseFloat(data.totalOpeningArea||0).toFixed(1)+' m²</span></div>';
+  document.getElementById('rDetails').innerHTML=det;
+  if(data.scaleNote){document.getElementById('rNote').textContent='AI注記：'+data.scaleNote;document.getElementById('rNote').style.display='block';}
+  document.getElementById('resultNum').classList.remove('hidden');
+
+  // 開口部サイズ一覧
+  var opEl=document.getElementById('opSizeList');
+  var opRows=G.openings.filter(function(op){return op.widthM;});
+  if(opRows.length>0){
+    var html='<table class="op-tbl"><thead><tr><th>開口部</th><th>幅</th><th>高さ</th><th>面積</th></tr></thead><tbody>';
+    opRows.forEach(function(op){
+      var wc=op.warning?'color:#cc3333':'';
+      html+='<tr><td style="'+wc+'"><span style="display:inline-block;width:10px;height:10px;background:'+op.color+';border-radius:2px;margin-right:5px;vertical-align:middle"></span>'+op.type+(op.warning?' ⚠':'')+'</td>'+
+        '<td style="text-align:center;font-weight:700;'+wc+'">'+parseFloat(op.widthM).toFixed(2)+'m</td>'+
+        '<td style="text-align:center;font-weight:700;'+wc+'">'+parseFloat(op.heightM).toFixed(2)+'m</td>'+
+        '<td style="text-align:center;'+wc+'">'+parseFloat(op.areaM||0).toFixed(2)+'m²</td></tr>';
+    });
+    html+='</tbody></table>';
+    opEl.innerHTML=html;
+    opEl.classList.remove('hidden');
+  }
+  document.getElementById('resultNum').scrollIntoView({behavior:'smooth'});
+}
+
 function renderResPhoto(w,h){
   var img=document.getElementById('resImg');
-  loadImgTo(img,function(){
+  var byteStr=atob(G.b64);
+  var ab=new ArrayBuffer(byteStr.length);
+  var ia=new Uint8Array(ab);
+  for(var i=0;i<byteStr.length;i++)ia[i]=byteStr.charCodeAt(i);
+  var blob=new Blob([ab],{type:G.mtype});
+  var url=URL.createObjectURL(blob);
+  img.onload=function(){
+    URL.revokeObjectURL(url);
     var cv=document.getElementById('resCv');
     cv.width=img.naturalWidth;cv.height=img.naturalHeight;
     var ctx=cv.getContext('2d');
@@ -547,100 +627,35 @@ function renderResPhoto(w,h){
     }
     G.openings.forEach(function(op){
       if(!op.widthM)return;
-      var pts=op.pts;
-      var b=op.bbox;
-      // 輪郭そのまま表示
+      var pts=op.pts,b=op.bbox;
       if(pts&&pts.length>2){
         ctx.beginPath();ctx.moveTo(pts[0].x*sx,pts[0].y*sy);
-        for(var j=1;j<pts.length;j++)ctx.lineTo(pts[j].x*sx,pts[j].y*sy);
-        ctx.closePath();
-        ctx.strokeStyle=op.color;ctx.lineWidth=3;ctx.stroke();
+        pts.forEach(function(p){ctx.lineTo(p.x*sx,p.y*sy);});
+        ctx.closePath();ctx.strokeStyle=op.color;ctx.lineWidth=3;ctx.stroke();
         ctx.fillStyle=op.color+'33';ctx.fill();
       }
-      // 番号のみ表示
-      var idx=G.openings.indexOf(op);
-      var cx=(b.x+b.w/2)*sx, cy=(b.y+b.h/2)*sy;
-      var fs=Math.max(14,cv.width/40);
-      ctx.fillStyle=op.color;
-      ctx.beginPath();ctx.arc(cx,cy,fs,0,Math.PI*2);ctx.fill();
-      ctx.fillStyle='white';ctx.font='bold '+fs+'px sans-serif';
-      ctx.textAlign='center';ctx.textBaseline='middle';
-      ctx.fillText((idx+1)+'',cx,cy);
-      ctx.textAlign='left';ctx.textBaseline='alphabetic';
+      var x=b.x*sx,y=b.y*sy;
+      var fs=Math.max(13,cv.width/50);
+      ctx.font='bold '+fs+'px sans-serif';
+      var lbl='幅'+parseFloat(op.widthM).toFixed(2)+'m × 高'+parseFloat(op.heightM).toFixed(2)+'m'+(op.warning?' ⚠':'');
+      var tw=ctx.measureText(lbl).width;
+      ctx.fillStyle=op.warning?'#cc3333':op.color;
+      ctx.fillRect(x,y-fs-6,tw+8,fs+6);
+      ctx.fillStyle='white';ctx.fillText(lbl,x+4,y-4);
     });
     ctx.fillStyle='rgba(0,0,0,0.65)';ctx.fillRect(0,cv.height-28,cv.width,28);
     ctx.fillStyle='white';ctx.font='bold 13px sans-serif';
     ctx.fillText('表示：幅（横）× 高さ（縦）　⚠=要確認',8,cv.height-9);
-  });
-  document.getElementById('resultPhoto').classList.remove('hidden');
-  document.getElementById('resultPhoto').scrollIntoView({behavior:'smooth'});
-}
-
-function loadImgTo(img,cb){
-  var byteStr=atob(G.b64);
-  var ab=new ArrayBuffer(byteStr.length);
-  var ia=new Uint8Array(ab);
-  for(var i=0;i<byteStr.length;i++)ia[i]=byteStr.charCodeAt(i);
-  var blob=new Blob([ab],{type:G.mtype});
-  var url=URL.createObjectURL(blob);
-  img.onload=function(){URL.revokeObjectURL(url);if(cb)cb();};
+  };
   img.src=url;
-}
-
-function renderResNum(w,h,data){
-  var wallArea=parseFloat(data.wallArea!=null?data.wallArea:w*h).toFixed(1);
-  var paintArea=parseFloat(data.paintArea||0).toFixed(1);
-  document.getElementById('rWall').textContent=wallArea+' m²';
-  document.getElementById('rPaint').textContent=paintArea+' m²';
-
-
-  var det='';
-  G.openings.forEach(function(op,i){
-    if(!op.widthM)return;
-    var warn=op.warning?'<span style="color:#ff6b7a"> ⚠'+op.warning+'</span>':'';
-    det+='<div class="dr"><span style="color:rgba(255,255,255,.7)">'+(i+1)+' '+op.type+'</span>'+
-      '<span>'+parseFloat(op.widthM).toFixed(2)+'×'+parseFloat(op.heightM).toFixed(2)+'m ='+parseFloat(op.areaM||0).toFixed(1)+'m²'+warn+'</span></div>';
-  });
-  det+='<div class="dr"><span style="color:rgba(255,255,255,.6)">開口部合計</span><span>−'+parseFloat(data.totalOpeningArea||0).toFixed(1)+' m²</span></div>';
-  document.getElementById('rDetails').innerHTML=det;
-  if(data.scaleNote){document.getElementById('rNote').textContent='AI注記：'+data.scaleNote;document.getElementById('rNote').style.display='block';}
-  document.getElementById('resultNum').classList.remove('hidden');
-
-  // 開口部サイズ一覧（写真の下）
-  var opSizeEl=document.getElementById('opSizeList');
-  if(opSizeEl){
-    var opRows=G.openings.filter(function(op){return op.widthM;});
-    if(opRows.length>0){
-      var opHtml='<table style="width:100%;border-collapse:collapse;font-size:12px;margin-top:4px">';
-      opHtml+='<thead><tr style="background:#f0f0e8">';
-      opHtml+='<th style="padding:6px 8px;text-align:left;border-bottom:1px solid #e0e0d8;color:#888;font-weight:600">開口部</th>';
-      opHtml+='<th style="padding:6px 8px;text-align:center;border-bottom:1px solid #e0e0d8;color:#888;font-weight:600">幅</th>';
-      opHtml+='<th style="padding:6px 8px;text-align:center;border-bottom:1px solid #e0e0d8;color:#888;font-weight:600">高さ</th>';
-      opHtml+='<th style="padding:6px 8px;text-align:center;border-bottom:1px solid #e0e0d8;color:#888;font-weight:600">面積</th>';
-      opHtml+='</tr></thead><tbody>';
-      opRows.forEach(function(op,i){
-        var warn=op.warning?' ⚠':'';
-        var wc=op.warning?'color:#cc3333':'';
-        opHtml+='<tr style="border-bottom:1px solid #f0f0e8">';
-        opHtml+='<td style="padding:7px 8px;'+wc+'"><span style="display:inline-block;width:10px;height:10px;background:'+op.color+';border-radius:2px;margin-right:5px;vertical-align:middle"></span>'+op.type+warn+'</td>';
-        opHtml+='<td style="padding:7px 8px;text-align:center;font-weight:700;'+wc+'">'+parseFloat(op.widthM).toFixed(2)+'m</td>';
-        opHtml+='<td style="padding:7px 8px;text-align:center;font-weight:700;'+wc+'">'+parseFloat(op.heightM).toFixed(2)+'m</td>';
-        opHtml+='<td style="padding:7px 8px;text-align:center;'+wc+'">'+parseFloat(op.areaM||0).toFixed(2)+'m²</td>';
-        opHtml+='</tr>';
-      });
-      opHtml+='</tbody></table>';
-      opSizeEl.innerHTML=opHtml;
-    }
-  }
-
-  // scrollはrenderResPhotoのimg.onload後に実行
+  document.getElementById('resultPhoto').classList.remove('hidden');
 }
 
 function copyRes(){
   var w=parseFloat(document.getElementById('wInput').value);
   var h=parseFloat(document.getElementById('hInput').value);
   var d=G.calcRes;
-  var text='【塗装面積 AI計測結果】\n横幅：'+w+'m　高さ：'+h+'m\n外壁面積：'+parseFloat(d.wallArea!=null?d.wallArea:w*h).toFixed(1)+' m²\n';
+  var text='【塗装面積 AI計測結果 v2（A4基準）】\n横幅：'+w+'m　高さ：'+h+'m\n外壁面積：'+parseFloat(d.wallArea||(w*h)).toFixed(1)+' m²\n';
   G.openings.forEach(function(op,i){
     if(!op.widthM)return;
     text+=(i+1)+' '+op.type+'：'+parseFloat(op.widthM).toFixed(2)+'m×'+parseFloat(op.heightM).toFixed(2)+'m ='+parseFloat(op.areaM||0).toFixed(1)+' m²'+(op.warning?' ⚠'+op.warning:'')+'\n';
@@ -665,30 +680,25 @@ function hideLoading(){
   document.getElementById('brushPaint').style.width='0%';
   document.getElementById('brushIcon').style.left='0px';
 }
-
 function show(id){
-  ['step1','step2','step3','step4'].forEach(function(s){
-    document.getElementById(s).classList.toggle('hidden',s!==id);
-  });
+  ['step1','step2','step3','step4'].forEach(function(s){document.getElementById(s).classList.toggle('hidden',s!==id);});
   window.scrollTo(0,0);
 }
-
 function resetAll(){
-  G.src=null;G.b64=null;G.outline=null;G.openings=[];G.drawPts=[];stopBlink();hideLoading();
-  document.getElementById('upPh').style.display='block';
-  document.getElementById('upPrev').style.display='none';
-  document.getElementById('upPrev').src='';
-  document.getElementById('retakeBtn').style.display='none';
-  document.getElementById('fileInput').value='';
+  G.src=null;G.b64=null;G.src2=null;G.b64_2=null;G.outline=null;G.openings=[];G.aiResult=null;
+  G.drawPts=[];stopBlink();hideLoading();
+  ['prev1','prev2'].forEach(function(id){var el=document.getElementById(id);el.style.display='none';el.src='';});
+  ['ph1','ph2'].forEach(function(id){document.getElementById(id).style.display='block';});
+  ['retake1','retake2'].forEach(function(id){document.getElementById(id).style.display='none';});
+  ['file1','file2'].forEach(function(id){document.getElementById(id).value='';});
   document.getElementById('s1Next').disabled=true;
+  document.getElementById('s1Sp').style.display='none';
+  document.getElementById('s1Txt').textContent='AIで解析する →';
   document.getElementById('resultPhoto').classList.add('hidden');
   document.getElementById('resultNum').classList.add('hidden');
+  document.getElementById('opSizeList').classList.add('hidden');
   document.getElementById('rNote').style.display='none';
-  // canvasのイベントフラグをリセット
-  ['cv2','cv3'].forEach(function(id){
-    var cv=document.getElementById(id);
-    if(cv)cv._evSet=false;
-  });
+  ['cv2','cv3'].forEach(function(id){var cv=document.getElementById(id);if(cv)cv._evSet=false;});
   show('step1');
 }
 </script>
