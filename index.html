@@ -94,6 +94,7 @@ header h1{font-size:16px;font-weight:600}
     <button class="btn btn-outline" id="retakeBtn" style="display:none;margin-top:8px;padding:10px;font-size:13px" onclick="document.getElementById('fileInput').click()">📷 撮り直す</button>
   </div>
   <div class="note-box">建物全体が写るよう少し離れて撮影してください。</div>
+  <div id="debugLog" style="display:none;background:#000;color:#0f0;padding:10px;font-size:11px;border-radius:8px;margin-bottom:10px;font-family:monospace"></div>
   <button class="btn btn-primary" id="s1Next" onclick="goS2()" disabled>次へ：外枠を選択する →</button>
 </div>
 
@@ -190,13 +191,25 @@ header h1{font-size:16px;font-weight:600}
 <script>
 var COLORS=['#e94560','#0066cc','#2d9e5a','#cc8800','#9933cc','#e07000'];
 
-// iOSでのファイル選択問題対策：DOMContentLoaded後にイベント登録
+// デバッグログ表示
+function dbg(msg){
+  var el=document.getElementById('debugLog');
+  if(!el)return;
+  el.style.display='block';
+  el.innerHTML+=msg+'<br>';
+}
+
 document.addEventListener('DOMContentLoaded', function(){
+  dbg('DOM ready');
   var fileInput = document.getElementById('fileInput');
   if(fileInput){
+    dbg('fileInput found');
     fileInput.addEventListener('change', function(e){
+      dbg('change fired: '+e.target.files.length+' files');
       onFile(e.target);
     });
+  } else {
+    dbg('fileInput NOT found');
   }
 });
 var G={
@@ -211,9 +224,13 @@ var G={
 
 // ===== Step1: ファイル選択 =====
 function onFile(inp){
-  var f=inp.files[0];if(!f)return;
+  dbg('onFile called');
+  var f=inp.files[0];
+  if(!f){dbg('no file');return;}
+  dbg('file: '+f.name+' '+f.type+' '+f.size+'bytes');
   var r=new FileReader();
   r.onload=function(ev){
+  dbg('FileReader loaded');
     G.src=ev.target.result;
     G.b64=ev.target.result.split(',')[1];
     G.mtype=f.type||'image/jpeg';
