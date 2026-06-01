@@ -82,17 +82,16 @@ header h1{font-size:16px;font-weight:600}
 <div id="step1">
   <div class="card">
     <div class="card-title">外壁写真をアップロード</div>
-    <!-- inputはoverflow:hiddenの外・画面外に配置（iOS Safari対応） -->
-    <input type="file" id="fileInput" accept="image/*" style="position:fixed;top:-9999px;left:-9999px">
-    <label for="fileInput" style="display:block;border:2px dashed #e0e0d8;border-radius:8px;background:white;cursor:pointer;min-height:120px">
+    <div style="position:relative;border:2px dashed #e0e0d8;border-radius:8px;background:white;overflow:hidden">
       <div id="upPh" style="padding:40px 20px;text-align:center">
         <div style="font-size:40px;margin-bottom:10px">🏠</div>
         <div style="font-size:15px;font-weight:600;margin-bottom:6px">写真をタップして選択</div>
         <div style="font-size:12px;color:#888">カメラまたはライブラリから</div>
       </div>
-      <img id="upPrev" style="width:100%;display:none;border-radius:6px;pointer-events:none">
-    </label>
-    <button class="btn btn-outline" id="retakeBtn" style="display:none;margin-top:8px;padding:10px;font-size:13px" onclick="document.getElementById('fileInput').value='';document.getElementById('fileInput').click()">📷 撮り直す</button>
+      <img id="upPrev" style="width:100%;display:none">
+      <input type="file" id="fileInput" accept="image/*" style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer" onchange="onFile(this)">
+    </div>
+    <button class="btn btn-outline" id="retakeBtn" style="display:none;margin-top:8px;padding:10px;font-size:13px" onclick="document.getElementById('fileInput').click()">📷 撮り直す</button>
   </div>
   <div class="note-box">建物全体が写るよう少し離れて撮影してください。</div>
   <button class="btn btn-primary" id="s1Next" onclick="goS2()" disabled>次へ：外枠を選択する →</button>
@@ -191,14 +190,7 @@ header h1{font-size:16px;font-weight:600}
 <script>
 var COLORS=['#e94560','#0066cc','#2d9e5a','#cc8800','#9933cc','#e07000'];
 
-document.addEventListener('DOMContentLoaded', function(){
-  var fileInput = document.getElementById('fileInput');
-  if(fileInput){
-    fileInput.addEventListener('change', function(e){
-      onFile(e.target);
-    });
-  }
-});
+
 var G={
   src:null,b64:null,mtype:'image/jpeg',
   imgW:0,imgH:0,
@@ -216,10 +208,7 @@ function onFile(inp){
   r.onload=function(ev){
     G.src=ev.target.result;
     G.b64=ev.target.result.split(',')[1];
-    // HEICなどf.typeが空の場合は拡張子から補完
-    var ext=(f.name||'').split('.').pop().toLowerCase();
-    var mimeMap={'heic':'image/jpeg','heif':'image/jpeg','jpg':'image/jpeg','jpeg':'image/jpeg','png':'image/png','gif':'image/gif','webp':'image/webp'};
-    G.mtype=f.type||(mimeMap[ext]||'image/jpeg');
+    G.mtype=f.type||'image/jpeg';
     document.getElementById('upPh').style.display='none';
     document.getElementById('upPrev').src=G.src;
     document.getElementById('upPrev').style.display='block';
