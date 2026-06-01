@@ -84,13 +84,13 @@ header h1{font-size:16px;font-weight:600}
     <div class="card-title">外壁写真をアップロード</div>
     <!-- inputはoverflow:hiddenの外・画面外に配置（iOS Safari対応） -->
     <input type="file" id="fileInput" accept="image/*" style="position:fixed;top:-9999px;left:-9999px">
-    <label for="fileInput" style="display:block;border:2px dashed #e0e0d8;border-radius:8px;background:white;cursor:pointer">
+    <label for="fileInput" style="display:block;border:2px dashed #e0e0d8;border-radius:8px;background:white;cursor:pointer;min-height:120px">
       <div id="upPh" style="padding:40px 20px;text-align:center">
         <div style="font-size:40px;margin-bottom:10px">🏠</div>
         <div style="font-size:15px;font-weight:600;margin-bottom:6px">写真をタップして選択</div>
         <div style="font-size:12px;color:#888">カメラまたはライブラリから</div>
       </div>
-      <img id="upPrev" style="width:100%;display:none;border-radius:6px">
+      <img id="upPrev" style="width:100%;display:none;border-radius:6px;pointer-events:none">
     </label>
     <button class="btn btn-outline" id="retakeBtn" style="display:none;margin-top:8px;padding:10px;font-size:13px" onclick="document.getElementById('fileInput').value='';document.getElementById('fileInput').click()">📷 撮り直す</button>
   </div>
@@ -216,7 +216,10 @@ function onFile(inp){
   r.onload=function(ev){
     G.src=ev.target.result;
     G.b64=ev.target.result.split(',')[1];
-    G.mtype=f.type||'image/jpeg';
+    // HEICなどf.typeが空の場合は拡張子から補完
+    var ext=(f.name||'').split('.').pop().toLowerCase();
+    var mimeMap={'heic':'image/jpeg','heif':'image/jpeg','jpg':'image/jpeg','jpeg':'image/jpeg','png':'image/png','gif':'image/gif','webp':'image/webp'};
+    G.mtype=f.type||(mimeMap[ext]||'image/jpeg');
     document.getElementById('upPh').style.display='none';
     document.getElementById('upPrev').src=G.src;
     document.getElementById('upPrev').style.display='block';
