@@ -82,16 +82,15 @@ header h1{font-size:16px;font-weight:600}
 <div id="step1">
   <div class="card">
     <div class="card-title">外壁写真をアップロード</div>
-    <div style="position:relative;border:2px dashed #e0e0d8;border-radius:8px;background:white;overflow:hidden">
-      <div id="upPh" style="padding:40px 20px;text-align:center">
-        <div style="font-size:40px;margin-bottom:10px">🏠</div>
-        <div style="font-size:15px;font-weight:600;margin-bottom:6px">写真をタップして選択</div>
-        <div style="font-size:12px;color:#888">カメラまたはライブラリから</div>
-      </div>
-      <img id="upPrev" style="width:100%;display:none">
-      <input type="file" id="fileInput" accept="image/*" style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer" onchange="onFile(this)">
+    <!-- ファイル選択ボタン（iOS対応） -->
+    <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="onFile(this)">
+    <div id="upPh" style="border:2px dashed #e0e0d8;border-radius:8px;background:white;padding:40px 20px;text-align:center;cursor:pointer" onclick="document.getElementById('fileInput').click()">
+      <div style="font-size:40px;margin-bottom:10px">🏠</div>
+      <div style="font-size:15px;font-weight:600;margin-bottom:6px">写真をタップして選択</div>
+      <div style="font-size:12px;color:#888">カメラまたはライブラリから</div>
     </div>
-    <button class="btn btn-outline" id="retakeBtn" style="display:none;margin-top:8px;padding:10px;font-size:13px" onclick="document.getElementById('fileInput').click()">📷 撮り直す</button>
+    <img id="upPrev" style="width:100%;display:none;border-radius:8px;margin-top:8px">
+    <button class="btn btn-outline" id="retakeBtn" style="display:none;margin-top:8px;padding:10px;font-size:13px" onclick="document.getElementById('fileInput').value='';document.getElementById('fileInput').click()">📷 撮り直す</button>
   </div>
   <div class="note-box">建物全体が写るよう少し離れて撮影してください。</div>
   <button class="btn btn-primary" id="s1Next" onclick="goS2()" disabled>次へ：外枠を選択する →</button>
@@ -189,8 +188,6 @@ header h1{font-size:16px;font-weight:600}
 </div>
 <script>
 var COLORS=['#e94560','#0066cc','#2d9e5a','#cc8800','#9933cc','#e07000'];
-
-
 var G={
   src:null,b64:null,mtype:'image/jpeg',
   imgW:0,imgH:0,
@@ -282,7 +279,6 @@ function confirmDraw(){
   var bx=Math.min.apply(null,xs),by=Math.min.apply(null,ys);
   var bw=Math.max.apply(null,xs)-bx,bh=Math.max.apply(null,ys)-by;
   stopBlink();
-  // pts からキャンバス座標のみ抽出（cx,cyはクライアント座標なので除外）
   var canvasPts=pts.map(function(p){return{x:p.x,y:p.y};});
   var autoType='開口部'+(G.openings.length+1);
   G.openings.push({
@@ -310,7 +306,7 @@ function buildOpList(){
     return '<div class="op-item">'+
       '<div class="op-col" style="background:'+op.color+'"></div>'+
       '<div class="op-info">'+
-        '<div class="op-type" onclick="editType(''+op.id+'')" style="cursor:pointer">'+(i+1)+'. '+op.type+' ✏️</div>'+
+        '<div class="op-type" onclick="editType(\''+op.id+'\')" style="cursor:pointer">'+(i+1)+'. '+op.type+' ✏</div>'+
         '<div class="op-size">'+(op.widthM?'幅'+parseFloat(op.widthM).toFixed(2)+'m × 高'+parseFloat(op.heightM).toFixed(2)+'m':'（計算前）')+(op.warning?' ⚠':'')+'</div>'+
       '</div>'+
       '<div class="op-actions">'+
@@ -324,8 +320,8 @@ function buildOpList(){
 function editType(id){
   var op=G.openings.find(function(o){return o.id===id;});
   if(!op)return;
-  var newType=prompt('開口部の種類を入力してください\n例：引き違い窓、玄関ドア、掃き出し窓、FIX窓', op.type);
-  if(newType)op.type=newType;
+  var newType=prompt('種類を入力してください\n例：引き違い窓、玄関ドア、掃き出し窓',op.type);
+  if(newType&&newType.trim())op.type=newType.trim();
   buildOpList();drawAll3();
 }
 function redrawOp(id){
@@ -691,7 +687,6 @@ function resetAll(){
   document.getElementById('s1Next').disabled=true;
   document.getElementById('resultPhoto').classList.add('hidden');
   document.getElementById('resultNum').classList.add('hidden');
-  document.getElementById('opSizeList').classList.add('hidden');
   document.getElementById('rNote').style.display='none';
   // canvasのイベントフラグをリセット
   ['cv2','cv3'].forEach(function(id){
