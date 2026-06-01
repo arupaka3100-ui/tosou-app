@@ -279,13 +279,12 @@ function confirmDraw(){
   var xs=pts.map(function(p){return p.x;}),ys=pts.map(function(p){return p.y;});
   var bx=Math.min.apply(null,xs),by=Math.min.apply(null,ys);
   var bw=Math.max.apply(null,xs)-bx,bh=Math.max.apply(null,ys)-by;
-  var type=prompt('この開口部の種類を入力してください\n例：引き違い窓、玄関ドア、掃き出し窓、FIX窓');
-  if(!type)return;
   stopBlink();
   // pts からキャンバス座標のみ抽出（cx,cyはクライアント座標なので除外）
   var canvasPts=pts.map(function(p){return{x:p.x,y:p.y};});
+  var autoType='開口部'+(G.openings.length+1);
   G.openings.push({
-    id:'op_'+Date.now(),type:type,
+    id:'op_'+Date.now(),type:autoType,
     pts:canvasPts,bbox:{x:bx,y:by,w:bw,h:bh},
     color:COLORS[G.openings.length%COLORS.length],
     widthM:null,heightM:null,areaM:null,warning:null
@@ -309,7 +308,7 @@ function buildOpList(){
     return '<div class="op-item">'+
       '<div class="op-col" style="background:'+op.color+'"></div>'+
       '<div class="op-info">'+
-        '<div class="op-type">'+(i+1)+'. '+op.type+'</div>'+
+        '<div class="op-type" onclick="editType(''+op.id+'')" style="cursor:pointer">'+(i+1)+'. '+op.type+' ✏️</div>'+
         '<div class="op-size">'+(op.widthM?'幅'+parseFloat(op.widthM).toFixed(2)+'m × 高'+parseFloat(op.heightM).toFixed(2)+'m':'（計算前）')+(op.warning?' ⚠':'')+'</div>'+
       '</div>'+
       '<div class="op-actions">'+
@@ -320,6 +319,13 @@ function buildOpList(){
   }).join('');
 }
 
+function editType(id){
+  var op=G.openings.find(function(o){return o.id===id;});
+  if(!op)return;
+  var newType=prompt('開口部の種類を入力してください\n例：引き違い窓、玄関ドア、掃き出し窓、FIX窓', op.type);
+  if(newType)op.type=newType;
+  buildOpList();drawAll3();
+}
 function redrawOp(id){
   G.openings=G.openings.filter(function(o){return o.id!==id;});
   buildOpList();drawAll3();
