@@ -88,7 +88,7 @@ header h1{font-size:16px;font-weight:600}
         <div style="font-size:15px;font-weight:600;margin-bottom:6px">写真をタップして選択</div>
         <div style="font-size:12px;color:#888">カメラまたはライブラリから</div>
       </div>
-      <img id="upPrev" style="width:100%;display:none">
+      <img id="upPrev" style="width:100%;display:block;height:0;overflow:hidden">
       <input type="file" id="fileInput" accept="image/*" style="position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer" onchange="onFile(this)">
     </div>
     <button class="btn btn-outline" id="retakeBtn" style="display:none;margin-top:8px;padding:10px;font-size:13px" onclick="document.getElementById('fileInput').click()">📷 撮り直す</button>
@@ -209,7 +209,7 @@ function onFile(inp){
     G.mtype=f.type||'image/jpeg';
     document.getElementById('upPh').style.display='none';
     document.getElementById('upPrev').src=G.src;
-    document.getElementById('upPrev').style.display='block';
+    document.getElementById('upPrev').style.height='auto';
     document.getElementById('retakeBtn').style.display='flex';
     document.getElementById('s1Next').disabled=false;
   };
@@ -682,13 +682,14 @@ function show(id){
 function resetAll(){
   G.src=null;G.b64=null;G.outline=null;G.openings=[];G.drawPts=[];stopBlink();hideLoading();
   document.getElementById('upPh').style.display='block';
-  document.getElementById('upPrev').style.display='none';
+  document.getElementById('upPrev').style.height='0';
   document.getElementById('upPrev').src='';
   document.getElementById('retakeBtn').style.display='none';
   document.getElementById('fileInput').value='';
   document.getElementById('s1Next').disabled=true;
   document.getElementById('resultPhoto').classList.add('hidden');
   document.getElementById('resultNum').classList.add('hidden');
+  document.getElementById('opSizeList').classList.add('hidden');
   document.getElementById('rNote').style.display='none';
   // canvasのイベントフラグをリセット
   ['cv2','cv3'].forEach(function(id){
