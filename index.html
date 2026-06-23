@@ -305,7 +305,7 @@ function applyHomography(){
   outW=Math.max(100,outW);outH=Math.max(100,outH);
   G.correctedW=outW;G.correctedH=outH;
   var dst=[{x:0,y:0},{x:outW,y:0},{x:outW,y:outH},{x:0,y:outH}];
-  var H=computeHomography(scaledSrc,dst);
+
   // 元画像が大きすぎる場合は縮小してから処理（メモリ・速度対策）
   var srcMaxSize=1600;
   var srcScale=1;
@@ -316,6 +316,8 @@ function applyHomography(){
   var srcH=Math.round(G.imgH*srcScale);
   // コーナー座標もスケールに合わせて変換
   var scaledSrc=src.map(function(p){return{x:p.x*srcScale,y:p.y*srcScale};});
+
+  var H=computeHomography(scaledSrc,dst);
 
   var srcCanvas=document.createElement('canvas');
   srcCanvas.width=srcW;srcCanvas.height=srcH;
