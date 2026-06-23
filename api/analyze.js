@@ -25,7 +25,9 @@ ${openingDesc}
 実測値とピクセルサイズから各開口部の実寸を計算してください。
 異常値には要確認フラグを付けてください。
 
-JSONのみで返答：
+JSON以外の文字（説明文・コードフェンス・前置き等）は一切出力しないでください。
+出力はJSONオブジェクトの { から } までのみです。
+
 {
   "openings": [
     {"id":"op1","type":"引き違い窓","widthM":1.65,"heightM":1.05,"areaM":1.73,"confidence":"high","warning":null,"note":"計算根拠"}
@@ -38,7 +40,7 @@ JSONのみで返答：
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-6', max_tokens: 2000,
+        model: 'claude-sonnet-4-6', max_tokens: 3000,
         messages: [{ role: 'user', content: [
           { type: 'image', source: { type: 'base64', media_type: mediaType, data: imageBase64 } },
           { type: 'text', text: prompt }
@@ -47,11 +49,23 @@ JSONのみで返答：
     });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error && data.error.message || 'APIエラー');
+    const rawText = data.content.map(i => i.text||'').join('');
     let result;
     try {
-      result = JSON.parse(data.content.map(i => i.text||'').join('').replace(/```json|```/g,'').trim());
-    } catch(e) {
-      return res.status(500).json({ error: 'AIの応答をJSONに変換できませんでした' });
+      result = JSON.parse(rawText.replace(/```json|```/g,'').trim());
+    } catch(e1) {
+      try {
+        const cleaned = rawText.replace(/```json|```/g,'').trim();
+        const s = cleaned.indexOf('{');
+        const eIdx = cleaned.lastIndexOf('}');
+        if (s === -1 || eIdx === -1 || eIdx <= s) throw new Error('JSON構造が見つかりません');
+        result = JSON.parse(cleaned.slice(s, eIdx + 1));
+      } catch(e2) {
+        return res.status(500).json({
+          error: 'AIの応答をJSONに変換できませんでした',
+          rawResponsePreview: rawText.slice(0, 500)
+        });
+      }
     }
 
     const serverWallArea = parseFloat((w * h).toFixed(1));
