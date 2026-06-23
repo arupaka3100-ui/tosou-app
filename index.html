@@ -278,7 +278,17 @@ function clearCorners(){
 function confirmCorners(){
   if(G.corners.length!==4)return;
   showLoading('台形補正中...','ホモグラフィー変換を適用しています');
-  setTimeout(function(){applyHomography();hideLoading();goS3();},100);
+  setTimeout(function(){
+    try{
+      applyHomography();
+      hideLoading();
+      goS3();
+    }catch(e){
+      hideLoading();
+      alert('補正エラー：'+e.message+'\n\nもう一度4隅を指定し直してください。');
+      console.error(e);
+    }
+  },100);
 }
 
 function applyHomography(){
@@ -289,18 +299,30 @@ function applyHomography(){
   var h2=Math.sqrt(Math.pow(src[2].x-src[1].x,2)+Math.pow(src[2].y-src[1].y,2));
   var outW=Math.round(Math.max(w1,w2));
   var outH=Math.round(Math.max(h1,h2));
-  var maxSize=1200;
+  var maxSize=800;
   if(outW>maxSize){var s=maxSize/outW;outW=maxSize;outH=Math.round(outH*s);}
   if(outH>maxSize){var s=maxSize/outH;outH=maxSize;outW=Math.round(outW*s);}
+  outW=Math.max(100,outW);outH=Math.max(100,outH);
   G.correctedW=outW;G.correctedH=outH;
   var dst=[{x:0,y:0},{x:outW,y:0},{x:outW,y:outH},{x:0,y:outH}];
-  var H=computeHomography(src,dst);
+  var H=computeHomography(scaledSrc,dst);
+  // 元画像が大きすぎる場合は縮小してから処理（メモリ・速度対策）
+  var srcMaxSize=1600;
+  var srcScale=1;
+  if(G.imgW>srcMaxSize||G.imgH>srcMaxSize){
+    srcScale=srcMaxSize/Math.max(G.imgW,G.imgH);
+  }
+  var srcW=Math.round(G.imgW*srcScale);
+  var srcH=Math.round(G.imgH*srcScale);
+  // コーナー座標もスケールに合わせて変換
+  var scaledSrc=src.map(function(p){return{x:p.x*srcScale,y:p.y*srcScale};});
+
   var srcCanvas=document.createElement('canvas');
-  srcCanvas.width=G.imgW;srcCanvas.height=G.imgH;
+  srcCanvas.width=srcW;srcCanvas.height=srcH;
   var srcCtx=srcCanvas.getContext('2d');
   var img=document.getElementById('img2');
-  srcCtx.drawImage(img,0,0);
-  var srcData=srcCtx.getImageData(0,0,G.imgW,G.imgH);
+  srcCtx.drawImage(img,0,0,srcW,srcH);
+  var srcData=srcCtx.getImageData(0,0,srcW,srcH);
   var dstCanvas=document.getElementById('cv3corrected');
   dstCanvas.width=outW;dstCanvas.height=outH;
   var dstCtx=dstCanvas.getContext('2d');
@@ -310,8 +332,8 @@ function applyHomography(){
     for(var dx=0;dx<outW;dx++){
       var p=applyMatrix(Hinv,dx,dy);
       var sx=Math.round(p.x),sy=Math.round(p.y);
-      if(sx>=0&&sx<G.imgW&&sy>=0&&sy<G.imgH){
-        var si=(sy*G.imgW+sx)*4;
+      if(sx>=0&&sx<srcW&&sy>=0&&sy<srcH){
+        var si=(sy*srcW+sx)*4;
         var di=(dy*outW+dx)*4;
         dstData.data[di]=srcData.data[si];
         dstData.data[di+1]=srcData.data[si+1];
