@@ -359,8 +359,9 @@ function computeHomography(src,dst){
 }
 
 function solveLinear(A){
-  var n=8,M=[],b=[];
-  for(var i=0;i<n*2;i++){M.push(A[i].slice(0,8));b.push(-A[i][8]);}
+  // Aは8行9列（4隅×2方程式）
+  var M=[],b=[];
+  for(var i=0;i<A.length;i++){M.push(A[i].slice(0,8));b.push(-A[i][8]);}
   var MT=transpose(M);
   var MtM=matMul(MT,M);
   var Mtb=matVec(MT,b);
