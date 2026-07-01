@@ -594,14 +594,27 @@ async function doCalc(){
   showLoading('AIで計算中...','補正済み画像で面積を計算しています');
   var ops=G.openings.map(function(op){return{id:op.id,type:op.type,widthPx:op.bbox.w,heightPx:op.bbox.h,imgW:G.correctedW,imgH:G.correctedH};});
   try{
-    var res=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({imageBase64:G.correctedB64,imageMediaType:'image/jpeg',width:w,height:h,openings:ops})});
-    var data=await res.json();
-    if(!res.ok)throw new Error(data.error||'計算エラー');
+    var body=JSON.stringify({imageBase64:G.correctedB64,imageMediaType:'image/jpeg',width:w,height:h,openings:ops});
+    console.log('API送信サイズ:',Math.round(body.length/1024)+'KB');
+    var res=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:body});
+    var rawText=await res.text();
+    var data;
+    try{data=JSON.parse(rawText);}catch(pe){
+      hideLoading();
+      err.textContent='応答解析エラー(HTTP'+res.status+'): '+rawText.slice(0,200);
+      err.style.display='block';return;
+    }
+    if(!res.ok){
+      hideLoading();
+      var msg='HTTP'+res.status+': '+(data.error||'不明なエラー');
+      if(data.rawResponsePreview)msg+='\nAI応答: '+data.rawResponsePreview.slice(0,150);
+      err.textContent=msg;err.style.display='block';return;
+    }
     hideLoading();
     (data.openings||[]).forEach(function(r,i){var op=G.openings[i];if(op){op.widthM=r.widthM;op.heightM=r.heightM;op.areaM=r.areaM;op.warning=r.warning;}});
     G.calcRes=data;
     renderResNum(w,h,data);
-  }catch(e){hideLoading();err.textContent='エラー：'+e.message;err.style.display='block';}
+  }catch(e){hideLoading();err.textContent='通信エラー：'+e.message;err.style.display='block';}
   btn.disabled=false;sp.style.display='none';bt.textContent='📐 AIで面積を計算する';
 }
 
