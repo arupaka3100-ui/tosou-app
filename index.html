@@ -305,12 +305,20 @@ function confirmCorners(){
 
 function applyHomography(){
   var src=G.corners;
+  console.log('=== HOMOGRAPHY DEBUG ===');
+  console.log('G.imgW='+G.imgW+', G.imgH='+G.imgH);
+  var img2el=document.getElementById('img2');
+  console.log('img2.naturalWidth='+img2el.naturalWidth+', img2.naturalHeight='+img2el.naturalHeight);
+  console.log('img2.getBCR='+JSON.stringify({w:Math.round(img2el.getBoundingClientRect().width),h:Math.round(img2el.getBoundingClientRect().height)}));
+  src.forEach(function(c,i){console.log('corner['+i+']='+Math.round(c.x)+','+Math.round(c.y));});
   var w1=Math.sqrt(Math.pow(src[1].x-src[0].x,2)+Math.pow(src[1].y-src[0].y,2));
   var w2=Math.sqrt(Math.pow(src[2].x-src[3].x,2)+Math.pow(src[2].y-src[3].y,2));
   var h1=Math.sqrt(Math.pow(src[3].x-src[0].x,2)+Math.pow(src[3].y-src[0].y,2));
   var h2=Math.sqrt(Math.pow(src[2].x-src[1].x,2)+Math.pow(src[2].y-src[1].y,2));
+  console.log('w1(top)='+Math.round(w1)+', w2(btm)='+Math.round(w2)+', h1(left)='+Math.round(h1)+', h2(right)='+Math.round(h2));
   var outW=Math.round(Math.max(w1,w2));
   var outH=Math.round(Math.max(h1,h2));
+  console.log('outW='+outW+', outH='+outH);
   var maxSize=800;
   if(outW>maxSize){var s=maxSize/outW;outW=maxSize;outH=Math.round(outH*s);}
   if(outH>maxSize){var s=maxSize/outH;outH=maxSize;outW=Math.round(outW*s);}
@@ -342,6 +350,12 @@ function applyHomography(){
   var dstCtx=dstCanvas.getContext('2d');
   var dstData=dstCtx.createImageData(outW,outH);
   var Hinv=invertMatrix3x3(H);
+  console.log('Hinv corner check:');
+  [{x:0,y:0},{x:outW,y:0},{x:outW,y:outH},{x:0,y:outH}].forEach(function(d,i){
+    var p=applyMatrix(Hinv,d.x,d.y);
+    console.log('  dst('+d.x+','+d.y+')->src('+Math.round(p.x)+','+Math.round(p.y)+') expect~corner['+i+']=('+Math.round(scaledSrc[i].x)+','+Math.round(scaledSrc[i].y)+')');
+  });
+  console.log('srcCanvas='+srcW+'x'+srcH+', srcScale='+srcScale.toFixed(4));
   for(var dy=0;dy<outH;dy++){
     for(var dx=0;dx<outW;dx++){
       var p=applyMatrix(Hinv,dx,dy);
