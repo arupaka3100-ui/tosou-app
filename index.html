@@ -34,7 +34,7 @@ header h1{font-size:16px;font-weight:600}
 .brush-icon{position:absolute;bottom:12px;font-size:26px;left:0}
 .photo-wrap{position:relative;border-radius:8px;overflow:hidden;margin-bottom:8px;touch-action:none;-webkit-user-select:none;user-select:none;background:#000}
 .photo-wrap img{width:100%;display:block}
-.photo-wrap canvas{position:absolute;top:0;left:0;width:100%;height:100%;background:transparent}
+.photo-wrap canvas{position:absolute;top:0;left:0;width:100%;height:100%;background:transparent;touch-action:none}
 #cv3corrected{position:relative!important;width:100%!important;height:auto!important;display:block!important;background:transparent!important}
 .sbar{border-radius:8px;padding:11px 14px;margin-bottom:8px;font-size:13px;font-weight:600;text-align:center;color:white}
 .s-blue{background:#0066cc}.s-purple{background:#9933cc}
@@ -218,14 +218,8 @@ function goS2(){
     cv.width=G.imgW;cv.height=G.imgH;
     if(!cv._evSet){
       cv._evSet=true;
-      cv.addEventListener('click',onCvClick);
-      cv.addEventListener('touchend',function(e){
-        e.preventDefault();
-        var r=cv.getBoundingClientRect();
-        var sx=cv.width/r.width,sy=cv.height/r.height;
-        var t=e.changedTouches[0];
-        onCvClickXY((t.clientX-r.left)*sx,(t.clientY-r.top)*sy);
-      },{passive:false});
+      cv.addEventListener('pointerdown',onCvPointerDown);
+      cv.addEventListener('pointerup',onCvPointerUp);
     }
     clearCorners();
   }
@@ -239,7 +233,20 @@ function goS2(){
   img.src=url;
 }
 
-function onCvClick(e){
+// 4隅タップは Pointer Events に一本化（click/touchend の二重発火で座標が2重登録される問題を回避）
+var _cvDown=null;
+function onCvPointerDown(e){
+  e.preventDefault();
+  _cvDown={x:e.clientX,y:e.clientY};
+}
+function onCvPointerUp(e){
+  e.preventDefault();
+  // pointerdown から大きく動いていればドラッグ扱いでタップにしない
+  if(_cvDown){
+    var dx=e.clientX-_cvDown.x,dy=e.clientY-_cvDown.y;
+    _cvDown=null;
+    if(dx*dx+dy*dy>144)return;
+  }
   var cv=document.getElementById('cv2');
   var r=cv.getBoundingClientRect();
   var sx=cv.width/r.width,sy=cv.height/r.height;
@@ -249,7 +256,15 @@ function onCvClick(e){
 var CORNER_LABELS=['①','②','③','④'];
 var CORNER_COLORS=['#ff4444','#ff9900','#00cc44','#0066ff'];
 
+var _lastTap=null;
 function onCvClickXY(x,y){
+  // 同座標付近（20px以内）への連続イベントが50ms以内に来たら2回目以降を無視（擬似イベント対策）
+  var now=Date.now();
+  if(_lastTap&&now-_lastTap.t<50&&Math.abs(x-_lastTap.x)<20&&Math.abs(y-_lastTap.y)<20){
+    _lastTap.t=now;
+    return;
+  }
+  _lastTap={x:x,y:y,t:now};
   if(G.corners.length>=4)return;
   G.corners.push({x:x,y:y});
   drawCorners();
@@ -431,12 +446,23 @@ function goS3(){
   cv3draw.width=G.correctedW;cv3draw.height=G.correctedH;
   if(!cv3draw._evSet){
     cv3draw._evSet=true;
-    cv3draw.addEventListener('touchstart',function(e){e.preventDefault();onDS(e);},{passive:false});
-    cv3draw.addEventListener('touchmove',function(e){e.preventDefault();onDM(e);},{passive:false});
-    cv3draw.addEventListener('touchend',function(e){onDE(e);},{passive:false});
-    cv3draw.addEventListener('mousedown',onDS);
-    cv3draw.addEventListener('mousemove',onDM);
-    cv3draw.addEventListener('mouseup',onDE);
+    // 開口部なぞりも Pointer Events に一本化（touch と mouse の二重発火を回避）
+    cv3draw.addEventListener('pointerdown',function(e){
+      e.preventDefault();
+      try{cv3draw.setPointerCapture(e.pointerId);}catch(_){}
+      onDS(e);
+    });
+    cv3draw.addEventListener('pointermove',function(e){
+      if(!G.drawing)return;
+      e.preventDefault();
+      onDM(e);
+    });
+    cv3draw.addEventListener('pointerup',function(e){
+      e.preventDefault();
+      try{cv3draw.releasePointerCapture(e.pointerId);}catch(_){}
+      onDE(e);
+    });
+    cv3draw.addEventListener('pointercancel',function(e){onDE(e);});
   }
   clearDraw();buildOpList();
 }
