@@ -166,6 +166,7 @@ header h1{font-size:16px;font-weight:600}
         <div class="metric"><div class="metric-label">外壁面積</div><div class="metric-value" id="rWall">—</div></div>
         <div class="metric"><div class="metric-label">塗装面積</div><div class="metric-value red" id="rPaint">—</div></div>
       </div>
+      <div style="border-radius:8px;overflow:hidden;margin-bottom:14px"><canvas id="cvResult" style="width:100%;display:block"></canvas></div>
       <div id="rDetails"></div>
       <button class="cb" onclick="copyRes()">📋 jimuuにコピーする</button>
     </div>
@@ -571,13 +572,8 @@ async function doCalc(){
 function renderResNum(w,h,data){
   document.getElementById('rWall').textContent=parseFloat(data.wallArea||(w*h)).toFixed(1)+' m²';
   document.getElementById('rPaint').textContent=parseFloat(data.paintArea||0).toFixed(1)+' m²';
-  var det='';
-  G.openings.forEach(function(op,i){
-    if(!op.widthM)return;
-    var warn=op.warning?'<span style="color:#ff6b7a"> ⚠'+op.warning+'</span>':'';
-    det+='<div class="dr"><span style="color:rgba(255,255,255,.7)">'+(i+1)+' '+op.type+'</span><span>'+parseFloat(op.widthM).toFixed(2)+'×'+parseFloat(op.heightM).toFixed(2)+'m ='+parseFloat(op.areaM||0).toFixed(1)+'m²'+warn+'</span></div>';
-  });
-  det+='<div class="dr"><span style="color:rgba(255,255,255,.6)">開口部合計</span><span>−'+parseFloat(data.totalOpeningArea||0).toFixed(1)+' m²</span></div>';
+  drawResultImage();
+  var det='<div class="dr"><span style="color:rgba(255,255,255,.6)">開口部合計</span><span>−'+parseFloat(data.totalOpeningArea||0).toFixed(1)+' m²</span></div>';
   document.getElementById('rDetails').innerHTML=det;
   if(data.scaleNote){document.getElementById('rNote').textContent='AI注記：'+data.scaleNote;document.getElementById('rNote').style.display='block';}
   document.getElementById('resultNum').classList.remove('hidden');
@@ -593,6 +589,38 @@ function renderResNum(w,h,data){
     opEl.innerHTML=html;opEl.classList.remove('hidden');
   }
   document.getElementById('resultNum').scrollIntoView({behavior:'smooth'});
+}
+
+function drawResultImage(){
+  var cv=document.getElementById('cvResult');
+  if(!cv||!G.correctedB64)return;
+  var ctx=cv.getContext('2d');
+  var img=new Image();
+  img.onload=function(){
+    cv.width=G.correctedW;cv.height=G.correctedH;
+    ctx.drawImage(img,0,0,G.correctedW,G.correctedH);
+    G.openings.forEach(function(op){
+      if(!op.widthM)return;
+      var pts=op.pts,b=op.bbox;
+      if(pts&&pts.length>=3){
+        ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);
+        pts.forEach(function(p){ctx.lineTo(p.x,p.y);});
+        ctx.closePath();
+        ctx.fillStyle=op.color+'55';ctx.fill();
+        ctx.strokeStyle=op.color;ctx.lineWidth=Math.max(2,G.correctedW/300);ctx.lineJoin='round';ctx.stroke();
+      }
+      var cx=b.x+b.w/2,cy=b.y+b.h/2;
+      var txt=parseFloat(op.areaM||0).toFixed(1)+'m²';
+      var fs=Math.max(14,Math.min(b.w/4,b.h*0.7));
+      ctx.font='bold '+fs+'px sans-serif';
+      ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineJoin='round';
+      ctx.lineWidth=Math.max(3,fs/4);ctx.strokeStyle='rgba(0,0,0,.85)';
+      ctx.strokeText(txt,cx,cy);
+      ctx.fillStyle='#fff';ctx.fillText(txt,cx,cy);
+    });
+    ctx.textAlign='start';ctx.textBaseline='alphabetic';
+  };
+  img.src='data:image/jpeg;base64,'+G.correctedB64;
 }
 
 function copyRes(){
